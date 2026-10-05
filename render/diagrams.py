@@ -73,16 +73,16 @@ def gap_bars(show_ratio: bool) -> Image.Image:
         d.text((cx - tw / 2, base_y + 120), kind, font=fk, fill=INK)
     d.line([(300, base_y), (1640, base_y)], fill=INK, width=6)
     if show_ratio:
-        f = font("gothic", 110)
+        f = font("gothic", 96)
         txt = "約33倍"
         tw = d.textlength(txt, font=f)
         top = base_y - max_h
         # 1億円の高さまで点線を引き、差をブラケットで示す
-        for x in range(780, 1440, 36):
+        for x in range(780, 1520, 36):
             d.line([(x, top), (x + 18, top)], fill=(176, 18, 30), width=5)
-        d.line([(1460, top), (1460, base_y - 20)], fill=(176, 18, 30), width=8)
-        d.polygon([(1460, base_y - 14), (1442, base_y - 50), (1478, base_y - 50)], fill=(176, 18, 30))
-        d.text((1490, top + 140), txt, font=f, fill=(176, 18, 30), stroke_width=10, stroke_fill=(255, 255, 255))
+        d.line([(1540, top), (1540, base_y - 20)], fill=(176, 18, 30), width=8)
+        d.polygon([(1540, base_y - 14), (1522, base_y - 50), (1558, base_y - 50)], fill=(176, 18, 30))
+        d.text((1566, top + 150), txt, font=f, fill=(176, 18, 30), stroke_width=10, stroke_fill=(255, 255, 255))
     return im
 
 

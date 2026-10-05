@@ -263,7 +263,7 @@ def grid_paper(seed=6):
     return _to_img(_spot(np.asarray(im, np.float32), BW / 2, BH / 2, BW * 0.8, BH * 0.8, 0.75, 0.3))
 
 
-# ---- 給料袋が並ぶ机 (たとえ話) --------------------------------------------
+# ---- お年玉のポチ袋が並ぶ机 (たとえ話) -------------------------------------
 def envelopes(seed=7):
     a = _wood(seed, (52, 36, 26))
     im = _to_img(_spot(a, BW / 2, BH * 0.5, BW * 0.6, BH * 0.6, 1.0))
@@ -273,11 +273,12 @@ def envelopes(seed=7):
         for col in range(7):
             x, y = 150 + col * 270 + row * 40, 140 + row * 320
             hl = (row, col) == (1, 3)
-            c = (196, 160, 104) if not hl else (232, 196, 120)
+            c = (236, 230, 220) if not hl else (255, 246, 214)
             d.rectangle((x + 10, y + 12, x + 210, y + 272), fill=(18, 12, 8))
             d.rectangle((x, y, x + 200, y + 260), fill=c)
-            d.polygon([(x, y), (x + 200, y), (x + 100, y + 60)], fill=tuple(int(v * 0.88) for v in c))
-            d.text((x + 52, y + 120), "給 与", font=f, fill=(90, 50, 30))
+            d.rectangle((x, y + 190, x + 200, y + 222), fill=(196, 30, 40))
+            d.polygon([(x, y), (x + 200, y), (x + 100, y + 60)], fill=tuple(int(v * 0.9) for v in c))
+            d.text((x + 42, y + 96), "お年玉", font=f, fill=(176, 24, 32))
     return _glow(im, 26, 0.2)
 
 

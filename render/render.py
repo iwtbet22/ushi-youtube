@@ -17,6 +17,7 @@ from PIL import Image, ImageDraw, ImageFilter
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import audio  # noqa: E402
+import tts  # noqa: E402
 import style  # noqa: E402
 from diagrams import DIAGRAMS  # noqa: E402
 from scenes import BH, BW, GENERATORS  # noqa: E402
@@ -112,9 +113,23 @@ def kenburns(bg, z0, z1, pan, u):
     return bg.resize((W, H), Image.BILINEAR, box=box)
 
 
+NAR_LEAD = 0.35   # シーン頭からナレーション開始までの間
+NAR_TAIL = 0.55   # 読み終わりから次のカットまでの間
+
+
+def durations():
+    """各シーンの実尺。ナレーションがあれば 読み上げ時間+前後の間 まで伸ばす。"""
+    out = []
+    for dur, _, _, opt in T:
+        if opt.get("nar"):
+            dur = max(dur, NAR_LEAD + tts.duration(tts.ensure(opt["nar"])) + NAR_TAIL)
+        out.append(round(dur * 30) / 30)
+    return out
+
+
 def scene_starts():
     starts, t0 = [], 0.0
-    for dur, *_ in T:
+    for dur in durations():
         starts.append(t0)
         t0 += dur
     return starts, t0
@@ -122,8 +137,8 @@ def scene_starts():
 
 def render_scene(args):
     """1シーンを書き出す。stills_dir があれば中央フレームの静止画だけ。"""
-    si, fps, size, stills_dir, seg_path = args
-    dur, bgname, ovs, opt = T[si]
+    si, fps, size, stills_dir, seg_path, dur = args
+    _, bgname, ovs, opt = T[si]
     starts, _ = scene_starts()
     vig = vignette()
     lut = grade_lut()
@@ -184,17 +199,19 @@ def render(preview=False, stills_dir=None, jobs=4):
     OUT.mkdir(exist_ok=True)
     seg_dir = OUT / "segments"
     seg_dir.mkdir(exist_ok=True)
-    tasks = [(si, fps, size, stills_dir, seg_dir / f"{si:02d}.mp4") for si in range(len(T))]
+    durs = durations()
+    tasks = [(si, fps, size, stills_dir, seg_dir / f"{si:02d}.mp4", durs[si]) for si in range(len(T))]
     # 長いシーンから先に投げて並列の偏りを減らす
-    tasks.sort(key=lambda a: -T[a[0]][0])
+    tasks.sort(key=lambda a: -a[5])
     with Pool(jobs) as pool:
         list(pool.imap_unordered(render_scene, tasks))
     if stills_dir:
         return
 
     cues = [(starts[i], opt.get("cut", "cut"), [o[0] for o in ovs]) for i, (_, _, ovs, opt) in enumerate(T)]
+    voices = [(starts[i] + NAR_LEAD, tts.ensure(opt["nar"])) for i, (*_, opt) in enumerate(T) if opt.get("nar")]
     wav = OUT / "ep01_opening_audio.wav"
-    audio.write(wav, total, cues)
+    audio.write(wav, total, cues, voices)
     lst = seg_dir / "list.txt"
     lst.write_text("".join(f"file '{si:02d}.mp4'\n" for si in range(len(T))))
     name = "ep01_opening_preview.mp4" if preview else "ep01_opening.mp4"

@@ -2,3 +2,4 @@ __pycache__/
 output/*.wav
 output/*_preview.mp4
 output/segments/
+output/voice/

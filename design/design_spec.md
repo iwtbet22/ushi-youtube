@@ -26,7 +26,9 @@ stadium / stadium_warm / baseball / money / money_red / money_dim / contract / r
 ## 音
 - BGM：低いドローン＋Am系のパッド（`render/audio.py` で合成した仮の音）
 - 効果音：フラッシュカット＝低音ヒット、テロップが出るシーン＝控えめなシュッ
-- ナレーションは未収録。字幕の文がそのまま読み原稿になる
+- ナレーション：`render/tts.py`（edge-tts の ja-JP-KeitaNeural、話速+10%）で作った仮の声。喋っている間はBGMを約-8dB下げる
+- シーンの長さは「読み上げ時間＋前後の間（0.35秒／0.55秒）」に自動で合わせる
+- 字幕はナレーションを要約したもの（参考動画と同じく、全文は出さない）
 
 ## フォント
 `assets/fonts/`（すべてOFL）：Noto Sans JP Black/Bold、Noto Serif JP Black、Zen Kaku Gothic New Black、Yuji Syuku、Oswald

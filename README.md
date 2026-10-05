@@ -10,9 +10,10 @@
 
 ### 書き出し方
 ```bash
-pip install numpy pillow        # ffmpeg も必要
+pip install numpy pillow edge-tts   # ffmpeg も必要
 python3 render/render.py                 # 本番
 python3 render/render.py --preview       # 960x540 / 15fps の確認用
 python3 render/render.py --stills out/   # 各シーンの静止画だけ
 ```
-台本と構成を変えるときは `render/timeline.py`、テロップの見た目を変えるときは `render/style.py` を編集する。
+台本を書き出すには `python3 render/export_script.py` を実行する。
+台本・ナレーション・構成を変えるときは `render/timeline.py`、テロップの見た目を変えるときは `render/style.py` を編集する。

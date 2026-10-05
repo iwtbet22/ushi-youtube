@@ -3,7 +3,7 @@
 - 低いドローン + ゆっくり動くパッド (Am系)
 - flash カットに「ドン」(低音ヒット + ノイズ)
 - 字幕のないキーワード/フックに軽い「シュッ」
-ナレーションは別録り前提。ここでは仮の音だけを入れる。
+- ナレーション (tts.py で生成した wav) を重ね、喋っている間は BGM を下げる
 """
 from __future__ import annotations
 
@@ -58,10 +58,26 @@ def _whoosh():
     return noise * np.sin(np.pi * t) ** 2 * 1.4
 
 
-def write(path, total, cues):
-    """cues: [(開始秒, カット種別, [オーバーレイ種別...]), ...]"""
+def _read_wav(path):
+    with wave.open(str(path)) as w:
+        assert w.getframerate() == SR and w.getnchannels() == 1
+        return np.frombuffer(w.readframes(w.getnframes()), np.int16).astype(np.float64) / 32768
+
+
+def write(path, total, cues, voices=()):
+    """cues: [(開始秒, カット種別, [オーバーレイ種別...]), ...]
+    voices: [(開始秒, wavパス), ...]"""
     mix = _pad(total)
     mix *= _env(len(mix), 2.5, 3.0)
+    voice = np.zeros_like(mix)
+    for t0, wav in voices:
+        v = _read_wav(wav)
+        s = int(t0 * SR)
+        e = min(len(voice), s + len(v))
+        voice[s:e] += v[: e - s]
+    # ダッキング: 声のある区間はBGMを約-8dB (前後0.3秒でなめらかに)
+    active = np.convolve((np.abs(voice) > 0.01).astype(float), np.ones(int(0.3 * SR)) / (0.3 * SR), mode="same")
+    mix *= 1 - 0.6 * np.clip(active * 4, 0, 1)
     hit, wh = _hit(), _whoosh()
     for t0, cut, kinds in cues:
         s = int(t0 * SR)
@@ -70,7 +86,7 @@ def write(path, total, cues):
             continue
         e = min(len(mix), s + len(snd))
         mix[s:e] += snd[: e - s] * 0.5
-    mix = np.tanh(mix * 1.2) * 0.8
+    mix = np.tanh(mix * 1.2) * 0.55 + voice * 0.95
     pcm = (np.stack([mix, mix], 1) * 32767).astype(np.int16)
     with wave.open(str(path), "wb") as w:
         w.setnchannels(2)
