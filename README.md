@@ -6,7 +6,7 @@
 
 - 台本：`script/ep01_opening.md`
 - デザイン仕様：`design/design_spec.md`
-- 完成動画：`output/ep01_opening.mp4`（1920x1080 / 30fps / 約3分）
+- 完成動画：`output/ep01_opening.mp4`（1920x1080 / 30fps / 約3分）。生成物なので Git では追跡しない（`python3 render/render.py` で作り直す）
 
 ### 書き出し方
 ```bash
