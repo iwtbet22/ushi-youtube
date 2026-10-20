@@ -51,9 +51,21 @@ def _display(line):
     return line[0] if isinstance(line, tuple) else line
 
 
+REC_MAP = ui.ROOT / "output" / "voice_rec" / "map.json"
+
+
+def recorded():
+    """本人の録音がある文 (tools/align_recording.py で作る) → wav のパス"""
+    import json
+    if not REC_MAP.exists():
+        return {}
+    return {k: ui.ROOT / v for k, v in json.loads(REC_MAP.read_text()).items()}
+
+
 def build_timeline():
     """[{kind: card|scene|trans, start, dur, ...}] を返す。文ごとの開始時刻と音声も入れる。"""
     items, t, prev = [], 0.0, None
+    rec = recorded()
     for si, sc in enumerate(SCENES):
         new_chapter = sc["chapter"] != prev and sc["bg"] not in ("board", "end")
         if new_chapter:
@@ -66,7 +78,7 @@ def build_timeline():
         prev = sc["chapter"]
         sents, st = [], 0.0
         for line in sc["lines"]:
-            wav = tts.ensure(_speech(line))
+            wav = rec.get(_display(line)) or tts.ensure(_speech(line))
             d = LEAD + tts.duration(wav) + TAIL
             sents.append({"start": st, "dur": d, "text": _display(line), "wav": wav})
             st += d
@@ -551,10 +563,15 @@ def main():
     ap.add_argument("--stills")
     ap.add_argument("--only", type=int)
     ap.add_argument("--check", action="store_true")
+    ap.add_argument("--upto", type=int, help="このシーン番号までだけ書き出す (試し書き出し用)")
     ap.add_argument("--jobs", type=int, default=4)
     args = ap.parse_args()
 
     items, total = build_timeline()
+    if args.upto is not None:
+        last = max(i for i, it in enumerate(items) if it.get("index") == args.upto)
+        items = items[:last + 1]
+        total = items[-1]["start"] + items[-1]["dur"]
     print(f"total {total:.1f}s ({total / 60:.1f} min), {len(items)} items", flush=True)
     problems = check(items)
     for p in problems:
@@ -562,7 +579,8 @@ def main():
     print(f"check: {len(problems)} problem(s)", flush=True)
     if args.check:
         return
-    write_chapters(items)
+    if args.upto is None:
+        write_chapters(items)
     OUT.mkdir(exist_ok=True)
     seg_dir = OUT / "segments_main"
     seg_dir.mkdir(exist_ok=True)
@@ -579,7 +597,7 @@ def main():
     write_audio(wav, items, total)
     lst = seg_dir / "list.txt"
     lst.write_text("".join(f"file '{i:03d}.mp4'\n" for i in range(len(items))))
-    out = OUT / "ep01_main.mp4"
+    out = OUT / ("ep01_sample.mp4" if args.upto is not None else "ep01_main.mp4")
     subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i", str(lst), "-i", str(wav),
                     "-c:v", "copy", "-c:a", "aac", "-b:a", "192k", "-shortest", "-movflags", "+faststart", str(out)],
                    check=True)
