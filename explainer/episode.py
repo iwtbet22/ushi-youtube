@@ -142,55 +142,47 @@ SCENES = [
     # ===== 2. 歴史 =====
     S(CH2, [
         "ドラフトが始まったのは、1965年です。",
-        "それまでは、球団が自由に選手と交渉する、いわば早い者勝ちの時代でした。",
-        "その結果、人気の選手には契約金がどんどんつり上がり、お金のある球団に有力な選手が集まっていきました。",
-        "そこで、戦力のバランスを保ち、契約金の高騰を抑えるために導入されたのが、ドラフト制度です。",
+        "まずは、それ以前のプロ野球で、新人選手がどうやって入団していたのかを見てみましょう。",
     ], [
         C(1965, lambda v: f"{int(v)}年", 960, 450, at=0, until=1, color="navy", size=200, dur=1.2),
-        E(P(il.person, "staff", "normal", TIE, pose="point"), 520, 620, at=1, until=3, anim="slide_l", scale=0.85),
-        E(P(il.person, "staff", "surprised", TIE2), 1400, 620, at=1, until=3, anim="slide_r", scale=0.85),
-        E(P(ui.bubble, "うちに来て！", 48, "down"), 520, 290, at=1, until=2, delay=0.5),
-        E(P(ui.bubble, "いや、うちに！", 48, "down"), 1400, 290, at=1, until=2, delay=1.4),
-        E(P(ui.arrow, 240, ui.RED, 90), 960, 520, at=2, until=3, anim="rise"),
-        E(P(ui.label, "契約金が高騰", "red", 80), 960, 250, at=2, until=3, delay=0.4),
-        E(P(il.scale_balance), 620, 580, at=3, anim="rise"),
-        E(P(ui.label, "戦力の均衡", "navy", 84), 1300, 420, at=3, delay=0.6),
-        E(P(ui.label, "契約金の抑制", "orange", 84), 1300, 620, at=3, delay=1.6),
+        E(il.stadium, 620, 540, at=1, anim="rise"),
+        E(P(ui.label, "1965年より前は？", "orange", 84), 1360, 500, at=1, delay=0.6),
     ], cam="in"),
+    # 1990年代: 選手が球団を選べる時代
     S(CH2, [
-        "ただ、その後のドラフトは、何度も形を変えてきました。",
-        "1993年には、大学生や社会人の選手が、行きたい球団を自分で選べる逆指名制度が始まります。",
-        "2001年には、これが自由獲得枠という名前に変わりました。",
-        "2005年からは希望入団枠となり、使える人数が1球団1人までに減らされます。",
-        "そして2007年、この希望入団枠は廃止されました。",
-        "翌年の2008年からは、高校生と、大学生や社会人のドラフトが一本化され、今の形に近づいていきます。",
+        "1990年代に入ると、今度は選手の側が球団を選べる仕組みが生まれます。",
+        "1993年には、大学生や社会人の選手が、行きたい球団を自分で選べる逆指名制度がスタート。",
+        "2001年からは自由獲得枠という名前になり、2005年からは希望入団枠として、使える人数が1球団1人に減らされました。",
     ], [
-        E(P(hist, 1), 960, 510, at=0, until=1, anim="wipe_up"),
-        E(P(hist, 2), 960, 510, at=1, until=2, anim="none"),
-        E(P(hist, 3), 960, 510, at=2, until=3, anim="none"),
-        E(P(hist, 4), 960, 510, at=3, until=4, anim="none"),
-        E(P(hist, 5), 960, 510, at=4, until=5, anim="none"),
-        E(P(hist, 6), 960, 510, at=5, anim="none"),
+        E(P(il.person, "player", "happy", GRAY_CAP, "大", pose="point"), 600, 610, at=0, until=1, anim="rise"),
+        E(P(ui.bubble, "この球団に\n行きたい！", 48, "left"), 1150, 330, at=0, until=1, delay=0.6),
+        E(P(hist, 2), 960, 510, at=1, until=2, anim="wipe_up"),
+        E(P(hist, 4), 960, 510, at=2, anim="none"),
     ], bg="tint", trans="wipe"),
+    # 2007年: 西武の問題と希望入団枠の廃止
     S(CH2, [
-        "なぜ、選手が球団を選べる仕組みは、なくなったのでしょうか。",
-        "きっかけは、お金の問題でした。",
-        "選手に選んでもらうために、球団がアマチュア選手に裏で金銭を渡す問題が、相次いで発覚したのです。",
-        "2007年には西武に、制裁金3000万円と、その年の高校生ドラフトで上位2人の指名権をはく奪する処分が下されました。",
+        "それでも、お金の問題はなくなりませんでした。",
+        "2007年、今度は西武が、アマチュア選手に金銭を渡していたことが発覚します。",
+        "西武には、制裁金3000万円と、その年の高校生ドラフトで上位2人の指名権をはく奪する処分が下されました。",
         "ドラフトで指名権が取り上げられたのは、制度が始まって以来、初めてのことでした。",
-        "こうして、選手が球団を選べる枠はなくなり、くじ引きとウェーバーを中心とした今の仕組みに落ち着いたのです。",
+        "選手が球団を選べる枠が、こうした裏金の温床になるとして、希望入団枠はこの年に廃止されます。",
+        "そして2008年からは、高校生と、大学生や社会人のドラフトが一本化され、くじ引きとウェーバーを中心とした今の仕組みになったのです。",
+        "ここまでの流れを年表にすると、このようになります。",
     ], [
-        E(P(il.mark, "q", 220), 960, 480, at=0, until=1),
-        E(P(il.money, 3), 960, 560, at=1, until=2, anim="drop"),
-        E(P(il.person, "staff", "normal", TIE), 640, 600, at=2, until=3, anim="slide_l", scale=0.85),
-        E(P(il.money, 1), 1060, 640, at=2, until=3, anim="slide_r", delay=0.8),
-        E(P(ui.stamp, "裏で金銭", ui.RED, 110, -8), 1350, 360, at=2, until=3, delay=1.6),
-        E(P(il.newspaper, "スポーツ報"), 560, 560, at=3, until=5, anim="slide_l"),
-        E(P(ui.label, "制裁金3000万円", "red", 76), 1250, 400, at=3, until=5, delay=0.6),
-        E(P(ui.label, "上位2人の指名権はく奪", "navy", 64), 1250, 580, at=3, until=5, delay=2.4),
-        E(P(ui.stamp, "制度初", ui.RED, 100, -8), 1250, 760, at=4, until=5),
-        E(P(il.lottery_box), 620, 560, at=5, anim="drop"),
-        E(P(ui.label, "くじ引き＋ウェーバー", "navy", 80), 1250, 560, at=5, delay=0.6),
+        E(P(il.money, 3), 960, 560, at=0, until=1, anim="drop"),
+        E(P(il.person, "staff", "normal", TIE), 640, 600, at=1, until=2, anim="slide_l", scale=0.85),
+        E(P(il.money, 1), 1060, 640, at=1, until=2, anim="slide_r", delay=0.8),
+        E(P(ui.stamp, "2007年 発覚", ui.RED, 100, -8), 1350, 360, at=1, until=2, delay=1.6),
+        E(P(il.newspaper, "スポーツ報"), 560, 560, at=2, until=4, anim="slide_l"),
+        E(P(ui.label, "制裁金3000万円", "red", 76), 1250, 400, at=2, until=4, delay=0.6),
+        E(P(ui.label, "上位2人の指名権はく奪", "navy", 64), 1250, 580, at=2, until=4, delay=2.4),
+        E(P(ui.stamp, "制度初", ui.RED, 100, -8), 1250, 760, at=3, until=4),
+        E(P(il.form_paper, "希望入団枠"), 620, 540, at=4, until=5, anim="drop"),
+        E(P(ui.stamp, "廃止", ui.RED, 150, -10), 620, 540, at=4, until=5, delay=1.6, over=True),
+        E(P(ui.label, "裏金の温床になる", "navy", 72), 1260, 520, at=4, until=5, delay=0.6),
+        E(P(il.lottery_box), 620, 560, at=5, until=6, anim="drop"),
+        E(P(ui.label, "くじ引き＋ウェーバー", "navy", 80), 1250, 560, at=5, until=6, delay=0.6),
+        E(P(hist, 6), 960, 510, at=6, anim="wipe_up"),
     ], trans="slide"),
 
     # ===== 3. プロ志望届 =====
@@ -694,15 +686,19 @@ SCENES = [
         E(P(board, 5, 2), 960, 540, at=5, anim="none", delay=0, full=True),
     ], bg="board", trans="slide"),
 
-    # ===== 終了画面: 右半分を YouTube の終了画面要素のために空けておく =====
+    # ===== 終わり: チャンネル登録の呼びかけ (中央でボタンをクリックするアニメ) =====
     S(CH14, [
-        "今回は、ドラフトのお金と制度を、まとめて解説しました。",
-        "次回は、FAで選手がいくら稼げるのかを見ていきます。",
+        "最後まで見ていただき、ありがとうございました。",
+        "このチャンネルでは、FAや年俸、育成契約など、プロ野球のお金と制度のしくみを、わかりやすく解説しています。",
+        "動画が役に立ったと思ったら、高評価とチャンネル登録、そして通知のオンをお願いします。",
     ], [
-        E(P(ui.label, "次回予告", "orange", 70), 460, 300, at=1, anim="slide_l"),
-        E(P(ui.label, "FAのお金のしくみ", "navy", 84), 460, 430, at=1, anim="slide_l", delay=0.4),
-        E(P(il.person, "player", "happy", BLUE_CAP, "", pose="point"), 460, 680, at=0, anim="rise", scale=0.55),
-    ], bg="end", trans="fade", hold=16),
+        E(P(ui.label, "ご視聴ありがとうございました", "navy", 84), 960, 460, at=0, until=1, anim="zoom"),
+        E(P(ui.label, "プロ野球 お金と制度のしくみ", "orange", 72), 960, 250, at=1, anim="slide_l"),
+        E(P(ui.flow_box, "FA", "navy", 340, 130, 56), 480, 560, at=1, until=2, anim="drop", delay=1.4),
+        E(P(ui.flow_box, "年俸", "green", 340, 130, 56), 960, 560, at=1, until=2, anim="drop", delay=1.8),
+        E(P(ui.flow_box, "育成契約", "orange", 340, 130, 56), 1440, 560, at=1, until=2, anim="drop", delay=2.2),
+        E(None, 960, 590, at=2, anim="none", delay=0.3, dyn=ui.cta_frame, dyn_dur=6.0, name="cta"),
+    ], bg="end", trans="fade", hold=12),
 ]
 
 
@@ -723,8 +719,8 @@ def _after(first_line, *new):
 
 _after("ドラフト会議の正式な名前", X.KOUSHOUKEN)
 _after("ドラフトには、大きく分けて二つ", X.DRAFT_DAY)
-_after("ドラフトが始まったのは、1965年", *X.PRE_DRAFT)
-_after("ただ、その後のドラフトは", X.HISTORY_MORE, *X.EGAWA, X.ICHIBA)
+_after("ドラフトが始まったのは、1965年", *X.PRE_DRAFT, X.HISTORY_MORE, *X.EGAWA)
+_after("1990年代に入ると", X.ICHIBA)
 _after("届けを出す先は", X.SHIBOU_COUNT)
 _after("一方で、独立リーグの選手は", *X.TAZAWA, X.FOREIGN)
 _after("いよいよ、ドラフト当日", X.SIMULATION)

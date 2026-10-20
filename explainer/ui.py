@@ -589,3 +589,92 @@ def checklist(items, upto=99, w=1100, size=56):
             d.line([(row - 44, y + 24), (20, y + row - 40)], fill=RED, width=12)
         d.text((row + 6, y + (row - size) / 2 - 10), text, font=f, fill=INK)
     return im
+
+
+# ---- チャンネル登録の呼びかけ (ボタンをクリックするアニメーション) ------------------
+def _cursor(scale=1.0):
+    """マウスカーソル (矢印)"""
+    S2 = 2
+    w, h = int(70 * scale), int(100 * scale)
+    im = Image.new("RGBA", (w * S2, h * S2), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    pts = [(0, 0), (0, 80), (20, 62), (34, 96), (48, 90), (34, 56), (60, 56)]
+    pts = [(x * scale * S2 + 4, y * scale * S2 + 4) for x, y in pts]
+    d.polygon(pts, fill=(255, 255, 255))
+    d.line(pts + [pts[0]], fill=(20, 20, 20), width=int(5 * S2 * scale), joint="curve")
+    return im.resize((w, h), Image.LANCZOS)
+
+
+def _pill(text, fill, fg=(255, 255, 255), w=520, h=130, size=56, icon=None, press=1.0):
+    im = Image.new("RGBA", (w + 20, h + 20), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    d.rounded_rectangle((14, 16, w + 14, h + 16), radius=h // 2, fill=(0, 0, 0, 60))
+    d.rounded_rectangle((4, 4, w + 4, h + 4), radius=h // 2, fill=fill)
+    f = font("label", size)
+    tw = d.textlength(text, font=f)
+    x0 = 4 + (w - tw) / 2 + (28 if icon else 0)
+    if icon == "thumb":   # 上向きの矢印 (高評価)
+        cx, cy = x0 - 52, 4 + h / 2
+        d.polygon([(cx, cy - 30), (cx - 26, cy + 4), (cx - 10, cy + 4), (cx - 10, cy + 30), (cx + 10, cy + 30),
+                   (cx + 10, cy + 4), (cx + 26, cy + 4)], fill=fg)
+    elif icon == "check":
+        cx, cy = x0 - 50, 4 + h / 2
+        d.line([(cx - 22, cy), (cx - 6, cy + 18), (cx + 24, cy - 18)], fill=fg, width=10)
+    d.text((x0, 4 + (h - size) / 2 - 10), text, font=f, fill=fg)
+    if press < 1.0:
+        im = im.resize((int(im.width * press), int(im.height * press)), Image.BILINEAR)
+    return im
+
+
+def _bell(ring=0.0, on=False):
+    """通知ベル。ring は揺れの角度 (度)"""
+    S2 = 2
+    im = Image.new("RGBA", (130 * S2, 130 * S2), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    col = ORANGE if on else (120, 120, 130)
+    d.ellipse((5 * S2, 5 * S2, 125 * S2, 125 * S2), fill=(255, 255, 255), outline=col, width=6 * S2)
+    d.pieslice((35 * S2, 28 * S2, 95 * S2, 100 * S2), 180, 360, fill=col)
+    d.rectangle((35 * S2, 63 * S2, 95 * S2, 88 * S2), fill=col)
+    d.rectangle((28 * S2, 86 * S2, 102 * S2, 94 * S2), fill=col)
+    d.ellipse((57 * S2, 92 * S2, 73 * S2, 106 * S2), fill=col)
+    im = im.resize((130, 130), Image.LANCZOS)
+    return im.rotate(ring, resample=Image.BICUBIC) if ring else im
+
+
+def cta_frame(t):
+    """t 秒目の呼びかけアニメ: 高評価 → チャンネル登録 → 通知ベル の順にカーソルでクリック"""
+    W2, H2 = 1500, 420
+    im = Image.new("RGBA", (W2, H2), (0, 0, 0, 0))
+    like_c, sub_c, bell_c = (260, 210), (850, 210), (1290, 210)
+    t_like, t_sub, t_bell = 1.2, 2.6, 4.0
+
+    def press_of(tc):
+        return 0.92 if tc <= t < tc + 0.15 else 1.0
+
+    liked, subbed, belled = t >= t_like, t >= t_sub, t >= t_bell
+    like = _pill("高評価", BLUE if liked else (150, 160, 175), w=380, icon="thumb", press=press_of(t_like))
+    sub = _pill("登録済み" if subbed else "チャンネル登録", (150, 150, 160) if subbed else RED, w=560,
+                icon="check" if subbed else None, press=press_of(t_sub))
+    ring = 18 * math.sin((t - t_bell) * 18) * max(0.0, 1 - (t - t_bell) / 1.2) if belled else 0
+    bell = _bell(ring, belled)
+    for spr, (cx, cy) in ((like, like_c), (sub, sub_c), (bell, bell_c)):
+        im.alpha_composite(spr, (int(cx - spr.width / 2), int(cy - spr.height / 2)))
+    if belled and t < t_bell + 2.0:
+        lab = text_sprite("通知オン", font("label", 40), ORANGE, stroke=6, stroke_fill=(255, 255, 255))
+        im.alpha_composite(lab, (bell_c[0] - lab.width // 2, bell_c[1] + 80))
+    # カーソルの移動: 右下から 高評価 → 登録 → ベル
+    path = [((W2 + 40, H2 + 60), 0.0), ((like_c[0] + 20, like_c[1] + 10), t_like - 0.15),
+            ((sub_c[0] + 40, sub_c[1] + 10), t_sub - 0.15), ((bell_c[0] + 10, bell_c[1] + 10), t_bell - 0.15),
+            ((bell_c[0] + 10, bell_c[1] + 10), 99.0)]
+    for (p0, a), (p1, b) in zip(path, path[1:]):
+        if a <= t <= b:
+            k = min(1.0, (t - a) / max(0.01, min(0.8, b - a)))
+            k = 1 - (1 - k) ** 3
+            x, y = p0[0] + (p1[0] - p0[0]) * k, p0[1] + (p1[1] - p0[1]) * k
+            break
+    else:
+        x, y = path[-1][0]
+    if t < t_bell + 1.5:
+        cur = _cursor(1.0 if not any(tc <= t < tc + 0.15 for tc in (t_like, t_sub, t_bell)) else 0.85)
+        im.alpha_composite(cur, (int(min(W2 - cur.width, x)), int(min(H2 - cur.height, y))))
+    return im

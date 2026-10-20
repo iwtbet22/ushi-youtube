@@ -234,6 +234,19 @@ class Count:
         return self.sprite(1e9)
 
 
+class Dyn:
+    """時間で形が変わる要素 (呼びかけアニメなど)。fn(t) が t 秒目のスプライトを返す"""
+
+    def __init__(self, fn, dur):
+        self.fn, self.dur = fn, dur
+
+    def sprite(self, t):
+        return self.fn(t)
+
+    def final(self):
+        return self.fn(self.dur)
+
+
 class SceneRenderer:
     """シーン1つ分。frame(t) で t 秒目の RGBA 画像を返す。"""
 
@@ -246,6 +259,9 @@ class SceneRenderer:
         for e in sc["els"]:
             if e.get("count"):
                 obj = Count(e["count"])
+                spr = obj.final()
+            elif e.get("dyn"):
+                obj = Dyn(e["dyn"], e["dyn_dur"])
                 spr = obj.final()
             else:
                 obj = None
@@ -265,6 +281,8 @@ class SceneRenderer:
     def _settle_time(self, e):
         if e.get("count"):
             return e["count"][4] + 0.1
+        if e.get("dyn"):
+            return e["dyn_dur"]
         return ANIM_LEN.get(e["anim"], 0) + 0.05
 
     def content(self, t):

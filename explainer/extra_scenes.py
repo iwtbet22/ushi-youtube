@@ -52,15 +52,17 @@ DRAFT_DAY = S("ドラフトとは何か", [
 
 # 1978年・1991年の変化 (2章)
 HISTORY_MORE = S("ドラフトの歴史", [
-    "ちなみに、全球団が同時に指名して、重なったら抽選という、今の1位指名に近いやり方が始まったのは1978年です。",
+    "その後もドラフトは、少しずつ形を変えていきます。",
+    "例えば、全球団が同時に指名して、重なったら抽選という、今の1位指名に近いやり方が始まったのは1978年です。",
     "また、昔はドラフトで指名されなかった選手を、あとから自由に獲得するドラフト外入団という方法もありました。",
     "このドラフト外入団は、1991年に廃止されています。",
 ], [
-    C(1978, lambda v: f"{int(v)}年", 560, 470, at=0, until=1, color="navy", size=160, dur=1.0),
-    E(P(il.lottery_box), 1300, 540, at=0, until=1, anim="drop", delay=1.0),
-    E(P(ui.big_word, "ドラフト外入団", "ink_brush", 130), 960, 450, at=1, until=2, anim="zoom"),
-    C(1991, lambda v: f"{int(v)}年", 560, 470, at=2, color="red", size=160, dur=1.0),
-    E(P(ui.stamp, "廃止", ui.RED, 150, -10), 1300, 470, at=2, delay=1.2),
+    E(P(ui.big_word, "少しずつ変化", "yellow", 140), 960, 450, at=0, until=1, anim="zoom"),
+    C(1978, lambda v: f"{int(v)}年", 560, 470, at=1, until=2, color="navy", size=160, dur=1.0),
+    E(P(il.lottery_box), 1300, 540, at=1, until=2, anim="drop", delay=1.0),
+    E(P(ui.big_word, "ドラフト外入団", "ink_brush", 130), 960, 450, at=2, until=3, anim="zoom"),
+    C(1991, lambda v: f"{int(v)}年", 560, 470, at=3, color="red", size=160, dur=1.0),
+    E(P(ui.stamp, "廃止", ui.RED, 150, -10), 1300, 470, at=3, delay=1.2),
 ], trans="fade")
 
 # 志望届を出しても (3章)
@@ -314,7 +316,7 @@ def days():
 # 自由競争の時代とドラフトの誕生 (2章のはじめ)
 PRE_DRAFT = [
     S("ドラフトの歴史", [
-        "もう少し具体的に、ドラフトができる前の様子を見てみましょう。",
+        "当時、新人選手の獲得は、球団が自由に選手と交渉する、早い者勝ちの自由競争でした。",
         "当時、有望な選手には球団どうしが競って高い契約金を提示し、お金だけでなく、土地や家まで用意されることもあったと言われています。",
         ("例えば1964年には、埼玉・上尾高校の山崎裕之選手が、当時史上最高額と報じられた契約金5000万円で、東京オリオンズに入団しました。",
          "例えば1964年には、埼玉・あげお高校の、やまざきひろゆき選手が、当時史上最高額と報じられた契約金5000万円で、東京オリオンズに入団しました。"),
@@ -335,16 +337,20 @@ PRE_DRAFT = [
         "しかも資金力のある球団ほど、有望な選手を集めやすく、球団の間の戦力の差も広がりやすい状況でした。",
         "そこで1964年、経営に苦しんでいた西鉄ライオンズの社長が、アメリカのアメフトのドラフトを参考に、新人を指名で振り分ける制度を提案します。",
         "選手を自由に獲得できていた巨人や阪神は反対したと伝えられていますが、最終的に導入が決まり、翌1965年に第1回ドラフト会議が開かれました。",
+        "目的は、球団どうしの戦力のバランスを保つことと、契約金の高騰を抑えることでした。",
     ], [
-        E(P(il.money, 4), 520, 600, at=0, anim="drop"),
-        E(P(il.person, "player", "happy", BLUE_CAP, ""), 1080, 640, at=0, anim="slide_r", scale=0.6, delay=0.6),
-        E(P(il.person, "player", "happy", GRAY_CAP, ""), 1300, 640, at=0, anim="slide_r", scale=0.6, delay=0.9),
-        E(P(il.person, "player", "happy", GREEN_CAP, ""), 1520, 640, at=0, anim="slide_r", scale=0.6, delay=1.2),
+        E(P(il.money, 4), 520, 600, at=0, until=3, anim="drop"),
+        E(P(il.person, "player", "happy", BLUE_CAP, ""), 1080, 640, at=0, until=3, anim="slide_r", scale=0.6, delay=0.6),
+        E(P(il.person, "player", "happy", GRAY_CAP, ""), 1300, 640, at=0, until=3, anim="slide_r", scale=0.6, delay=0.9),
+        E(P(il.person, "player", "happy", GREEN_CAP, ""), 1520, 640, at=0, until=3, anim="slide_r", scale=0.6, delay=1.2),
         E(P(ui.label, "資金力のある球団に集まる", "red", 66), 960, 250, at=0, until=1, delay=1.8),
         E(P(ui.flow_box, "西鉄の社長が提案", "navy", 520, 130, 52), 960, 250, at=1, until=2, anim="drop"),
         E(P(ui.label, "アメフトのドラフトを参考に", "orange", 56, 8), 960, 400, at=1, until=2, delay=1.4),
-        E(P(ui.label, "巨人・阪神は反対したと伝えられる", "ink", 56, 8), 960, 250, at=2, delay=0.4),
-        C(1965, lambda v: f"{int(v)}年 第1回", 960, 420, at=2, color="red", size=100, dur=1.0, delay=3.0),
+        E(P(ui.label, "巨人・阪神は反対したと伝えられる", "ink", 56, 8), 960, 250, at=2, until=3, delay=0.4),
+        C(1965, lambda v: f"{int(v)}年 第1回", 960, 420, at=2, until=3, color="red", size=100, dur=1.0, delay=3.0),
+        E(P(il.scale_balance), 620, 580, at=3, anim="rise"),
+        E(P(ui.label, "戦力の均衡", "navy", 84), 1300, 420, at=3, delay=0.6),
+        E(P(ui.label, "契約金の抑制", "orange", 84), 1300, 620, at=3, delay=1.6),
     ], bg="dots", trans="wipe"),
 ]
 
