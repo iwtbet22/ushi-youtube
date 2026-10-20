@@ -83,9 +83,19 @@ def stack(sprites, gap=0, align="center"):
     return out
 
 
+# ---- YouTube の表示とかぶらないための配置 ------------------------------------
+# 下: シークバーと操作ボタン (一時停止中・マウスを乗せたとき) は下端から約 5〜8% に出るので、字幕帯を浮かせる
+# 右下: チャンネル透かし (ブランディング) が出るので、字幕の行幅を短くして右端に文字を置かない
+# 上: タイトル表示・カードの i アイコンが出るので、章タイトルと帯を端から離す
+SUB_H = 164
+SUB_BOTTOM = 40
+SUB_Y = H - SUB_BOTTOM - SUB_H              # 字幕帯の上端 (876)
+CHAPTER_POS = (64, 44)                      # 左上の章タイトル
+BANNER_MARGIN = (64, 40)                    # 右上の帯 (右端・上端からの距離)
+CONTENT = (80, 150, W - 80, SUB_Y - 14)     # 画面要素を置いてよい範囲
+
 # ---- 字幕 (画面下のグレー帯) -------------------------------------------------
-SUB_H = 176
-SUB_MAX = 30  # 1行の最大文字数
+SUB_MAX = 28  # 1行の最大文字数 (右下の透かしにかからない幅)
 
 _NO_HEAD = set("、。，．・：；？！ゃゅょっャュョッァィゥェォー）」』】々〜")
 _PARTICLES = set("はがをにでともへのてや")
@@ -153,9 +163,9 @@ def subtitle(text: str) -> Image.Image:
     """横幅いっぱいの帯 (W x SUB_H)。白文字・黒縁の2行を中央揃え。"""
     im = Image.new("RGBA", (W, SUB_H), SUB_BAND)
     d = ImageDraw.Draw(im)
-    f = font("sub", 54)
+    f = font("sub", 52)
     lines = text.split("\n")
-    lh = 72
+    lh = 68
     y0 = (SUB_H - lh * len(lines)) // 2 - 6
     for i, l in enumerate(lines):
         tw = d.textlength(l, font=f)
@@ -359,3 +369,122 @@ def chalkboard(lines, title=None):
 
 def strip_markup(s: str) -> str:
     return re.sub(r"[【】《》]", "", s)
+
+
+# ---- バリエーション用の図解 ------------------------------------------------------
+def staircase(rows, upto, w=1500, h=600):
+    """順位別の相場を「下り階段」で見せる。rows=[(順位, 高さ0-1, 金額表示)]
+    順位は段の下、金額は段の上に書く。"""
+    im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    n = len(rows)
+    sw = w / n
+    base = h - 80
+    for i, (lab, v, amt) in enumerate(rows[:upto]):
+        x0, x1 = i * sw + 6, (i + 1) * sw - 6
+        top = base - (base - 90) * v
+        col = (255, 196, 40) if i == 0 else (120, 170, 235)
+        d.rounded_rectangle((x0, top, x1, base), radius=12, fill=col, outline=INK, width=4)
+        fl = font("label", 50)
+        lw = d.textlength(lab, font=fl)
+        d.text(((x0 + x1) / 2 - lw / 2, base + 8), lab, font=fl, fill=INK)
+        fa = font("label", 40)
+        aw = d.textlength(amt, font=fa)
+        d.text(((x0 + x1) / 2 - aw / 2, top - 58), amt, font=fa, fill=RED if i == 0 else INK,
+               stroke_width=6, stroke_fill=(255, 255, 255))
+    return im
+
+
+def timeline(marks, w=1500, h=300, upto=99):
+    """左→右の時間軸。marks=[(位置0-1, 上の文字, 下の文字, 色)]"""
+    im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    y = h / 2
+    d.rounded_rectangle((20, y - 12, w - 70, y + 12), radius=12, fill=(150, 160, 180))
+    d.polygon([(w - 80, y - 36), (w - 10, y), (w - 80, y + 36)], fill=(150, 160, 180))
+    for k, (p, top, bottom, col) in enumerate(marks[:upto]):
+        x = 40 + (w - 160) * p
+        c = COLORS.get(col, col) if isinstance(col, str) else col
+        d.ellipse((x - 26, y - 26, x + 26, y + 26), fill=c, outline=(255, 255, 255), width=6)
+        ft = font("label", 50)
+        tw = d.textlength(top, font=ft)
+        d.text((x - tw / 2, y - 110), top, font=ft, fill=c, stroke_width=6, stroke_fill=(255, 255, 255))
+        fb = font("body", 40)
+        bw = d.textlength(bottom, font=fb)
+        d.text((x - bw / 2, y + 44), bottom, font=fb, fill=INK)
+    return im
+
+
+def flow_box(text, color="navy", w=420, h=130, size=50):
+    im = Image.new("RGBA", (w + 12, h + 12), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    c = COLORS.get(color, color) if isinstance(color, str) else color
+    d.rounded_rectangle((10, 10, w + 10, h + 10), radius=22, fill=(0, 0, 0, 50))
+    d.rounded_rectangle((0, 0, w, h), radius=22, fill=c)
+    f = font("label", size)
+    lines = text.split("\n")
+    lh = size * 1.25
+    y = (h - lh * len(lines)) / 2 - 4
+    for l in lines:
+        tw = d.textlength(l, font=f)
+        d.text(((w - tw) / 2, y), l, font=f, fill=(255, 255, 255))
+        y += lh
+    return im
+
+
+def diamond(text, w=520, h=300, size=50):
+    im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    d.polygon([(w / 2, 6), (w - 6, h / 2), (w / 2, h - 6), (6, h / 2)], fill=(255, 246, 214), outline=INK)
+    d.line([(w / 2, 6), (w - 6, h / 2), (w / 2, h - 6), (6, h / 2), (w / 2, 6)], fill=INK, width=6)
+    f = font("label", size)
+    lines = text.split("\n")
+    lh = size * 1.25
+    y = (h - lh * len(lines)) / 2 - 4
+    for l in lines:
+        tw = d.textlength(l, font=f)
+        d.text(((w - tw) / 2, y), l, font=f, fill=INK)
+        y += lh
+    return im
+
+
+def line_arrow(x0, y0, x1, y1, color=INK, width=8, label=None):
+    """2点を結ぶ細い矢印 (フローチャート用)。返り値はスプライトと中心座標"""
+    pad = 60
+    l, t = min(x0, x1) - pad, min(y0, y1) - pad
+    w, h = abs(x1 - x0) + pad * 2, abs(y1 - y0) + pad * 2
+    im = Image.new("RGBA", (int(w), int(h)), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    a, b = (x0 - l, y0 - t), (x1 - l, y1 - t)
+    d.line([a, b], fill=color, width=width)
+    ang = math.atan2(b[1] - a[1], b[0] - a[0])
+    hd = 30
+    d.polygon([b, (b[0] - hd * math.cos(ang - 0.45), b[1] - hd * math.sin(ang - 0.45)),
+               (b[0] - hd * math.cos(ang + 0.45), b[1] - hd * math.sin(ang + 0.45))], fill=color)
+    if label:
+        f = font("label", 44)
+        mx, my = (a[0] + b[0]) / 2, (a[1] + b[1]) / 2
+        tw = d.textlength(label, font=f)
+        d.text((mx - tw / 2 + 30, my - 30), label, font=f, fill=color, stroke_width=6, stroke_fill=(255, 255, 255))
+    return im
+
+
+def number(text, color="red", size=150):
+    """大きな数字 (カウントアップ用)"""
+    c = COLORS.get(color, color) if isinstance(color, str) else color
+    return text_sprite(text, font("impact", size), c, stroke=12, stroke_fill=(255, 255, 255), shadow=True)
+
+
+def gap_marker(w=270, h=135, color=RED):
+    """2つの高さの差を示す: 上の高さから伸ばした点線 + 右端の上下矢印"""
+    S2 = 2
+    im = Image.new("RGBA", (w * S2, h * S2), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    y0, y1 = 8 * S2, (h - 8) * S2
+    x = (w - 24) * S2
+    for xx in range(0, x, 28 * S2):
+        d.line([(xx, y0), (min(x, xx + 16 * S2), y0)], fill=color, width=6 * S2)
+    d.line([(x, y0 + 20 * S2), (x, y1 - 20 * S2)], fill=color, width=8 * S2)
+    for yy, sgn in ((y0, 1), (y1, -1)):
+        d.polygon([(x, yy), (x - 16 * S2, yy + sgn * 26 * S2), (x + 16 * S2, yy + sgn * 26 * S2)], fill=color)
+    return im.resize((w, h), Image.LANCZOS)

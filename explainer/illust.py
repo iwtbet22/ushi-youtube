@@ -90,8 +90,9 @@ def _face(d, cx, cy, r, mood="normal", hair=(50, 40, 36), cap=None, hair_style="
 
 # ---- 人物 ---------------------------------------------------------------------
 @lru_cache(maxsize=None)
-def person(kind="player", mood="normal", color=(30, 70, 160), letter="", w=300, h=520):
-    """kind: player(ユニフォーム) / suit(スーツ) / gakuran(学ラン) / staff(スーツ+バインダー)"""
+def person(kind="player", mood="normal", color=(30, 70, 160), letter="", w=300, h=520, pose="normal"):
+    """kind: player(ユニフォーム) / suit(スーツ) / gakuran(学ラン) / staff(スーツ+バインダー)
+    pose: normal / point(右を指す) / cheer(両手を上げる) / think(あごに手)"""
     im, d = _canvas(w, h)
     cx = w / 2
     head_r = 74
@@ -110,8 +111,22 @@ def person(kind="player", mood="normal", color=(30, 70, 160), letter="", w=300, 
     _rr(d, (cx - 82, 168, cx + 82, 350), 46, body)
     # 腕
     for sx in (-1, 1):
-        _rr(d, (cx + sx * 82 - 24, 182, cx + sx * 82 + 24, 320), 22, body)
-        _ell(d, (cx + sx * 82 - 20, 300, cx + sx * 82 + 20, 340), SKIN, 4)
+        ax = cx + sx * 82
+        if pose == "cheer":
+            _line(d, [(ax, 200), (ax + sx * 40, 110)], 44, LINE)
+            _line(d, [(ax, 200), (ax + sx * 40, 110)], 34, body)
+            _ell(d, (ax + sx * 40 - 22, 70, ax + sx * 40 + 22, 114), SKIN, 4)
+        elif pose == "point" and sx > 0:
+            _line(d, [(ax - 10, 210), (ax + 100, 200)], 44, LINE)
+            _line(d, [(ax - 10, 210), (ax + 100, 200)], 34, body)
+            _ell(d, (ax + 92, 182, ax + 132, 218), SKIN, 4)
+        elif pose == "think" and sx > 0:
+            _line(d, [(ax, 200), (ax - 30, 290), (cx + 20, 196)], 40, LINE)
+            _line(d, [(ax, 200), (ax - 30, 290), (cx + 20, 196)], 30, body)
+            _ell(d, (cx, 160, cx + 40, 200), SKIN, 4)
+        else:
+            _rr(d, (ax - 24, 182, ax + 24, 320), 22, body)
+            _ell(d, (ax - 20, 300, ax + 20, 340), SKIN, 4)
     if kind == "player":
         _line(d, [(cx, 172), (cx, 346)], 3, (200, 200, 205))
         if letter:
@@ -128,7 +143,7 @@ def person(kind="player", mood="normal", color=(30, 70, 160), letter="", w=300, 
         for k in range(4):
             d.ellipse(_p(cx - 7, 200 + k * 36, cx + 7, 214 + k * 36), fill=(230, 190, 60))
         _rr(d, (cx - 40, 164, cx + 40, 186), 6, (34, 34, 44), 4)
-    if kind == "staff":  # バインダー
+    if kind == "staff" and pose == "normal":  # バインダー
         _rr(d, (cx + 40, 230, cx + 124, 340), 8, (250, 246, 230), 4)
         for k in range(4):
             _line(d, [(cx + 54, 256 + k * 20), (cx + 110, 256 + k * 20)], 3, (150, 150, 160))
@@ -282,4 +297,34 @@ def gate(w=420, h=300):
     _rr(d, (20, 40, 70, h - 10), 6, (200, 70, 60))
     _rr(d, (w - 70, 40, w - 20, h - 10), 6, (200, 70, 60))
     _rr(d, (0, 20, w, 70), 8, (230, 90, 70))
+    return _done(im)
+
+
+# ---- 図解用の小物 --------------------------------------------------------------
+@lru_cache(maxsize=None)
+def newspaper(head="スポーツ報", w=360, h=300):
+    """新聞 (見出しは架空)"""
+    im, d = _canvas(w, h)
+    _rr(d, (16, 16, w - 16, h - 16), 6, (250, 248, 240))
+    dd = ImageDraw.Draw(im)
+    dd.text((40 * S, 30 * S), head, font=font("label", 44 * S), fill=INK)
+    _line(d, [(36, 92), (w - 36, 92)], 4)
+    _rr(d, (36, 108, 170, 250), 4, (200, 200, 205), 3)
+    for k in range(6):
+        _line(d, [(190, 116 + k * 24), (w - 40, 116 + k * 24)], 4, (170, 170, 178))
+    return _done(im)
+
+
+@lru_cache(maxsize=None)
+def scale_balance(w=420, h=340):
+    """天秤 (公平のイメージ)"""
+    im, d = _canvas(w, h)
+    _rr(d, (w / 2 - 70, h - 40, w / 2 + 70, h - 14), 8, (200, 160, 80))
+    _rr(d, (w / 2 - 12, 70, w / 2 + 12, h - 36), 6, (220, 180, 90))
+    _rr(d, (40, 60, w - 40, 84), 8, (220, 180, 90))
+    for x in (70, w - 70):
+        _line(d, [(x, 84), (x - 40, 190)], 4)
+        _line(d, [(x, 84), (x + 40, 190)], 4)
+        d.chord(_p(x - 60, 160, x + 60, 220), 0, 180, fill=(240, 210, 120), outline=LINE, width=5 * S)
+    _ell(d, (w / 2 - 22, 40, w / 2 + 22, 84), (240, 200, 100))
     return _done(im)
