@@ -2,7 +2,15 @@
 
 プロ野球の「お金と制度の仕組み」を解説するチャンネルの制作リポジトリ。
 
-## 第1回：ドラフト1位の契約金はなぜ1億円なのか（冒頭3分・デザイン確定用プロト）
+## 第1回 本編：ドラフトの契約金はいくら？（白背景の解説スタイル・現行版）
+
+- 台本：`script/ep01_main.md`
+- デザイン仕様：`design/design_spec_v2.md`
+- 書き出し：`python3 explainer/engine.py` → `output/ep01_main.mp4`（1920x1080 / 30fps）
+- 台本を書き出す：`python3 explainer/export_script.py`
+- 台本・画面構成は `explainer/episode.py`、テロップ部品は `explainer/ui.py`、イラストは `explainer/illust.py`
+
+## 旧版：冒頭3分のシネマ調プロト（参考用）
 
 - 台本：`script/ep01_opening.md`
 - デザイン仕様：`design/design_spec.md`

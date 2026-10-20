@@ -3,3 +3,4 @@ output/*.wav
 output/segments/
 output/voice/
 output/*.mp4
+output/segments_main/

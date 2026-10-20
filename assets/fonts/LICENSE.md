@@ -10,3 +10,7 @@ and were downloaded from Google Fonts.
 | ZenKakuGothicNew-Black.ttf | Zen Kaku Gothic New |
 | YujiSyuku-Regular.ttf | Yuji Syuku |
 | Oswald-Bold.ttf | Oswald |
+| MPLUSRounded1c-ExtraBold.ttf / MPLUSRounded1c-Black.ttf | M PLUS Rounded 1c |
+| DelaGothicOne-Regular.ttf | Dela Gothic One |
+| YuseiMagic-Regular.ttf | Yusei Magic |
+| YujiBoku-Regular.ttf | Yuji Boku |
