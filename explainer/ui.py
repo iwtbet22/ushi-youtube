@@ -408,10 +408,12 @@ def timeline(marks, w=1500, h=300, upto=99):
         d.ellipse((x - 26, y - 26, x + 26, y + 26), fill=c, outline=(255, 255, 255), width=6)
         ft = font("label", 50)
         tw = d.textlength(top, font=ft)
-        d.text((x - tw / 2, y - 110), top, font=ft, fill=c, stroke_width=6, stroke_fill=(255, 255, 255))
+        tx = min(max(x - tw / 2, 0), w - tw - 8)
+        d.text((tx, y - 110), top, font=ft, fill=c, stroke_width=6, stroke_fill=(255, 255, 255))
         fb = font("body", 40)
         bw = d.textlength(bottom, font=fb)
-        d.text((x - bw / 2, y + 44), bottom, font=fb, fill=INK)
+        bx = min(max(x - bw / 2, 0), w - bw - 8)
+        d.text((bx, y + 44), bottom, font=fb, fill=INK)
     return im
 
 
@@ -488,3 +490,102 @@ def gap_marker(w=270, h=135, color=RED):
     for yy, sgn in ((y0, 1), (y1, -1)):
         d.polygon([(x, yy), (x - 16 * S2, yy + sgn * 26 * S2), (x + 16 * S2, yy + sgn * 26 * S2)], fill=color)
     return im.resize((w, h), Image.LANCZOS)
+
+
+def snake_order(rows=3, cols=12, upto=99, w=1560, h=470, labels=("2巡目", "3巡目", "4巡目")):
+    """ウェーバー → 逆ウェーバー → ウェーバー … の順番。
+    列は球団 (左が最下位、右が優勝)、丸の中の数字はその巡での指名の順番。"""
+    im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    lab_w = 190
+    gap = (w - lab_w - 70) / cols
+    head = 64
+    rh = (h - head) / rows
+    fl = font("label", 46)
+    fn = font("label", 34)
+    fh = font("label", 34)
+    xs = [lab_w + gap * (c + 0.5) for c in range(cols)]
+    for txt, x, col in (("最下位", xs[0], ORANGE), ("優勝", xs[-1], NAVY)):
+        tw = d.textlength(txt, font=fh)
+        d.text((x - tw / 2, 4), txt, font=fh, fill=col)
+    for r in range(min(rows, upto)):
+        y = head + rh * (r + 0.5)
+        d.text((0, y - 30), labels[r], font=fl, fill=INK)
+        fwd = r % 2 == 0
+        x0, x1 = (xs[0], xs[-1]) if fwd else (xs[-1], xs[0])
+        tip = x1 + (52 if fwd else -52)
+        d.line([(x0, y), (tip, y)], fill=(170, 180, 200), width=8)
+        d.polygon([(tip + (18 if fwd else -18), y), (tip, y - 18), (tip, y + 18)], fill=(170, 180, 200))
+        for c in range(cols):
+            k = c + 1 if fwd else cols - c
+            col = ORANGE if k == 1 else NAVY
+            x = xs[c]
+            d.ellipse((x - 30, y - 30, x + 30, y + 30), fill=col, outline=(255, 255, 255), width=4)
+            t = str(k)
+            tw = d.textlength(t, font=fn)
+            d.text((x - tw / 2, y - 24), t, font=fn, fill=(255, 255, 255))
+    return im
+
+
+def vtimeline(items, upto=99, w=1300, row_h=104):
+    """縦の年表。items=[(年, 出来事, 色)]"""
+    h = row_h * len(items) + 10
+    im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    d.rounded_rectangle((176, 20, 188, h - 20), radius=6, fill=(200, 205, 215))
+    fy = font("num", 62)
+    fe = font("label", 56)
+    for k, (year, text, col) in enumerate(items[:upto]):
+        y = 10 + row_h * k + row_h / 2
+        c = COLORS.get(col, col) if isinstance(col, str) else col
+        d.rounded_rectangle((0, y - 40, 160, y + 40), radius=18, fill=c)
+        yw = d.textlength(year, font=fy)
+        d.text((80 - yw / 2, y - 46), year, font=fy, fill=(255, 255, 255))
+        d.ellipse((168, y - 14, 196, y + 14), fill=c, outline=(255, 255, 255), width=4)
+        d.text((226, y - 40), text, font=fe, fill=INK)
+    return im
+
+
+def month_bar(months, marks, w=1500, h=260):
+    """月の帯。months=["10月",...], marks=[(index, 上の文字, 色)]"""
+    im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    n = len(months)
+    cw = w / n
+    y0 = h - 110
+    fm = font("label", 40)
+    for i, m in enumerate(months):
+        x0 = i * cw
+        d.rounded_rectangle((x0 + 4, y0, x0 + cw - 4, y0 + 90), radius=12,
+                            fill=(236, 240, 248), outline=(190, 196, 210), width=3)
+        tw = d.textlength(m, font=fm)
+        d.text((x0 + cw / 2 - tw / 2, y0 + 20), m, font=fm, fill=INK)
+    ft = font("label", 42)
+    for i, text, col in marks:
+        c = COLORS.get(col, col) if isinstance(col, str) else col
+        x = i * cw + cw / 2
+        tw = d.textlength(text, font=ft)
+        tx = min(max(x - tw / 2, 0), w - tw - 6)
+        d.text((tx, 6), text, font=ft, fill=c, stroke_width=6, stroke_fill=(255, 255, 255))
+        d.polygon([(x - 18, 70), (x + 18, 70), (x, 100)], fill=c)
+        d.rounded_rectangle((i * cw + 4, y0, i * cw + cw - 4, y0 + 90), radius=12, outline=c, width=7)
+    return im
+
+
+def checklist(items, upto=99, w=1100, size=56):
+    """チェックリスト (✓ 付き)"""
+    row = int(size * 1.9)
+    im = Image.new("RGBA", (w, row * len(items)), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    f = font("label", size)
+    for k, (text, ok) in enumerate(items[:upto]):
+        y = k * row
+        d.rounded_rectangle((0, y + 8, row - 24, y + row - 16), radius=12, fill=(255, 255, 255),
+                            outline=INK, width=5)
+        if ok:
+            d.line([(16, y + row / 2), (row / 2 - 12, y + row - 30), (row - 30, y + 20)], fill=GREEN, width=12)
+        else:
+            d.line([(20, y + 24), (row - 44, y + row - 40)], fill=RED, width=12)
+            d.line([(row - 44, y + 24), (20, y + row - 40)], fill=RED, width=12)
+        d.text((row + 6, y + (row - size) / 2 - 10), text, font=f, fill=INK)
+    return im

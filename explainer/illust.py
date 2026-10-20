@@ -328,3 +328,60 @@ def scale_balance(w=420, h=340):
         d.chord(_p(x - 60, 160, x + 60, 220), 0, 180, fill=(240, 210, 120), outline=LINE, width=5 * S)
     _ell(d, (w / 2 - 22, 40, w / 2 + 22, 84), (240, 200, 100))
     return _done(im)
+
+
+@lru_cache(maxsize=None)
+def lottery_box(w=360, h=320):
+    """抽選箱 (上に手を入れる穴)"""
+    im, d = _canvas(w, h)
+    _rr(d, (30, 80, w - 30, h - 14), 10, (232, 60, 52))
+    _poly(d, [(30, 80), (w - 30, 80), (w - 60, 40), (60, 40)], (250, 110, 96))
+    _ell(d, (w / 2 - 70, 46, w / 2 + 70, 74), (60, 30, 30), 4)
+    dd = ImageDraw.Draw(im)
+    f = font("label", 54 * S)
+    tw = dd.textlength("抽選", font=f)
+    dd.text((w / 2 * S - tw / 2, 150 * S), "抽選", font=f, fill=(255, 255, 255))
+    return _done(im)
+
+
+@lru_cache(maxsize=None)
+def lottery_card(text="交渉権確定", w=300, h=170):
+    """抽選で引くカード"""
+    im, d = _canvas(w, h)
+    _rr(d, (10, 10, w - 10, h - 10), 10, (255, 255, 252))
+    d.rectangle(_p(10, 10, w - 10, 44), fill=(214, 32, 40))
+    dd = ImageDraw.Draw(im)
+    f = font("label", 44 * S)
+    tw = dd.textlength(text, font=f)
+    dd.text((w / 2 * S - tw / 2, 70 * S), text, font=f, fill=(214, 32, 40))
+    return _done(im)
+
+
+@lru_cache(maxsize=None)
+def form_paper(title="プロ野球志望届", w=320, h=400):
+    """届出の用紙 (枠と記入欄だけの架空の書式)"""
+    im, d = _canvas(w, h)
+    _rr(d, (16, 10, w - 16, h - 10), 6, (255, 255, 250))
+    dd = ImageDraw.Draw(im)
+    f = font("label", 32 * S)
+    tw = dd.textlength(title, font=f)
+    dd.text((w / 2 * S - tw / 2, 30 * S), title, font=f, fill=INK)
+    for k in range(5):
+        y = 100 + k * 52
+        d.rectangle(_p(40, y, w - 40, y + 38), outline=(150, 150, 160), width=3 * S)
+    _ell(d, (w - 100, h - 90, w - 40, h - 30), (255, 255, 255), 4)
+    dd.ellipse(_p(w - 96, h - 86, w - 44, h - 34), outline=RED, width=5 * S)
+    return _done(im)
+
+
+@lru_cache(maxsize=None)
+def plane(w=300, h=160):
+    """飛行機 (海外へ行くイメージ)"""
+    im, d = _canvas(w, h)
+    _rr(d, (30, 60, w - 20, 100), 20, (235, 240, 250))
+    _poly(d, [(120, 70), (180, 70), (120, 10), (96, 10)], (120, 160, 220))
+    _poly(d, [(120, 90), (180, 90), (120, 150), (96, 150)], (120, 160, 220))
+    _poly(d, [(36, 70), (60, 70), (40, 30), (24, 30)], (120, 160, 220))
+    for k in range(5):
+        d.ellipse(_p(150 + k * 22, 72, 162 + k * 22, 84), fill=(120, 160, 220))
+    return _done(im)

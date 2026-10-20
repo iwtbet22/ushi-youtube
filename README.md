@@ -2,13 +2,16 @@
 
 プロ野球の「お金と制度の仕組み」を解説するチャンネルの制作リポジトリ。
 
-## 第1回 本編：ドラフトの契約金はいくら？（白背景の解説スタイル・現行版）
+## 第1回 本編：ドラフトのお金と制度 完全解説（約30分・現行版）
 
-- 台本：`script/ep01_main.md`
-- デザイン仕様：`design/design_spec_v2.md`
-- 書き出し：`python3 explainer/engine.py` → `output/ep01_main.mp4`（1920x1080 / 30fps）
-- 台本を書き出す：`python3 explainer/export_script.py`
-- 台本・画面構成は `explainer/episode.py`、テロップ部品は `explainer/ui.py`、イラストは `explainer/illust.py`
+- 台本：`script/ep01_main.md`（`python3 explainer/export_script.py` で生成）
+- ファクトチェック表：`script/ep01_factcheck.md`
+- 録音用台本：`script/ep01_recording.md`（`python3 explainer/export_recording.py` で生成）
+- 概要欄用チャプター：`script/ep01_chapters.txt`（書き出し時に生成）
+- デザイン仕様：`design/design_spec_v2.md`、収益化リスクのメモ：`design/youtube_risk_notes.md`
+- 書き出し：`python3 explainer/engine.py` → `output/ep01_main.mp4`（1920x1080 / 30fps、約30分。4並列で1時間前後）
+- 配置チェックだけ：`python3 explainer/engine.py --check`
+- 台本・画面構成は `explainer/episode.py`（30分版で足したシーンは `explainer/extra_scenes.py`）、テロップ部品は `explainer/ui.py`、イラストは `explainer/illust.py`
 
 ## 旧版：冒頭3分のシネマ調プロト（参考用）
 

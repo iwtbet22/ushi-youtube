@@ -10,10 +10,11 @@ import hashlib
 import os
 import ssl
 import subprocess
+import time
 from pathlib import Path
 
 VOICE = "ja-JP-KeitaNeural"
-RATE = "+10%"
+RATE = "+0%"
 CACHE = Path(__file__).resolve().parent.parent / "output" / "voice"
 CA = "/root/.ccr/ca-bundle.crt"
 
@@ -40,7 +41,15 @@ def ensure(text: str) -> Path:
         return wav
     CACHE.mkdir(parents=True, exist_ok=True)
     mp3 = wav.with_suffix(".mp3")
-    asyncio.run(_synth(text, mp3))
+    for attempt in range(5):  # 通信が一時的に切れることがあるので、間をあけて再試行する
+        try:
+            asyncio.run(_synth(text, mp3))
+            if mp3.exists() and mp3.stat().st_size > 0:
+                break
+        except Exception:  # noqa: BLE001
+            if attempt == 4:
+                raise
+        time.sleep(2 ** (attempt + 1))
     subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(mp3), "-ac", "1", "-ar", "48000", str(wav)],
                    check=True)
     mp3.unlink()
