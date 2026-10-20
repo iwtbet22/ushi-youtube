@@ -385,3 +385,30 @@ def plane(w=300, h=160):
     for k in range(5):
         d.ellipse(_p(150 + k * 22, 72, 162 + k * 22, 84), fill=(120, 160, 220))
     return _done(im)
+
+
+@lru_cache(maxsize=None)
+def house(w=300, h=280):
+    """家 (自由競争時代に契約金のほかに用意されたもののイメージ)"""
+    im, d = _canvas(w, h)
+    _poly(d, [(20, 130), (w / 2, 20), (w - 20, 130)], (200, 80, 60))
+    _rr(d, (50, 120, w - 50, h - 14), 6, (250, 236, 210))
+    _rr(d, (w / 2 - 30, h - 110, w / 2 + 30, h - 14), 4, (150, 100, 60), 4)
+    d.rectangle(_p(76, 150, 126, 196), fill=(170, 210, 240), outline=LINE, width=3 * S)
+    d.rectangle(_p(w - 126, 150, w - 76, 196), fill=(170, 210, 240), outline=LINE, width=3 * S)
+    return _done(im)
+
+
+@lru_cache(maxsize=None)
+def letter(title="お願い", w=320, h=240):
+    """封筒から出した手紙"""
+    im, d = _canvas(w, h)
+    _rr(d, (20, 60, w - 20, h - 10), 6, (245, 236, 214))
+    _rr(d, (50, 10, w - 50, h - 60), 4, (255, 255, 252))
+    dd = ImageDraw.Draw(im)
+    f = font("label", 34 * S)
+    tw = dd.textlength(title, font=f)
+    dd.text((w / 2 * S - tw / 2, 30 * S), title, font=f, fill=INK)
+    for k in range(3):
+        _line(d, [(80, 100 + k * 24), (w - 80, 100 + k * 24)], 4, (170, 170, 178))
+    return _done(im)

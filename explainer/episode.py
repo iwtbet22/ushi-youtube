@@ -723,9 +723,10 @@ def _after(first_line, *new):
 
 _after("ドラフト会議の正式な名前", X.KOUSHOUKEN)
 _after("ドラフトには、大きく分けて二つ", X.DRAFT_DAY)
-_after("ただ、その後のドラフトは", X.HISTORY_MORE)
+_after("ドラフトが始まったのは、1965年", *X.PRE_DRAFT)
+_after("ただ、その後のドラフトは", X.HISTORY_MORE, *X.EGAWA, X.ICHIBA)
 _after("届けを出す先は", X.SHIBOU_COUNT)
-_after("一方で、独立リーグの選手は", X.FOREIGN)
+_after("一方で、独立リーグの選手は", *X.TAZAWA, X.FOREIGN)
 _after("いよいよ、ドラフト当日", X.SIMULATION)
 _after("抽選に外れた球団は", X.ODDS, X.WHY_LOTTERY)
 _after("ここで言う成績とは", X.WAIVER_EXAMPLE, X.READING)
