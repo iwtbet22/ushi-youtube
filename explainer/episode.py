@@ -727,5 +727,5 @@ _after("いよいよ、ドラフト当日", X.SIMULATION)
 _after("抽選に外れた球団は", X.ODDS, X.WHY_LOTTERY)
 _after("ここで言う成績とは", X.WAIVER_EXAMPLE, X.READING)
 _after("この三つには、12球団の申し合わせ", X.BONUS_DETAIL)
-_after("この交渉には、期限があります", *X.CASE_STUDY)
+# ケーススタディ (X.CASE_STUDY) は本編から外した
 _after("ここで、育成選手のお金も", *X.QA)

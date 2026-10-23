@@ -1,13 +1,20 @@
 """本人の録音を台本の文ごとに切り分けて、合成音声の代わりに使えるようにする。
 
-  python3 tools/align_recording.py 録音.wav 開始文番号
-    - 録音の文字起こし (faster-whisper) と台本を突き合わせ、録音を文ごとの wav に切る
-    - 音量をそろえる (ハイパス・コンプレッサー・-16 LUFS・リミッター)
-    - output/voice_rec/ に保存し、output/voice_rec/map.json に「台本の文 → wav」を追記する
-  engine.py は map.json にある文は録音を、ない文は合成音声を使う。
+  python3 tools/align_recording.py 録音.wav [--first 0] [--asr 文字起こし.json] [--extra-case-study]
+
+  1. ノイズ除去と音量調整 (ハイパス → FFTノイズ除去 → 歯擦音の軽減 → コンプレッサー → -16 LUFS → リミッター)
+  2. faster-whisper で単語ごとの時刻つき文字起こし (--asr で既存の結果を再利用できる)
+  3. 台本の文字と文字起こしの文字を突き合わせて、各文の境目のおおよその時刻を出し、近くの無音で切る
+  4. 切った文をもう一度文字起こしして、台本とどのくらい合っているかを表示する
+  5. output/voice_rec/ に文ごとの wav を保存し、map.json に「台本の文 → wav」を書く
+
+--extra-case-study: 録音に、本編から外したケーススタディの文も含まれているときに付ける。
+  突き合わせには使い、map.json には入れない。
+engine.py は map.json にある文は録音を、ない文は合成音声を使う。
 """
 from __future__ import annotations
 
+import argparse
 import difflib
 import json
 import re
@@ -17,20 +24,28 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "explainer"))
+import extra_scenes as X  # noqa: E402
 from episode import SCENES  # noqa: E402
 
 OUT = ROOT / "output" / "voice_rec"
+CLEAN_FILTER = ("highpass=f=80,afftdn=nr=12:nf=-50:tn=1,deesser=i=0.25,"
+                "acompressor=threshold=-24dB:ratio=3:attack=5:release=120,"
+                "loudnorm=I=-16:TP=-1.5:LRA=7,alimiter=limit=0.84")
+
+
+def disp(line):
+    return line[0] if isinstance(line, tuple) else line
 
 
 def norm(s):
-    return re.sub(r"[、。？！「」（）・\s,.?!]", "", s)
+    return re.sub(r"[、。？！「」（）・…\s,.?!]", "", s)
 
 
 def sim(a, b):
-    return difflib.SequenceMatcher(None, norm(a), norm(b)).ratio()
+    return difflib.SequenceMatcher(None, norm(a), norm(b), autojunk=False).ratio()
 
 
-def silences(wav, noise="-45dB", d=0.25):
+def silences(wav, noise="-45dB", d=0.2):
     r = subprocess.run(["ffmpeg", "-hide_banner", "-i", str(wav), "-af", f"silencedetect=noise={noise}:d={d}",
                         "-f", "null", "-"], capture_output=True, text=True)
     st = [float(x) for x in re.findall(r"silence_start: ([0-9.]+)", r.stderr)]
@@ -38,40 +53,51 @@ def silences(wav, noise="-45dB", d=0.25):
     return list(zip(st, en))
 
 
+def script_lines(with_case_study):
+    """録音されている順の台本の文。(文, 本編に使うか) のリスト"""
+    out = []
+    case_first = disp(X.CASE_STUDY[0]["lines"][0])
+    for sc in SCENES:
+        for l in sc["lines"]:
+            out.append((disp(l), True))
+        # ケーススタディは「交渉には期限」の場面の直後にあった
+        if with_case_study and disp(sc["lines"][0]).startswith("この交渉には、期限があります"):
+            out += [(disp(l), False) for cs in X.CASE_STUDY for l in cs["lines"]]
+    assert not with_case_study or any(t == case_first for t, _ in out)
+    return out
+
+
 def main():
-    src, first = Path(sys.argv[1]), int(sys.argv[2])
-    lines = [(l[0] if isinstance(l, tuple) else l) for sc in SCENES for l in sc["lines"]]
+    ap = argparse.ArgumentParser()
+    ap.add_argument("src")
+    ap.add_argument("--first", type=int, default=0, help="録音が何文目から始まるか")
+    ap.add_argument("--asr", help="文字起こしの結果 (json) を再利用する")
+    ap.add_argument("--extra-case-study", action="store_true")
+    args = ap.parse_args()
+
+    src = Path(args.src)
+    lines = script_lines(args.extra_case_study)[args.first:]
     OUT.mkdir(parents=True, exist_ok=True)
 
-    # 1) 音量をそろえたモノラル 48kHz を作る
+    # 1) ノイズ除去と音量調整 (モノラル 48kHz)
     clean = OUT / f"{src.stem}_clean.wav"
-    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(src), "-ac", "1", "-ar", "48000", "-af",
-                    "highpass=f=80,acompressor=threshold=-24dB:ratio=3:attack=5:release=120,"
-                    "loudnorm=I=-16:TP=-1.5:LRA=7,alimiter=limit=0.84", str(clean)], check=True)
+    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(src), "-ac", "1", "-ar", "48000",
+                    "-af", CLEAN_FILTER, str(clean)], check=True)
 
-    # 2) 文字起こし
+    # 2) 文字起こし (単語の時刻つき)
     from faster_whisper import WhisperModel
-    m = WhisperModel("small", device="cpu", compute_type="int8")
-    segs, _ = m.transcribe(str(clean), language="ja", beam_size=5, word_timestamps=True)
-    segs = list(segs)
-    words = [(w.start, w.end, w.word) for sg in segs for w in sg.words]
-    segs = [(sg.start, sg.end, sg.text) for sg in segs]
+    model = WhisperModel("small", device="cpu", compute_type="int8")
+    if args.asr:
+        segs = json.loads(Path(args.asr).read_text())
+        words = [tuple(w) for s in segs for w in s["words"]]
+    else:
+        res, _ = model.transcribe(str(clean), language="ja", beam_size=5, word_timestamps=True)
+        words = [(w.start, w.end, w.word) for s in res for w in s.words]
 
-    # 3) 文の数を文字起こしとの照合で決める (録音が台本のどこまでか)
-    full = "".join(t for _, _, t in segs)
-    best_n, best_v = 1, -1.0
-    for n in range(1, len(lines) - first + 1):
-        v = sim(full, "".join(lines[first:first + n]))
-        if v > best_v:
-            best_n, best_v = n, v
-    n = best_n
-    sent = lines[first:first + n]
-
-    # 4) 台本の文字と、文字起こしの単語の時刻を対応づけて、各文の境目のおおよその時刻を出す
-    #    → その近くの無音 (いちばん長いもの) で切る
-    sil = [(s_, e_) for s_, e_ in silences(clean) if e_ - s_ >= 0.2]
+    # 3) 台本の文字 ↔ 文字起こしの文字 を対応づけ、文の境目の時刻を推定して近くの無音で切る
     total = float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0",
                                   str(clean)], capture_output=True, text=True).stdout)
+    sil = [(s_, e_) for s_, e_ in silences(clean) if e_ - s_ >= 0.2]
     head = sil[0][1] if sil and sil[0][0] < 0.05 else 0.0
     tail = sil[-1][0] if sil and sil[-1][1] > total - 0.05 else total
     asr_chars, asr_time = [], []
@@ -80,22 +106,33 @@ def main():
         for q, ch in enumerate(c):
             asr_chars.append(ch)
             asr_time.append(w0 + (w1 - w0) * q / max(1, len(c)))
-    script = "".join(norm(t) for t in sent)
+    script = "".join(norm(t) for t, _ in lines)
     sm = difflib.SequenceMatcher(None, script, "".join(asr_chars), autojunk=False)
     pairs = [(bl.a + q, bl.b + q) for bl in sm.get_matching_blocks() for q in range(bl.size)]
+    pa = [p[0] for p in pairs]
+    import bisect
 
     def time_at(ci):
         """台本の ci 文字目が読まれたおおよその時刻 (前後の対応点から補間)"""
-        before = [p_ for p_ in pairs if p_[0] <= ci]
-        after = [p_ for p_ in pairs if p_[0] >= ci]
-        if before and after:
-            (a0, b0), (a1, b1) = before[-1], after[0]
+        i = bisect.bisect_left(pa, ci)
+        if 0 < i < len(pairs):
+            (a0, b0), (a1, b1) = pairs[i - 1], pairs[i]
             t0, t1 = asr_time[b0], asr_time[b1]
             return t0 if a1 == a0 else t0 + (t1 - t0) * (ci - a0) / (a1 - a0)
-        return asr_time[(before or after)[0][1]]
+        return asr_time[pairs[min(i, len(pairs) - 1)][1]]
+
+    # 録音がどこまで続いているか (最後に対応がとれた台本の文字)
+    last_char = pairs[-1][0] if pairs else 0
+    n, acc = 0, 0
+    for t, _ in lines:
+        if acc >= last_char - 2:
+            break
+        acc += len(norm(t))
+        n += 1
+    lines = lines[:n]
 
     bounds, ci = [head], 0
-    for t in sent[:-1]:
+    for t, _ in lines[:-1]:
         ci += len(norm(t))
         guess = time_at(ci)
         last = bounds[-1] if isinstance(bounds[-1], float) else bounds[-1][1]
@@ -107,25 +144,28 @@ def main():
             bounds.append((guess, guess))
     bounds.append(tail)
 
-    mapping_path = OUT / "map.json"
-    mapping = json.loads(mapping_path.read_text()) if mapping_path.exists() else {}
+    # 4) 切り出して確認
+    mapping = {}
     report = []
-    for idx in range(n):
+    for idx, (text, use) in enumerate(lines):
         a = bounds[idx] if idx == 0 else bounds[idx][1]
-        b = bounds[idx + 1] if idx == n - 1 else bounds[idx + 1][0]
+        b = bounds[idx + 1] if idx == len(lines) - 1 else bounds[idx + 1][0]
         a, b = max(0.0, a - 0.06), b + 0.10
-        text = sent[idx]
-        out = OUT / f"{src.stem}_{first + idx:03d}.wav"
+        out = OUT / f"{src.stem}_{args.first + idx:03d}.wav"
         subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-ss", f"{a:.3f}", "-to", f"{b:.3f}", "-i", str(clean),
                         "-af", "afade=t=in:d=0.02,areverse,afade=t=in:d=0.04,areverse", str(out)], check=True)
-        heard = "".join(x.text for x in m.transcribe(str(out), language="ja", beam_size=5)[0])
-        mapping[text] = str(out.relative_to(ROOT))
-        report.append((first + idx, round(a, 2), round(b, 2), round(sim(heard, text), 2), text[:24], heard[:30]))
-    score = sum(r[3] for r in report) / n
-    mapping_path.write_text(json.dumps(mapping, ensure_ascii=False, indent=1))
-    print(f"matched {n} sentences, mean similarity {score:.2f}")
-    for r in report:
-        print(r)
+        heard = "".join(x.text for x in model.transcribe(str(out), language="ja", beam_size=5)[0])
+        if use:
+            mapping[text] = str(out.relative_to(ROOT))
+        report.append({"no": args.first + idx, "start": round(a, 2), "end": round(b, 2),
+                       "sim": round(sim(heard, text), 2), "used": use, "script": text, "heard": heard})
+        print(f"{args.first + idx:3d} {a:8.2f}-{b:8.2f} {sim(heard, text):.2f} {'  ' if use else '除外'} "
+              f"{text[:22]} | {heard[:26]}", flush=True)
+
+    (OUT / "map.json").write_text(json.dumps(mapping, ensure_ascii=False, indent=1))
+    (OUT / "report.json").write_text(json.dumps(report, ensure_ascii=False, indent=1))
+    print(f"aligned {len(lines)} sentences (used {len(mapping)}), "
+          f"mean similarity {sum(r['sim'] for r in report) / len(report):.2f}")
 
 
 if __name__ == "__main__":
