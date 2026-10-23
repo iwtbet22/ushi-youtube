@@ -9,7 +9,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
-from engine import LEAD, build_timeline  # noqa: E402
+from engine import LEAD, build_timeline, recorded  # noqa: E402
 from episode import SCENES  # noqa: E402
 from ui import ROOT  # noqa: E402
 
@@ -22,8 +22,9 @@ def tc(sec):
 def main():
     items, total = build_timeline()
     n = sum(len(sc["lines"]) for sc in SCENES)
+    voice = "録音" if recorded() else "合成音声"
     out = ["# ナレーション台本：ドラフトのお金と制度 完全解説（本編）", "",
-           f"全{n}文・約{total / 60:.0f}分（合成音声の速さでの目安）。時刻は動画内で読み始める位置です。",
+           f"全{n}文・約{total / 60:.0f}分（{voice}の長さでの目安）。時刻は動画内で読み始める位置です。",
            "事実関係と出典は `script/ep01_factcheck.md` にまとめています。",
            "`explainer/episode.py` から `python3 explainer/export_script.py` で生成しています。", ""]
     prev = None

@@ -1,6 +1,7 @@
 """本人の録音を台本の文ごとに切り分けて、合成音声の代わりに使えるようにする。
 
   python3 tools/align_recording.py 録音.wav [--first 0] [--asr 文字起こし.json] [--extra-case-study]
+                                    [--fixes 手直し.json [--fix-only]]
 
   1. ノイズ除去と音量調整 (ハイパス → FFTノイズ除去 → 歯擦音の軽減 → コンプレッサー → -16 LUFS → リミッター)
   2. faster-whisper で単語ごとの時刻つき文字起こし (--asr で既存の結果を再利用できる)
@@ -10,6 +11,10 @@
 
 --extra-case-study: 録音に、本編から外したケーススタディの文も含まれているときに付ける。
   突き合わせには使い、map.json には入れない。
+--fixes: 自動の切り分けがずれた文を手で直す。{"文の番号": [[開始, 終了], ...] または null}
+  時刻はノイズ除去後の録音での秒。区間が複数あればつなげる (言い直しを飛ばすとき)。
+  null は録音で読まなかった文で、map.json には空文字を書く (engine.py は字幕も音声も出さない)。
+  --fix-only を付けると、前回の切り分けはそのままで、手直しの文だけ切り直す。
 engine.py は map.json にある文は録音を、ない文は合成音声を使う。
 """
 from __future__ import annotations
@@ -73,7 +78,12 @@ def main():
     ap.add_argument("--first", type=int, default=0, help="録音が何文目から始まるか")
     ap.add_argument("--asr", help="文字起こしの結果 (json) を再利用する")
     ap.add_argument("--extra-case-study", action="store_true")
+    ap.add_argument("--fixes", help="手で直す文の区間 (json)")
+    ap.add_argument("--fix-only", action="store_true", help="手直しの文だけ切り直す")
     args = ap.parse_args()
+    if args.fix_only:
+        apply_fixes(Path(args.src), json.loads(Path(args.fixes).read_text()))
+        return
 
     src = Path(args.src)
     lines = script_lines(args.extra_case_study)[args.first:]
@@ -171,6 +181,41 @@ def main():
     (OUT / "report.json").write_text(json.dumps(report, ensure_ascii=False, indent=1))
     print(f"aligned {len(lines)} sentences (used {len(mapping)}), "
           f"mean similarity {sum(r['sim'] for r in report) / len(report):.2f}")
+    if args.fixes:
+        apply_fixes(src, json.loads(Path(args.fixes).read_text()))
+
+
+def apply_fixes(src, fixes):
+    """report.json の文番号ごとに、指定の区間で切り直して map.json と report.json を更新する"""
+    from faster_whisper import WhisperModel
+    model = WhisperModel("small", device="cpu", compute_type="int8")
+    clean = OUT / f"{src.stem}_clean.wav"
+    mapping = json.loads((OUT / "map.json").read_text())
+    report = {r["no"]: r for r in json.loads((OUT / "report.json").read_text())}
+    for no, spans in fixes.items():
+        r = report[int(no)]
+        if spans is None:
+            if r["used"]:
+                mapping[r["script"]] = ""
+            r.update(start=None, end=None, sim=None, heard="(読まなかった文)")
+            print(f"{int(no):3d} 読まなかった文 {r['script'][:22]}")
+            continue
+        out = OUT / f"{src.stem}_{int(no):03d}.wav"
+        cmd = ["ffmpeg", "-y", "-loglevel", "error"]
+        for a, b in spans:
+            cmd += ["-ss", f"{a:.3f}", "-to", f"{b:.3f}", "-i", str(clean)]
+        # 区間ごとに端を短くフェードしてからつなぐ
+        fade = "afade=t=in:d=0.02,areverse,afade=t=in:d=0.04,areverse"
+        graph = ";".join(f"[{i}:a]{fade}[p{i}]" for i in range(len(spans)))
+        graph += ";" + "".join(f"[p{i}]" for i in range(len(spans))) + f"concat=n={len(spans)}:v=0:a=1[o]"
+        subprocess.run(cmd + ["-filter_complex", graph, "-map", "[o]", str(out)], check=True)
+        heard = "".join(x.text for x in model.transcribe(str(out), language="ja", beam_size=5)[0])
+        if r["used"]:
+            mapping[r["script"]] = str(out.relative_to(ROOT))
+        r.update(start=spans[0][0], end=spans[-1][1], sim=round(sim(heard, r["script"]), 2), heard=heard)
+        print(f"{int(no):3d} {r['sim']:.2f} {r['script'][:22]} | {heard[:26]}", flush=True)
+    (OUT / "map.json").write_text(json.dumps(mapping, ensure_ascii=False, indent=1))
+    (OUT / "report.json").write_text(json.dumps(list(report.values()), ensure_ascii=False, indent=1))
 
 
 if __name__ == "__main__":

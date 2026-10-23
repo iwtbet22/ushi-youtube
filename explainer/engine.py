@@ -37,6 +37,7 @@ from episode import SCENES  # noqa: E402
 W, H, FPS = ui.W, ui.H, 30
 OUT = ui.ROOT / "output"
 LEAD, TAIL = 0.15, 0.5       # 文の前後の間
+SKIP = 0.4                   # 録音で読まなかった文に置く間
 CARD = 1.8                   # 章タイトルカードの長さ
 TRANS = 0.45                 # シーン間トランジションの長さ
 SR = 48000
@@ -55,11 +56,11 @@ REC_MAP = ui.ROOT / "output" / "voice_rec" / "map.json"
 
 
 def recorded():
-    """本人の録音がある文 (tools/align_recording.py で作る) → wav のパス"""
+    """本人の録音がある文 (tools/align_recording.py で作る) → wav のパス。録音で読まなかった文は None"""
     import json
     if not REC_MAP.exists():
         return {}
-    return {k: ui.ROOT / v for k, v in json.loads(REC_MAP.read_text()).items()}
+    return {k: ui.ROOT / v if v else None for k, v in json.loads(REC_MAP.read_text()).items()}
 
 
 def build_timeline():
@@ -78,6 +79,11 @@ def build_timeline():
         prev = sc["chapter"]
         sents, st = [], 0.0
         for line in sc["lines"]:
+            if _display(line) in rec and rec[_display(line)] is None:
+                # 録音で読まなかった文は、字幕も音声も出さずに短い間だけ置く
+                sents.append({"start": st, "dur": SKIP, "text": "", "wav": None})
+                st += SKIP
+                continue
             wav = rec.get(_display(line)) or tts.ensure(_speech(line))
             d = LEAD + tts.duration(wav) + TAIL
             sents.append({"start": st, "dur": d, "text": _display(line), "wav": wav})
@@ -218,6 +224,8 @@ def chapter_card(chapter):
 
 def subtitle_pages(sent):
     """文を2行ずつのページにし、文字数に比例して時間を割り振る"""
+    if not sent["text"]:
+        return []
     pages = ui.pages(sent["text"])
     total = sum(len(p) for p in pages)
     out, t = [], sent["start"]
@@ -525,6 +533,8 @@ def write_audio(path, items, total):
             continue
         sc = SCENES[it["index"]]
         for s in it["sents"]:
+            if s["wav"] is None:
+                continue
             add(voice, it["start"] + s["start"] + LEAD, _read(s["wav"]))
         for e in sc["els"]:
             if e["anim"] in ("pop", "drop", "zoom") or e.get("count"):
