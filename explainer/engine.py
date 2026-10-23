@@ -36,7 +36,7 @@ from episode import SCENES  # noqa: E402
 
 W, H, FPS = ui.W, ui.H, 30
 OUT = ui.ROOT / "output"
-LEAD, TAIL = 0.1, 0.3        # 文の前後の間
+LEAD, TAIL = 0.08, 0.2       # 文の前後の間
 SKIP = 0.4                   # 録音で読まなかった文に置く間
 CARD = 1.8                   # 章タイトルカードの長さ
 TRANS = 0.45                 # シーン間トランジションの長さ
