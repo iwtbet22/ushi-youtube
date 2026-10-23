@@ -609,6 +609,8 @@ def main():
     lst.write_text("".join(f"file '{i:03d}.mp4'\n" for i in range(len(items))))
     out = OUT / ("ep01_sample.mp4" if args.upto is not None else "ep01_main.mp4")
     subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i", str(lst), "-i", str(wav),
+                    # AAC にしたあとも 0 dB を超えないよう、ピークを -3 dB ほどに抑える
+                    "-af", "alimiter=limit=0.7:level=false",
                     "-c:v", "copy", "-c:a", "aac", "-b:a", "192k", "-shortest", "-movflags", "+faststart", str(out)],
                    check=True)
     print("wrote", out, flush=True)
