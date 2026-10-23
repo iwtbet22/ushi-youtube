@@ -31,6 +31,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(HERE.parent / "render"))
 import tts  # noqa: E402  (render/tts.py を共用)
+import rec_timing  # noqa: E402
 import ui  # noqa: E402
 from episode import SCENES  # noqa: E402
 
@@ -56,14 +57,17 @@ REC_MAP = ui.ROOT / "output" / "voice_rec" / "map.json"
 REC_SPEED = 1.1              # 録音を少し速めて読む (声の高さは変えない)
 
 
-def _speed_up(wav):
-    """録音を REC_SPEED 倍速にした wav (output/voice_rec/x1.1/ にキャッシュ)"""
-    if REC_SPEED == 1.0:
-        return wav
-    out = wav.parent / f"x{REC_SPEED:g}" / wav.name
+# 頭と終わりの無音を削る (字幕が出てから声が出るまでの間をそろえる)
+TRIM = ("silenceremove=start_periods=1:start_threshold=-50dB:start_silence=0.03,areverse,"
+        "silenceremove=start_periods=1:start_threshold=-50dB:start_silence=0.08,areverse")
+
+
+def _prepare(wav):
+    """録音を REC_SPEED 倍速にして前後の無音を削った wav (output/voice_rec/prep/ にキャッシュ)"""
+    out = wav.parent / "prep" / wav.name
     if not out.exists() or out.stat().st_mtime < wav.stat().st_mtime:
         out.parent.mkdir(exist_ok=True)
-        subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(wav), "-af", f"atempo={REC_SPEED}",
+        subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(wav), "-af", f"atempo={REC_SPEED},{TRIM}",
                         str(out)], check=True)
     return out
 
@@ -73,7 +77,9 @@ def recorded():
     import json
     if not REC_MAP.exists():
         return {}
-    return {k: _speed_up(ui.ROOT / v) if v else None for k, v in json.loads(REC_MAP.read_text()).items()}
+    rec = {k: _prepare(ui.ROOT / v) if v else None for k, v in json.loads(REC_MAP.read_text()).items()}
+    rec_timing.ensure([w for w in rec.values() if w])
+    return rec
 
 
 def build_timeline():
@@ -99,7 +105,7 @@ def build_timeline():
                 continue
             wav = rec.get(_display(line)) or tts.ensure(_speech(line))
             d = LEAD + tts.duration(wav) + TAIL
-            sents.append({"start": st, "dur": d, "text": _display(line), "wav": wav})
+            sents.append({"start": st, "dur": d, "text": _display(line), "wav": wav, "rec": _display(line) in rec})
             st += d
         st += sc.get("hold", 0)
         dur = math.ceil(st * FPS) / FPS
@@ -236,17 +242,23 @@ def chapter_card(chapter):
 
 
 def subtitle_pages(sent):
-    """文を2行ずつのページにし、文字数に比例して時間を割り振る"""
+    """文を2行ずつのページにして時間を割り振る。
+    録音なら、各ページを読み始める時刻で切り替える。合成音声などで時刻が分からなければ文字数の比で割り振る。"""
     if not sent["text"]:
         return []
     pages = ui.pages(sent["text"])
-    total = sum(len(p) for p in pages)
-    out, t = [], sent["start"]
-    for p in pages:
-        d = sent["dur"] * len(p) / total
-        out.append((t, t + d, ui.subtitle(p)))
-        t += d
-    return out
+    marks = sent.get("rec") and rec_timing.page_starts(sent["wav"], pages)
+    if marks:
+        # 1ページ目は文の頭から、2ページ目以降は読み始めの少し前に切り替える
+        starts = [sent["start"]] + [sent["start"] + LEAD + m - 0.1 for m in marks[1:]]
+    else:
+        total = sum(len(p) for p in pages)
+        starts, t = [], sent["start"]
+        for p in pages:
+            starts.append(t)
+            t += sent["dur"] * len(p) / total
+    ends = starts[1:] + [sent["start"] + sent["dur"]]
+    return [(a, b, ui.subtitle(p)) for a, b, p in zip(starts, ends, pages)]
 
 
 class Count:
