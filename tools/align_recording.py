@@ -136,12 +136,15 @@ def main():
         ci += len(norm(t))
         guess = time_at(ci)
         last = bounds[-1] if isinstance(bounds[-1], float) else bounds[-1][1]
-        near = [(e_ - s_, s_, e_) for s_, e_ in sil if s_ > last and abs((s_ + e_) / 2 - guess) < 2.0]
+        # 推定位置に近い無音ほど良く、長い無音 (文の区切りらしい) ほど良い
+        near = [(min(e_ - s_, 1.5) - 0.6 * abs((s_ + e_) / 2 - guess), s_, e_)
+                for s_, e_ in sil if s_ > last + 0.3 and abs((s_ + e_) / 2 - guess) < 2.5]
         if near:
             _, s_, e_ = max(near)
             bounds.append((s_, e_))
         else:
-            bounds.append((guess, guess))
+            g = max(guess, last + 0.3)  # 近くに無音がないときも、前の切れ目より後ろにする
+            bounds.append((g, g))
     bounds.append(tail)
 
     # 4) 切り出して確認
@@ -151,6 +154,8 @@ def main():
         a = bounds[idx] if idx == 0 else bounds[idx][1]
         b = bounds[idx + 1] if idx == len(lines) - 1 else bounds[idx + 1][0]
         a, b = max(0.0, a - 0.06), b + 0.10
+        if b < a + 0.3:
+            b = a + 0.3
         out = OUT / f"{src.stem}_{args.first + idx:03d}.wav"
         subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-ss", f"{a:.3f}", "-to", f"{b:.3f}", "-i", str(clean),
                         "-af", "afade=t=in:d=0.02,areverse,afade=t=in:d=0.04,areverse", str(out)], check=True)
