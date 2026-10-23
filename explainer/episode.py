@@ -698,7 +698,7 @@ SCENES = [
         E(P(ui.flow_box, "年俸", "green", 340, 130, 56), 960, 560, at=1, until=2, anim="drop", delay=1.8),
         E(P(ui.flow_box, "育成契約", "orange", 340, 130, 56), 1440, 560, at=1, until=2, anim="drop", delay=2.2),
         E(None, 960, 590, at=2, anim="none", delay=0.3, dyn=ui.cta_frame, dyn_dur=6.0, name="cta"),
-    ], bg="end", trans="fade", hold=12),
+    ], bg="end", trans="fade", hold=1),
 ]
 
 
