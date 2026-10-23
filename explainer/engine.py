@@ -476,7 +476,7 @@ def _bgm(total):
     """明るめの軽いループ (マリンバ風のアルペジオ + ベース)。C-G-Am-F, 104bpm"""
     beat = 60 / 104
     chords = [(261.63, 329.63, 392.0), (196.0, 246.94, 293.66), (220.0, 261.63, 329.63), (174.61, 220.0, 261.63)]
-    n = int(total * SR)
+    n = round(total * SR)
     out = np.zeros(n)
     note_len = int(0.5 * SR)
     tt = np.arange(note_len) / SR
