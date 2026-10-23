@@ -53,6 +53,19 @@ def _display(line):
 
 
 REC_MAP = ui.ROOT / "output" / "voice_rec" / "map.json"
+REC_SPEED = 1.1              # 録音を少し速めて読む (声の高さは変えない)
+
+
+def _speed_up(wav):
+    """録音を REC_SPEED 倍速にした wav (output/voice_rec/x1.1/ にキャッシュ)"""
+    if REC_SPEED == 1.0:
+        return wav
+    out = wav.parent / f"x{REC_SPEED:g}" / wav.name
+    if not out.exists() or out.stat().st_mtime < wav.stat().st_mtime:
+        out.parent.mkdir(exist_ok=True)
+        subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(wav), "-af", f"atempo={REC_SPEED}",
+                        str(out)], check=True)
+    return out
 
 
 def recorded():
@@ -60,7 +73,7 @@ def recorded():
     import json
     if not REC_MAP.exists():
         return {}
-    return {k: ui.ROOT / v if v else None for k, v in json.loads(REC_MAP.read_text()).items()}
+    return {k: _speed_up(ui.ROOT / v) if v else None for k, v in json.loads(REC_MAP.read_text()).items()}
 
 
 def build_timeline():
