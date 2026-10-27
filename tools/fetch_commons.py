@@ -33,10 +33,16 @@ def get(url, binary=False, tries=4):
 
 
 def license_of(raw):
-    lic = re.findall(r"\{\{\s*(?:self2?\|)?((?:cc-[\w.,-]+|GFDL|PD-[\w-]+|cc-zero)[^}|]*)", raw, re.I)
+    # {{self|GFDL|cc-by-sa-all}} のように1つのテンプレートに複数並ぶこともある
+    lic = [x for t in re.findall(r"\{\{\s*(?:self2?\|)?((?:cc-|GFDL|PD-)[^}]*)\}\}", raw, re.I)
+           for x in t.split("|") if re.match(r"(cc-|GFDL|PD-)", x, re.I)]
     author = re.search(r"\|\s*author\s*=\s*(.+)", raw, re.I)
     a = author.group(1).strip() if author else ""
     a = re.sub(r"\[\[(?:[^|\]]*\|)?([^\]]*)\]\]", r"\1", a)  # [[User:x|x]] → x
+    a = re.sub(r"\[https?://\S+ ([^\]]+)\]", r"\1", a)  # [https://... 名前] → 名前
+    a = re.sub(r"<[^>]+>", " ", a)
+    a = re.sub(r"\(talk\)|\(Original version\).*|from District of Columbia, USA", "", a)
+    a = re.sub(r"\s+", " ", a).strip(" .")
     a = re.sub(r"\{\{lang\|\w+\|([^}]*)\}\}", r"\1", a)  # {{lang|ja|x}} → x
     a = re.sub(r"\{\{[^}]*\}\}", "", a).strip()
     return a, sorted({l.strip() for l in lic})
