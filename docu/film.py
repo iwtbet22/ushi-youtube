@@ -35,13 +35,13 @@ SR = 48000
 OUT = ROOT / "output"
 LEAD, TAIL = 0.12, 0.32      # 文の前後の間
 FADE = 0.5                   # シーン間のクロスフェード
-VOICE = {"rate": "+6%", "pitch": "-4Hz"}  # 落ち着いた低めの語り
+VOICE = {"rate": "+0%", "pitch": "-4Hz"}  # 落ち着いた低めの語り
 
 
-def E(fn, x, y, at=0, delay=0.0, until=None, anim="fade", anchor="c", sfx=None):
+def E(fn, x, y, at=0, delay=0.0, until=None, anim="fade", anchor="c", sfx=None, dyn=False):
     """画面要素。fn() が RGBA 画像を返す。(x, y) は anchor の位置 (c: 中心 / tl: 左上 / tr: 右上 ...)。
     at 番目の文の頭から delay 秒後に出て、until 番目の文の終わりで消える (None ならシーンの終わりまで)"""
-    return dict(fn=fn, x=x, y=y, at=at, delay=delay, until=until, anim=anim, anchor=anchor, sfx=sfx)
+    return dict(fn=fn, x=x, y=y, at=at, delay=delay, until=until, anim=anim, anchor=anchor, sfx=sfx, dyn=dyn)
 
 
 def S(lines, bg, move="in", tag=None, els=(), trans="fade", hold=0.0):
@@ -95,6 +95,14 @@ def sub_pages(sent):
 
 
 # ---- 描画 -------------------------------------------------------------------
+def el_times(e, item):
+    """要素が出ている時間 (シーンの頭からの秒)。ナレーションのないシーン (章の扉) は頭から数える"""
+    sents = item["sents"]
+    t0 = (sents[e["at"]]["start"] if sents else 0.0) + e["delay"]
+    t1 = item["dur"] if e["until"] is None else sents[e["until"]]["start"] + sents[e["until"]]["dur"]
+    return t0, t1
+
+
 def ease_out(x):
     x = min(1.0, max(0.0, x))
     return 1 - (1 - x) ** 3
@@ -110,15 +118,11 @@ class SceneRenderer:
     def __init__(self, sc, item, index):
         self.sc, self.item, self.index = sc, item, index
         self.base = sc["bg"]()
-        self.sprites = [e["fn"]() for e in sc["els"]]
+        # dyn=True の要素は、毎フレーム fn(出てからの秒数) で描き直す
+        self.sprites = [None if e["dyn"] else e["fn"]() for e in sc["els"]]
         self.subs = [(a, b, look.subtitle(p)) for s in item["sents"] for a, b, p in sub_pages(s)]
         self.tag = look.chapter_tag(sc["tag"]) if sc["tag"] else None
-        sents = item["sents"]
-        self.times = []
-        for e in sc["els"]:
-            t0 = sents[e["at"]]["start"] + e["delay"]
-            t1 = item["dur"] if e["until"] is None else sents[e["until"]]["start"] + sents[e["until"]]["dur"]
-            self.times.append((t0, t1))
+        self.times = [el_times(e, item) for e in sc["els"]]
 
     def frame(self, t, no):
         u = t / self.item["dur"]
@@ -130,6 +134,8 @@ class SceneRenderer:
             k = ease_out((t - t0) / 0.35)
             out = min(1.0, (t1 - t) / 0.25)
             alpha = min(k, out)
+            if e["dyn"]:
+                sp = e["fn"](t - t0)
             s = sp
             x, y = _place(e, sp)
             if e["anim"] == "rise":
@@ -171,7 +177,7 @@ def render_scene(args):
     r = SceneRenderer(sc, item, i)
     n = round(item["dur"] * FPS)
     if stills:
-        mid = item["sents"][-1]["start"] + 0.9
+        mid = item["sents"][-1]["start"] + 0.9 if item["sents"] else item["dur"] / 2
         r.frame(min(mid, item["dur"] - 0.05), 0).save(out_path)
         return
     prev = None
@@ -275,7 +281,7 @@ def write_audio(path, scenes, items, total):
             add(sfx, it["start"] - 0.25, snd["whoosh"], 0.8)
         for e in sc["els"]:
             if e["sfx"]:
-                add(sfx, it["start"] + it["sents"][e["at"]]["start"] + e["delay"], snd[e["sfx"]])
+                add(sfx, it["start"] + el_times(e, it)[0], snd[e["sfx"]])
     music = bgm(total)[:n]
     talking = np.convolve((np.abs(voice) > 0.01).astype(float), np.ones(int(0.4 * SR)) / (0.4 * SR), "same")
     music *= 0.55 * (1 - 0.4 * np.clip(talking * 3, 0, 1))
@@ -299,7 +305,7 @@ def check(scenes, items):
     for i, (sc, it) in enumerate(zip(scenes, items)):
         subs = [(a, b, look.subtitle(p)) for s in it["sents"] for a, b, p in sub_pages(s)]
         for e in sc["els"]:
-            sp = e["fn"]()
+            sp = e["fn"](9.0) if e["dyn"] else e["fn"]()
             x, y = _place(e, sp)
             box = (x, y, x + sp.width, y + sp.height)
             if box[0] < -40 or box[1] < -40 or box[2] > W + 40 or box[3] > H + 40:
@@ -325,6 +331,7 @@ def main():
     ap.add_argument("--stills", action="store_true")
     ap.add_argument("--check", action="store_true")
     ap.add_argument("--jobs", type=int, default=4)
+    ap.add_argument("--only", help="この番号のシーンだけ描き直してつなぎ直す (例: 3,7,12)。ほかは前回の書き出しを使う")
     args = ap.parse_args()
     scenes = importlib.import_module(args.module).SCENES
     items, total = timeline(scenes)
@@ -339,7 +346,8 @@ def main():
         st.mkdir(parents=True, exist_ok=True)
         tasks = [(i, args.module, items, st / f"{i:02d}.png", True) for i in range(len(scenes))]
     else:
-        tasks = [(i, args.module, items, seg / f"{i:03d}.mp4", False) for i in range(len(scenes))]
+        only = {int(x) for x in args.only.split(",")} if args.only else set(range(len(scenes)))
+        tasks = [(i, args.module, items, seg / f"{i:03d}.mp4", False) for i in range(len(scenes)) if i in only]
     with Pool(args.jobs) as p:
         list(p.imap_unordered(render_scene, tasks))
     if args.stills:
