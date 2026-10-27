@@ -48,6 +48,21 @@ FUKUOKA = "Fukuoka_dome01.jpg"
 YANKEE = "YankeeStadium-9-21-22-1.jpg"
 DODGER = "Dodger_Stadium_and_Chavez_Ravine_far_view__Chicago_Cubs_at_Los_Angeles_Dodgers___April_12__2025_.jpg"
 MORI = "Tomoya_Mori_Orix_Buffaloes_20230.jpg"
+NAGOYA = "Binnenkant_van_Nagoya_Dome__-21_maart_2019_a.jpg"
+SCOREBOARD = "Nagoyadome_scoreboard_2025.jpg"
+MIYAGI = "Rakuten_Mobile_Saikyo_Park_Miyagi_Inside.jpg"
+CHIBA = "ZOZOマリンスタジアム_内景.jpg"
+ESCON = "ES_CON_FIELD_HOKKAIDO_exterior_from_south_202607a.jpg"
+SEIBU = "Seibu_Dome_baseball_stadium_-_19.jpg"
+YOKOHAMA = "YokohamaStadium_view.jpg"
+FANS = "YokohamaStadium_fans.jpg"
+KAWASAKI = "Kawasaki_1989_02.jpg"
+BALL = "Baseball-2.jpg"
+BATS = "fourbats.jpg"
+CITI = "Citi_Field__48613685207_.jpg"
+DRAFT = "2012_プロ野球ドラフト会議_TOSHIBA__8122479103_.jpg"
+VICTORY = "Moment_of_Saitama_Seibu_Lions_Victory_at_MetLife_Dome.jpg"
+FIREWORKS = "Chiba_Marine_Stadium_Fireworks.jpg"
 
 
 def has(name):
@@ -92,7 +107,7 @@ BODY = [
     S(["プロ野球選手の多くは、球団と1年ごとに契約を結び直しています。",
        "1年契約なら、契約が切れたあとは、好きな球団に行けそうなものです。",
        "ところが、そうはなりません。"],
-      ph(JINGU, "dark"), move="right", tag=T1, els=[
+      ph(BALL, "dark"), move="right", tag=T1, els=[
           E(big("1年ごとの契約", 96), 960, 300, until=0, anim="rise"),
           E(big("契約が切れたら…自由？", 96), 960, 300, at=1, until=1, anim="rise"),
           E(big("そうはならない", 130, L.GOLD), 960, 420, at=2, anim="slam", sfx="boom"),
@@ -101,7 +116,7 @@ BODY = [
        "球団はシーズンが終わると、来年も契約したい選手の名簿を出します。",
        "この名簿に載った選手は、ほかの球団と契約の話をすることができません。",
        "つまり選手は、球団が手放さない限り、ずっと同じ球団にいることになります。"],
-      ph(DOME, "cold"), move="in", tag=T1, els=[
+      ph(SEIBU, "cold"), move="in", tag=T1, els=[
           E(P(L.scroll, "保留制度", "ほりゅうせいど"), 960, 380, until=0, anim="zoom", sfx="boom"),
           E(P(C.bullet_list, ["来年も契約したい選手の名簿を出す", "名簿に載ると、他球団と交渉できない"], 54),
             960, 380, at=1, until=2, anim="rise"),
@@ -111,7 +126,7 @@ BODY = [
        "入口のドラフトでは行き先を選べず、入ったあとは保留制度で縛られる。",
        "この縛りを解いて、選手が自分で次の球団を選べるようにする権利。",
        "それが、FA、フリーエージェントです。"],
-      P(L.bokeh, 12), move="in", tag=T1, els=[
+      ph(DRAFT, "dark", layout="blur", seed=12), move="in", tag=T1, els=[
           E(P(C.timeline, [("入口", "ドラフト\n交渉権"), ("在籍中", "保留制度\nで縛られる"), ("出口", "FA\n自分で選ぶ")], 0),
             960, 360, until=0, anim="fade"),
           E(P(C.timeline, [("入口", "ドラフト\n交渉権"), ("在籍中", "保留制度\nで縛られる"), ("出口", "FA\n自分で選ぶ")], 1),
@@ -123,7 +138,7 @@ BODY = [
     S(["FA宣言した選手は、12球団のどこの球団とも、自由に交渉できます。",
        "海外FA権なら、メジャーリーグなど、海外の球団とも契約できます。",
        "ただし、この自由は、長い時間をかけて、ようやく手に入れたものでした。"],
-      ph(YANKEE, "dark"), move="left", tag=T1, els=[
+      ph(MIYAGI, "dark"), move="left", tag=T1, els=[
           E(P(C.bullet_list, ["国内FA：12球団と自由に交渉", "海外FA：海外の球団とも契約できる"], 56),
             960, 360, until=1, anim="rise"),
           E(big("長い時間をかけて、手に入れた自由", 86, L.GOLD), 960, 420, at=2, anim="fade"),
@@ -155,7 +170,7 @@ BODY = [
       ]),
     S(["しかし、10年選手制度は、1975年限りで廃止されます。",
        "ここから、選手が自分の意思で移籍できる仕組みがない時代が、およそ18年続くことになります。"],
-      P(L.bokeh, 23, (120, 120, 130)), move="out", tag=T2, els=[
+      ph(KAWASAKI, "sepia", seed=23), move="out", tag=T2, els=[
           E(P(L.gold, "1975年 廃止", size=150), 960, 330, anim="glitch", sfx="boom"),
           E(P(C.timeline, [("1947", "10年選手\n制度"), ("1975", "廃止"), ("1993", "FA導入")], 1), 960, 600,
             at=1, anim="fade"),
@@ -175,7 +190,7 @@ BODY = [
     S(["日本でも、選手たちが動き出します。",
        "1985年、日本プロ野球選手会が、労働組合として認められました。",
        "球団と対等に話し合える立場を手に入れた選手会が、強く求めたのが、移籍の自由、FA制度でした。"],
-      ph(DOME, "dark", focus=(0.5, 0.6)), move="in", tag=T3, els=[
+      ph(SCOREBOARD, "dark"), move="in", tag=T3, els=[
           E(P(L.gold, "1985年", size=200), 960, 300, at=1, until=1, anim="slam", sfx="boom"),
           E(P(C.name_plate, "日本プロ野球選手会", "労働組合として認められる"), 960, 560, at=1, until=1, anim="rise"),
           E(big("求めたのは「移籍の自由」", 100, L.GOLD), 960, 420, at=2, anim="rise"),
@@ -189,7 +204,7 @@ BODY = [
     S(["ただし、生まれたFAは、使うのに条件の多い制度でした。",
        "権利を取るまでに長い年数がかかり、移籍するには補償も必要。",
        "この使いにくさは、今も続く議論の出発点になっています。"],
-      P(L.bokeh, 33, (120, 120, 130)), move="in", tag=T3, els=[
+      ph(BATS, "dark", layout="blur", seed=33), move="in", tag=T3, els=[
           E(P(C.bullet_list, ["権利を取るまで、長い年数", "移籍するには、補償が必要"], 60), 960, 380, at=1, anim="rise"),
           E(big("使いにくいFA", 120, L.GOLD), 960, 380, until=0, anim="glitch", sfx="boom"),
       ]),
@@ -234,7 +249,7 @@ BODY = [
     S(["では、FA権は、どうすれば手に入るのでしょうか。",
        "数えるのは、一軍に登録されていた日数です。",
        "1シーズンに145日、一軍に登録されると、1年と数えます。"],
-      ph(JINGU, "dark"), move="in", tag=T5, els=[
+      ph(NAGOYA, "dark"), move="in", tag=T5, els=[
           E(big("数えるのは「一軍の登録日数」", 92), 960, 300, at=1, anim="rise"),
           E(P(C.days_bar, 145), 960, 560, at=2, anim="rise"),
       ]),
@@ -249,7 +264,7 @@ BODY = [
        "大学や社会人からプロに入った選手は、7年です。",
        "海外の球団とも契約できる海外FA権は、全員が9年です。",
        "ずっと一軍にいても、国内FA権を取れるのは、高卒の選手で26歳前後、大卒の選手で29歳前後になります。"],
-      ph(DOME, "dark"), move="right", tag=T5, els=[
+      ph(CHIBA, "dark"), move="right", tag=T5, els=[
           E(P(C.table, ["", "必要な年数"], [["国内FA（高卒）", "8年"], ["国内FA（大卒・社会人）", "7年"],
                                             ["海外FA（全員）", "9年"]], [620, 420], 110, None, 50),
             960, 390, until=2, anim="rise"),
@@ -271,7 +286,7 @@ BODY = [
       ]),
     S(["権利を使うときは、日本シリーズが終わった翌日から、土日と祝日を除く7日以内に、書面で申請します。",
        "申請した選手はFA宣言選手として公示され、その翌日から、すべての球団と交渉できるようになります。"],
-      ph(DOME, "cold"), move="in", tag=T5, els=[
+      ph(YOKOHAMA, "cold"), move="in", tag=T5, els=[
           E(P(C.timeline, [("日本シリーズ", "終了"), ("7日以内", "書面で申請"), ("公示", "FA宣言選手"),
                            ("翌日", "交渉スタート")], 1), 960, 330, until=0, anim="fade"),
           E(P(C.timeline, [("日本シリーズ", "終了"), ("7日以内", "書面で申請"), ("公示", "FA宣言選手"),
@@ -292,7 +307,7 @@ BODY = [
     S(["FAで新しい契約を結ぶとき、お金にもルールがあります。",
        "まず、翌シーズンの年俸は、今の年俸が上限。いわゆる現状維持までです。",
        "球団どうしが年俸をつり上げ合うのを防ぐためのルールです。"],
-      P(L.bokeh, 62), move="in", tag=T6, els=[
+      ph(SCOREBOARD, "dark", layout="blur", seed=62), move="in", tag=T6, els=[
           E(P(L.scroll, "現状維持", "1年目の年俸は、前の年まで"), 960, 380, at=1, anim="zoom", sfx="boom"),
           E(P(C.note, "FA規約 第7条", 32), 960, 640, at=1, delay=1.0),
       ]),
@@ -326,7 +341,7 @@ BODY = [
     S(["そしてもう一つ。補償が必要な選手を、よその球団から獲得できるのは、原則として1球団2人までです。",
        "補償という言葉が出てきました。",
        "ここからが、FAのいちばん複雑で、いちばんドラマが生まれる部分です。"],
-      ph(DOME, "dark"), move="in", tag=T6, els=[
+      ph(BATS, "dark"), move="in", tag=T6, els=[
           E(P(L.gold, "1球団 2人まで", size=150), 960, 380, until=0, anim="slam", sfx="boom"),
           E(P(L.scroll, "補償", "ほしょう"), 960, 400, at=1, anim="zoom", sfx="boom"),
       ]),
@@ -337,7 +352,7 @@ BODY = [
        "その穴を埋めるために、獲得した球団から元の球団へ、補償をします。",
        "補償が必要かどうかは、選手のランクで決まります。",
        "ランクは、元の球団の日本人選手の中での、年俸の順位です。"],
-      ph(JINGU, "cold"), move="left", tag=T7, els=[
+      ph(ESCON, "cold"), move="left", tag=T7, els=[
           E(P(C.move, "元の球団", "獲得した球団"), 960, 340, until=0, anim="rise"),
           E(P(C.move, "獲得した球団", "元の球団（補償）"), 960, 340, at=1, until=1, anim="rise"),
           E(big("決め手は「ランク」", 110, L.GOLD), 960, 380, at=2, anim="slam", sfx="boom"),
@@ -381,14 +396,14 @@ BODY = [
     S(["選ばれた選手は、拒否できません。拒否すれば資格停止となり、試合に出られなくなります。",
        "自分の意思とは関係なく、ある日突然、別の球団への移籍が決まる。",
        "これが、人的補償です。"],
-      ph(DOME, "dark", focus=(0.5, 0.7)), move="out", tag=T7, els=[
+      ph(FANS, "dark"), move="out", tag=T7, els=[
           E(P(L.gold, "拒否 ＝ 資格停止", size=120), 960, 360, until=0, anim="slam", sfx="boom"),
           E(big("ある日突然、移籍が決まる", 100), 960, 380, at=1, until=1, anim="fade"),
           E(P(L.scroll, "人的補償", "じんてきほしょう"), 960, 400, at=2, anim="zoom", sfx="boom"),
       ]),
     S(["人的補償の第1号は、1995年のオフ。",
        "日本ハムから巨人へ移った河野博文投手の補償として、川邉忠義投手が、巨人から日本ハムへ移りました。"],
-      ph(KOSHIEN, "sepia"), move="right", tag=T7, els=[
+      ph(DOME, "sepia"), move="right", tag=T7, els=[
           E(P(L.gold, "人的補償 第1号", size=130), 960, 300, anim="slam", sfx="boom"),
           E(P(C.name_plate, "河野博文 → 巨人", "日本ハムからFA（1995年オフ）"), 600, 560, at=1, anim="rise"),
           E(P(C.name_plate, "川邉忠義 → 日本ハム", "人的補償"), 1320, 560, at=1, delay=1.8, anim="rise"),
@@ -476,7 +491,7 @@ BODY = [
        "選手が、物のようにやり取りされていないか。",
        "守る選手と守らない選手を分ける名簿が、外にもれていないか。",
        "選手会の事務局長からは、起きるべくして起きた、という声も上がりました。"],
-      P(L.bokeh, 95, (150, 150, 160)), move="in", tag=T8, els=[
+      ph(VICTORY, "cold", layout="blur", seed=95), move="in", tag=T8, els=[
           E(big("選手は「物」なのか", 110), 960, 300, at=1, anim="glitch", sfx="boom"),
           E(big("名簿は、もれていないか", 96), 960, 470, at=2, anim="rise"),
           E(P(C.quote, "起きるべくして起きた", 64), 960, 660, at=3, anim="rise"),
@@ -484,7 +499,7 @@ BODY = [
     S(["人的補償は、獲得する球団にとっても、重い負担です。",
        "高額の契約に加えて、補償のお金、そして選手1人。",
        "このコストの重さが、FAでの移籍を少なくしている、という指摘もあります。"],
-      ph(DOME, "dark"), move="right", tag=T8, els=[
+      ph(FUKUOKA, "dark"), move="right", tag=T8, els=[
           E(P(C.bullet_list, ["高額の契約", "補償のお金", "選手1人"], 64), 960, 380, at=1, anim="rise"),
           E(big("重すぎるコスト → FAが動かない", 88, L.GOLD), 960, 700, at=2, anim="rise"),
       ]),
@@ -571,7 +586,7 @@ BODY = [
        "ここからは、FA権を使って結んだ契約の、総額ランキングです。",
        "対象は、宣言残留を含む、日本の球団との契約。",
        "金額はすべて、報道による推定です。"],
-      P(L.bokeh, 112), move="in", tag=T10, els=[
+      ph(MIYAGI, "gold", layout="blur", seed=112), move="in", tag=T10, els=[
           E(P(L.gold, "歴代 大型契約ランキング", size=110), 960, 330, at=1, anim="slam", sfx="boom"),
           E(P(C.bullet_list, ["FA権を使った契約（宣言残留を含む）", "日本の球団との契約", "金額は報道による推定"], 48),
             960, 600, at=2, anim="rise"),
@@ -696,7 +711,7 @@ BODY = [
        "制度は、今も変わり続けています。",
        "今年のオフ、誰がFAを宣言するのか。そして、補償のルールは、どう変わっていくのか。",
        "その目線でストーブリーグを見ると、プロ野球は、もっとおもしろくなるはずです。"],
-      ph(DOME, "dark", focus=(0.5, 0.6)), move="out", tag=T11, els=[
+      ph(FIREWORKS, "dark"), move="out", tag=T11, els=[
           E(big("今年のオフ、誰が動くのか", 104, L.GOLD), 960, 400, at=2, anim="rise"),
       ]),
 

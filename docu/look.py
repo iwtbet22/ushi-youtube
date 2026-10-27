@@ -93,6 +93,9 @@ def plate(name, mood="dark", layout="full", focus=(0.5, 0.5), scale=1.18):
     im = photo(name)
     if layout == "full":
         return grade(cover(im, pw, ph, focus), mood)
+    if layout == "blur":  # 図解の後ろに敷く、強くぼかして暗くした写真
+        bg = grade(cover(im, pw, ph, focus).filter(ImageFilter.GaussianBlur(16)), mood)
+        return ImageEnhance.Brightness(bg).enhance(0.6)
     bg = grade(cover(im, pw, ph, focus).filter(ImageFilter.GaussianBlur(28)), mood)
     bg = ImageEnhance.Brightness(bg).enhance(0.55)
     fh = round(ph * 0.94)
