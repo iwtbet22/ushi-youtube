@@ -41,7 +41,7 @@ def license_of(raw):
     a = re.sub(r"\[\[(?:[^|\]]*\|)?([^\]]*)\]\]", r"\1", a)  # [[User:x|x]] → x
     a = re.sub(r"\[https?://\S+ ([^\]]+)\]", r"\1", a)  # [https://... 名前] → 名前
     a = re.sub(r"<[^>]+>", " ", a)
-    a = re.sub(r"\(talk\)|\(Original version\).*|from District of Columbia, USA", "", a)
+    a = re.sub(r"\(\s*talk\s*\)|\(Original version\).*|from District of Columbia, USA", "", a)
     a = re.sub(r"\s+", " ", a).strip(" .")
     a = re.sub(r"\{\{lang\|\w+\|([^}]*)\}\}", r"\1", a)  # {{lang|ja|x}} → x
     a = re.sub(r"\{\{[^}]*\}\}", "", a).strip()
