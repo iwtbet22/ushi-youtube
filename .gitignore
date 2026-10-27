@@ -6,3 +6,5 @@ output/*.mp4
 output/segments_main/
 output/preview/
 output/voice_rec/
+output/segments_*/
+output/stills_*/
