@@ -220,6 +220,14 @@ def _lowpass(x, cutoff):
     return np.fft.irfft(X, len(x))
 
 
+def _moving_avg(x, n):
+    """長さ n の移動平均 (中心合わせ)。累積和で計算するので長い音でも速い"""
+    c = np.concatenate([[0.0], np.cumsum(x, dtype=np.float64)])
+    i = np.arange(len(x))
+    lo, hi = np.clip(i - n // 2, 0, len(x)), np.clip(i + n // 2, 0, len(x))
+    return ((c[hi] - c[lo]) / n).astype(np.float32)
+
+
 def bgm(total):
     """暗めの持続音 (Dm - B♭ - F - C) と、低い鼓動のようなキック"""
     n = int(total * SR) + SR
@@ -233,12 +241,13 @@ def bgm(total):
             break
         tt = t[s:e] - k * bar
         env = np.minimum(1, tt / 2.5) * np.minimum(1, np.maximum(0, (bar + 1 - tt)) / 2.0)
+        seg = np.zeros(e - s)
         for f in chords[k % 4]:
             for det in (-0.6, 0.6):
                 ph = 2 * np.pi * (f + det) * tt
-                out[s:e] += (np.sin(ph) + 0.35 * np.sin(2 * ph) + 0.15 * np.sin(3 * ph)) * env * 0.05
-            out[s:e] += np.sin(2 * np.pi * f / 2 * tt) * env * 0.05
-    out = _lowpass(out, 900)
+                seg += (np.sin(ph) + 0.35 * np.sin(2 * ph) + 0.15 * np.sin(3 * ph)) * env * 0.05
+            seg += np.sin(2 * np.pi * f / 2 * tt) * env * 0.05
+        out[s:e] += _lowpass(seg, 900)  # 1小節ずつ削る (全体を一度に FFT するとメモリが足りない)
     beat = 60 / 64
     kick_t = np.arange(int(0.45 * SR)) / SR
     kick = np.sin(2 * np.pi * (55 * kick_t + 40 * (1 - np.exp(-kick_t * 18)) / 18)) * np.exp(-kick_t * 7) * 0.22
@@ -283,7 +292,7 @@ def write_audio(path, scenes, items, total):
             if e["sfx"]:
                 add(sfx, it["start"] + el_times(e, it)[0], snd[e["sfx"]])
     music = bgm(total)[:n]
-    talking = np.convolve((np.abs(voice) > 0.01).astype(float), np.ones(int(0.4 * SR)) / (0.4 * SR), "same")
+    talking = _moving_avg((np.abs(voice) > 0.01).astype(np.float32), int(0.4 * SR))
     music *= 0.55 * (1 - 0.4 * np.clip(talking * 3, 0, 1))
     end = int(total * SR)
     fade = int(2.5 * SR)

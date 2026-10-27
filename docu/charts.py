@@ -102,8 +102,11 @@ def timeline(marks, upto=99, w=1640, h=330):
     d.line((40, y, w - 40, y), fill=(200, 190, 170, 200), width=5)
     n = len(marks)
     fy, fl = _f(50), _f(34, "NotoSansJP-Bold.ttf")
+    # 端のラベルがはみ出さないよう、いちばん広い文字の半分だけ内側から並べる
+    half = max(max(_tw(d, yr, fy), *(_tw(d, p, fl) for p in lab.split("\n"))) for yr, lab in marks) / 2
+    m = max(120, half + 20)
     for i, (yr, lab) in enumerate(marks):
-        x = 120 + (w - 240) * i / max(1, n - 1)
+        x = m + (w - 2 * m) * i / max(1, n - 1)
         on = i <= upto
         col = L.GOLD if i == upto else (INK if on else (110, 105, 100))
         r = 18 if i == upto else 12
