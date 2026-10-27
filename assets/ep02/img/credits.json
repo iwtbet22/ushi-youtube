@@ -1,7 +1,7 @@
 {
  "Hiromitsu_Ochiai.jpg": {
   "file": "Hiromitsu_Ochiai.jpg",
-  "author": "machu. on Flickr",
+  "author": "[https://www.flickr.com/people/machu/ machu.] on [https://www.flickr.com/ Flickr] (Original version) <br /> UCinternational (Crop)",
   "license": [
    "cc-by-2.0"
   ],
@@ -25,9 +25,8 @@
  },
  "Tokyo_Dome_2007-12.jpg": {
   "file": "Tokyo_Dome_2007-12.jpg",
-  "author": "DX Broadrec",
+  "author": "User:DX Broadrec",
   "license": [
-   "cc-by-sa-3.0",
    "GFDL"
   ],
   "url": "https://commons.wikimedia.org/wiki/File:Tokyo_Dome_2007-12.jpg"
@@ -42,9 +41,8 @@
  },
  "YB-Norihiro-Komada20090430.jpg": {
   "file": "YB-Norihiro-Komada20090430.jpg",
-  "author": "Cake6",
+  "author": "Cake6 (<span class=\"signature-talk\">talk</span>)",
   "license": [
-   "cc-by-sa (all versions)",
    "GFDL"
   ],
   "url": "https://commons.wikimedia.org/wiki/File:YB-Norihiro-Komada20090430.jpg"
@@ -75,7 +73,7 @@
  },
  "Ken_Kadokura_2010__2_.jpg": {
   "file": "Ken_Kadokura_2010_(2).jpg",
-  "author": "boomer-44 on Flickr",
+  "author": "[https://www.flickr.com/people/boomer44/ boomer-44] on [https://www.flickr.com/ Flickr] (Original version) <br /> UCinternational (Crop)",
   "license": [
    "cc-by-2.0"
   ],
@@ -171,7 +169,7 @@
  },
  "Binnenkant_van_Nagoya_Dome__-21_maart_2019_a.jpg": {
   "file": "Binnenkant_van_Nagoya_Dome,_-21_maart_2019_a.jpg",
-  "author": "thatlostdog--",
+  "author": "[https://www.flickr.com/people/10354431@N03 thatlostdog--]",
   "license": [
    "cc-by-2.0"
   ],
@@ -235,7 +233,7 @@
  },
  "Baseball-2.jpg": {
   "file": "Baseball-2.jpg",
-  "author": "Wikimedia Commons（File:Baseball.jpg から派生）",
+  "author": "",
   "license": [
    "cc-by-sa-3.0"
   ],
@@ -243,7 +241,7 @@
  },
  "2012_プロ野球ドラフト会議_TOSHIBA__8122479103_.jpg": {
   "file": "2012_プロ野球ドラフト会議_TOSHIBA_(8122479103).jpg",
-  "author": "shiori.k",
+  "author": "[https://www.flickr.com/people/60912216@N04 shiori.k]",
   "license": [
    "cc-by-sa-2.0"
   ],
@@ -251,15 +249,15 @@
  },
  "Chiba_Marine_Stadium_Fireworks.jpg": {
   "file": "Chiba_Marine_Stadium_Fireworks.jpg",
-  "author": "Tohomar (ja.wikipedia)",
+  "author": "User Tohomar on ja.wikipedia",
   "license": [
-   "cc-by-sa-3.0 (GFDL から移行)"
+   "GFDL"
   ],
   "url": "https://commons.wikimedia.org/wiki/File:Chiba_Marine_Stadium_Fireworks.jpg"
  },
  "Dodgers_at_Nationals__53677192000___cropped2_.jpg": {
   "file": "Dodgers_at_Nationals_(53677192000)_(cropped2).jpg",
-  "author": "All-Pro Reels",
+  "author": "[https://www.flickr.com/people/10457902@N08 All-Pro Reels] from District of Columbia, USA",
   "license": [
    "cc-by-sa-2.0"
   ],
@@ -267,7 +265,7 @@
  },
  "Yoshinobu_Yamamoto_in_2024__53676737736_.jpg": {
   "file": "Yoshinobu_Yamamoto_in_2024_(53676737736).jpg",
-  "author": "All-Pro Reels",
+  "author": "[https://www.flickr.com/people/10457902@N08 All-Pro Reels] from District of Columbia, USA",
   "license": [
    "cc-by-sa-2.0"
   ],
@@ -275,7 +273,7 @@
  },
  "Kodai_Senga__52801251674_.jpg": {
   "file": "Kodai_Senga_(52801251674).jpg",
-  "author": "slgckgc",
+  "author": "[https://www.flickr.com/people/14771153@N04 slgckgc]",
   "license": [
    "cc-by-2.0"
   ],
@@ -315,7 +313,7 @@
  },
  "fourbats.jpg": {
   "file": "fourbats.jpg",
-  "author": "Dave Hogg (Flickr)",
+  "author": "",
   "license": [
    "Cc-by-2.0",
    "cc-by-2.0"
@@ -329,5 +327,13 @@
    "cc-by-sa-4.0"
   ],
   "url": "https://commons.wikimedia.org/wiki/File:Moment_of_Saitama_Seibu_Lions_Victory_at_MetLife_Dome.jpg"
+ },
+ "Hideki_Matsui_in_USA-7.jpg": {
+  "file": "Hideki_Matsui_in_USA-7.jpg",
+  "author": "Keith Allison (Flickr)",
+  "license": [
+   "cc-by-sa-2.0"
+  ],
+  "url": "https://commons.wikimedia.org/wiki/File:Hideki_Matsui_in_USA-7.jpg"
  }
 }
