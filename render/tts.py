@@ -19,12 +19,13 @@ CACHE = Path(__file__).resolve().parent.parent / "output" / "voice"
 CA = "/root/.ccr/ca-bundle.crt"
 
 
-def path_for(text: str) -> Path:
-    h = hashlib.sha1(f"{VOICE}|{RATE}|{text}".encode()).hexdigest()[:12]
+def path_for(text: str, rate: str = RATE, pitch: str = "+0Hz") -> Path:
+    key = f"{VOICE}|{rate}|{text}" if pitch == "+0Hz" else f"{VOICE}|{rate}|{pitch}|{text}"
+    h = hashlib.sha1(key.encode()).hexdigest()[:12]
     return CACHE / f"{h}.wav"
 
 
-async def _synth(text: str, mp3: Path):
+async def _synth(text: str, mp3: Path, rate: str, pitch: str):
     import aiohttp
     import edge_tts
 
@@ -32,18 +33,19 @@ async def _synth(text: str, mp3: Path):
     if os.path.exists(CA):  # このクラウド環境のプロキシ越しに繋ぐための設定
         kw["connector"] = aiohttp.TCPConnector(ssl=ssl.create_default_context(cafile=CA))
         kw["proxy"] = os.environ.get("HTTPS_PROXY")
-    await edge_tts.Communicate(text, VOICE, rate=RATE, **kw).save(str(mp3))
+    await edge_tts.Communicate(text, VOICE, rate=rate, pitch=pitch, **kw).save(str(mp3))
 
 
-def ensure(text: str) -> Path:
-    wav = path_for(text)
+def ensure(text: str, rate: str = RATE, pitch: str = "+0Hz") -> Path:
+    """rate / pitch は edge-tts の指定 (例 "+8%", "-4Hz")。省略すると1本目と同じ声"""
+    wav = path_for(text, rate, pitch)
     if wav.exists():
         return wav
     CACHE.mkdir(parents=True, exist_ok=True)
     mp3 = wav.with_suffix(".mp3")
     for attempt in range(5):  # 通信が一時的に切れることがあるので、間をあけて再試行する
         try:
-            asyncio.run(_synth(text, mp3))
+            asyncio.run(_synth(text, mp3, rate, pitch))
             if mp3.exists() and mp3.stat().st_size > 0:
                 break
         except Exception:  # noqa: BLE001
