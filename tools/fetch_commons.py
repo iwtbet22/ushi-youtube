@@ -21,7 +21,7 @@ OUT = ROOT / "assets" / "ep02" / "img"
 UA = "UshiYoutubeImageFetcher/0.2 (https://github.com/iwtbet22/ushi-youtube; educational video)"
 
 
-def get(url, binary=False, tries=8):
+def get(url, binary=False, tries=4):
     for k in range(tries):
         r = subprocess.run(["curl", "-sSL", "-A", UA, url], capture_output=True)
         body = r.stdout
