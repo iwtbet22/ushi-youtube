@@ -26,6 +26,7 @@ ROOT = HERE.parent
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(ROOT / "render"))
 import look  # noqa: E402
+import readings  # noqa: E402
 import tts  # noqa: E402
 import ui  # noqa: E402
 
@@ -50,7 +51,7 @@ def S(lines, bg, move="in", tag=None, els=(), trans="fade", hold=0.0):
 
 # ---- タイムライン -----------------------------------------------------------
 def _speech(line):
-    return line[1] if isinstance(line, tuple) else line
+    return line[1] if isinstance(line, tuple) else readings.speech(line)
 
 
 def _display(line):
