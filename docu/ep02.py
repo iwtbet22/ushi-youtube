@@ -116,7 +116,7 @@ BODY = [
        "球団はシーズンが終わると、来年も契約したい選手の名簿を出します。",
        "この名簿に載った選手は、ほかの球団と契約の話をすることができません。",
        "つまり選手は、球団が手放さない限り、ずっと同じ球団にいることになります。"],
-      ph(SEIBU, "cold"), move="in", tag=T1, els=[
+      ph(VICTORY, "cold"), move="in", tag=T1, els=[
           E(P(L.scroll, "保留制度", "ほりゅうせいど"), 960, 380, until=0, anim="zoom", sfx="boom"),
           E(P(C.bullet_list, ["来年も契約したい選手の名簿を出す", "名簿に載ると、他球団と交渉できない"], 54),
             960, 380, at=1, until=2, anim="rise"),
@@ -149,13 +149,13 @@ BODY = [
     S(["実は、FAが生まれる前にも、移籍の自由を認める仕組みがありました。",
        "1947年に始まった、10年選手制度です。",
        "10シーズン以上、現役としてプレーした選手に、特別な権利を与える制度でした。"],
-      ph(JINGU_OLD, "sepia"), move="in", tag=T2, els=[
+      ph(JINGU, "sepia"), move="in", tag=T2, els=[
           E(P(L.gold, "1947年", size=200), 960, 330, at=1, until=1, anim="slam", sfx="boom"),
           E(P(L.scroll, "十年選手制度", "1947年〜1975年"), 960, 400, at=2, anim="zoom"),
       ]),
     S(["1952年の改正後は、同じ球団で10年を過ごした選手が、ボーナスを受け取るか、自由に移籍するかを選べるようになります。",
        "今で言えば、残留のごほうびをもらうか、FAで移籍するか、という選択です。"],
-      ph(KOSHIEN_OLD, "sepia"), move="left", tag=T2, els=[
+      ph(KOSHIEN, "sepia", layout="blur"), move="left", tag=T2, els=[
           E(P(C.option_cards, ("残る", "ボーナスを\n受け取る"), ("出る", "自由に\n移籍する"), "同じ球団で10年"),
             960, 420, anim="rise"),
       ]),
@@ -213,7 +213,7 @@ BODY = [
     chap(4, T4, 41),
     S(["1993年のオフ、初めてのFA宣言の季節がやってきます。",
        "第1号となったのは、松永浩美選手。阪神からダイエーへの移籍でした。"],
-      ph(FUKUOKA, "sepia"), move="in", tag=T4, els=[
+      ph(KAWASAKI, "sepia"), move="in", tag=T4, els=[
           E(P(L.gold, "FA移籍 第1号", size=120), 960, 280, at=1, anim="slam", sfx="boom"),
           E(P(C.name_plate, "松永浩美", "阪神 → ダイエー（1993年オフ）"), 960, 520, at=1, delay=0.6, anim="rise"),
       ]),
@@ -279,7 +279,7 @@ BODY = [
     S(["さらに2024年からは、先発投手の特例も始まりました。",
        "先発投手は、登板の間隔をあけるために、いったん一軍登録を外れることがあります。いわゆる、投げ抹消です。",
        "この間の日数が数えられず、FA権が遠のく不公平を減らすため、条件付きで6日分を足すことになりました。"],
-      ph(FUKUOKA, "dark"), move="left", tag=T5, els=[
+      ph(NAGOYA, "dark"), move="left", tag=T5, els=[
           E(P(L.gold, "2024年〜 先発投手の特例", size=100), 960, 300, until=0, anim="slam", sfx="boom"),
           E(P(L.scroll, "投げ抹消", "登板のあと、いったん登録を外れる"), 960, 400, at=1, until=1, anim="zoom"),
           E(P(L.gold, "＋6日", size=220), 960, 400, at=2, delay=1.5, anim="slam", sfx="boom"),
@@ -499,7 +499,7 @@ BODY = [
     S(["人的補償は、獲得する球団にとっても、重い負担です。",
        "高額の契約に加えて、補償のお金、そして選手1人。",
        "このコストの重さが、FAでの移籍を少なくしている、という指摘もあります。"],
-      ph(FUKUOKA, "dark"), move="right", tag=T8, els=[
+      ph(CHIBA, "dark"), move="right", tag=T8, els=[
           E(P(C.bullet_list, ["高額の契約", "補償のお金", "選手1人"], 64), 960, 380, at=1, anim="rise"),
           E(big("重すぎるコスト → FAが動かない", 88, L.GOLD), 960, 700, at=2, anim="rise"),
       ]),
