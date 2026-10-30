@@ -270,10 +270,21 @@ def scroll(s, sub=None, w=None):
     d.rectangle((62, 42, w - 62, h - 42), outline=(170, 130, 60, 255), width=3)
     for x in (18, w - 40):
         d.rounded_rectangle((x, 0, x + 22, h), radius=10, fill=(90, 50, 30, 255))
-    t = text(s, "YujiSyuku-Regular.ttf", 120, (40, 25, 20), glow=False, pad=0)
+    inner = w - 160  # 内枠の内側に収める
+    size = 120
+    while True:
+        t = text(s, "YujiSyuku-Regular.ttf", size, (40, 25, 20), glow=False, pad=0)
+        if t.width <= inner or size <= 50:
+            break
+        size -= 6
     im.alpha_composite(t, ((w - t.width) // 2, (h - t.height) // 2 - (28 if sub else 0)))
     if sub:
-        st = text(sub, "NotoSerifJP-Black.ttf", 40, (90, 40, 30), glow=False, pad=0)
+        size = 40
+        while True:
+            st = text(sub, "NotoSerifJP-Black.ttf", size, (90, 40, 30), glow=False, pad=0)
+            if st.width <= inner or size <= 22:
+                break
+            size -= 2
         im.alpha_composite(st, ((w - st.width) // 2, h - 100))
     return im
 

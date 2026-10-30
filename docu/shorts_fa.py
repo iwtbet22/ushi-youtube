@@ -13,6 +13,9 @@ import look as L
 from ep02 import DOME, KAINO, KONDO, MARU, MORI, VICTORY, WADA, YAMAKAWA, has, ph
 from film import E, S
 
+SUGIUCHI_G = "Toshiya_Sugiuchi_on_March_24__2012.jpg"
+ASAMURA = "Hideto_Asamura_2023.jpg"
+
 CX = L.SAFE_CX
 
 
@@ -111,24 +114,30 @@ def card(rank, name, line, amount, photo=None):
 
 
 SHORT3 = [
-    S(["プロ野球のFAで結ばれた、歴代の大型契約。トップ3を発表します。"],
+    S(["プロ野球のFA、歴代の大型契約トップ3です。"],
       P(L.bokeh, 205), move="in", trans="cut", els=[
           E(head("FA大型契約"), CX, 300),
           E(P(L.gold, "歴代 TOP3", size=170), CX, 800, anim="slam", sfx="boom"),
           E(P(C.note), CX, 1000, delay=1.0),
       ]),
-    S(["第3位、杉内俊哉投手。2011年のオフ、ソフトバンクから巨人へ。4年総額20億円。"],
+    S(["第3位は、同じ金額で2人。",
+       "ソフトバンクから巨人へ移った、杉内俊哉投手。",
+       "西武から楽天へ移った、浅村栄斗選手。",
+       "どちらも、4年総額20億円です。"],
       ph(DOME, "dark"), move="in", els=[
           E(head("第3位"), CX, 300),
-          E(card(3, "杉内俊哉", "ソフトバンク → 巨人（2011年）", "4年 20億円"), CX, 900, anim="rise", sfx="whoosh"),
+          E(card(3, "杉内俊哉", "ソフトバンク → 巨人（2011年）", "4年 20億円", SUGIUCHI_G), CX, 620, at=1,
+            anim="rise", sfx="whoosh"),
+          E(card(3, "浅村栄斗", "西武 → 楽天（2018年）", "4年 20億円", ASAMURA), CX, 1010, at=2, anim="rise",
+            sfx="whoosh"),
       ]),
-    S(["第2位、丸佳浩選手。2018年のオフ、広島から巨人へ。5年総額25億5000万円。"],
+    S(["第2位、丸佳浩選手。広島から巨人へ、5年総額25億5000万円。"],
       ph(MARU, "dark", focus=(0.5, 0.3)), move="in", els=[
           E(head("第2位"), CX, 300),
           E(card(2, "丸佳浩", "広島 → 巨人（2018年）", "5年 25.5億円"), CX, 1000, anim="rise", sfx="whoosh"),
       ]),
     S(["そして第1位。",
-       "近藤健介選手。2022年のオフ、日本ハムからソフトバンクへ。7年総額50億円規模。",
+       "近藤健介選手。日本ハムからソフトバンクへ、7年総額50億円規模。",
        "2位の、およそ2倍です。"],
       ph(KONDO, "gold", focus=(0.5, 0.3)), move="in", els=[
           E(head("第1位"), CX, 300),
@@ -137,6 +146,6 @@ SHORT3 = [
             sfx="whoosh"),
           E(big("2位の約2倍", 100, L.GOLD), CX, 700, at=2, anim="slam", sfx="boom"),
       ]),
-    S(["金額はすべて報道による推定です。4位から9位と、FAの仕組みは、関連動画のFA完全解説で。"],
+    S(["金額は報道による推定です。続きのランキングは、関連動画のFA完全解説で。"],
       P(L.bokeh, 206), move="in", hold=1.0, els=to_main()),
 ]

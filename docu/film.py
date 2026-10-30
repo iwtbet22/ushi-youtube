@@ -310,8 +310,15 @@ def write_audio(path, scenes, items, total):
 # ---- 確認 -------------------------------------------------------------------
 def check(scenes, items):
     """字幕帯と画面要素が重ならないか、要素が画面からはみ出さないかを調べる"""
+    import charts
     problems = 0
     for i, (sc, it) in enumerate(zip(scenes, items)):
+        charts.OVERFLOWS.clear()
+        for e in sc["els"]:
+            e["fn"](9.0) if e["dyn"] else e["fn"]()
+        for s, b, box in charts.OVERFLOWS:
+            print(f"scene {i}: text out of its box: {s!r} {b} > {box}")
+            problems += 1
         subs = [(a, b, look.subtitle(p)) for s in it["sents"] for a, b, p in sub_pages(s)]
         for e in sc["els"]:
             sp = e["fn"](9.0) if e["dyn"] else e["fn"]()

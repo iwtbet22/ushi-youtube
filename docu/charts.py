@@ -21,6 +21,26 @@ def _tw(d, s, f):
     return d.textlength(s, font=f)
 
 
+# 枠からはみ出した文字の記録 (film.check が読んで報告する)
+OVERFLOWS = []
+
+
+def fit(s, size, max_w, name="NotoSerifJP-Black.ttf", min_size=20):
+    """max_w に収まるまで文字を小さくしたフォントを返す"""
+    d = ImageDraw.Draw(Image.new("L", (1, 1)))
+    while size > min_size and _tw(d, s, _f(size, name)) > max_w:
+        size -= 2
+    return _f(size, name)
+
+
+def put(d, xy, s, font, fill, anchor, box):
+    """文字を置き、box (x0, y0, x1, y1) からはみ出していたら記録する"""
+    d.text(xy, s, font=font, fill=fill, anchor=anchor)
+    b = d.textbbox(xy, s, font=font, anchor=anchor)
+    if b[0] < box[0] - 1 or b[1] < box[1] - 1 or b[2] > box[2] + 1 or b[3] > box[3] + 1:
+        OVERFLOWS.append((s, tuple(round(v) for v in b), box))
+
+
 def panel(w, h, border=L.GOLD, fill=PANEL, width=3):
     im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     d = ImageDraw.Draw(im)
@@ -60,14 +80,15 @@ def move(src, dst, year=None, size=56, max_w=900):
     d = ImageDraw.Draw(im)
     x = 40
     cy = h // 2
-    d.text((x, cy), src, font=f, fill=INK, anchor="lm")
+    box = (12, 6, w - 12, h - 6)
+    put(d, (x, cy), src, f, INK, "lm", box)
     x += a + 20
     d.line((x, cy, x + arrow - 30, cy), fill=L.GOLD, width=6)
     d.polygon([(x + arrow - 34, cy - 16), (x + arrow - 6, cy), (x + arrow - 34, cy + 16)], fill=L.GOLD)
     x += arrow
-    d.text((x, cy), dst, font=f, fill=L.WHITE, anchor="lm")
+    put(d, (x, cy), dst, f, L.WHITE, "lm", box)
     if yr:
-        d.text((x + b + 10, cy + 4), yr, font=fs, fill=DIM, anchor="lm")
+        put(d, (x + b + 10, cy + 4), yr, fs, DIM, "lm", box)
     if im.width > max_w:
         im = im.resize((max_w, round(im.height * max_w / im.width)), Image.LANCZOS)
     return im
@@ -77,12 +98,12 @@ def note(s="※金額は報道による推定", size=30):
     return L.caption_small(s, size)
 
 
-def bullet_list(items, size=60, width=None, gap=34, mark="◆"):
-    """箇条書き (左に金のしるし)"""
+def bullet_list(items, size=60, width=None, gap=34, mark="◆", max_w=1700):
+    """箇条書き (左に金のしるし)。width を決めたときは、収まらない行を小さくする"""
     f = _f(size)
     d = ImageDraw.Draw(Image.new("L", (1, 1)))
     tw = max(_tw(d, s, f) for s in items)
-    w = width or round(tw + size * 2.4 + 80)
+    w = width or min(max_w, round(tw + size * 2.4 + 80))
     lh = round(size * 1.25) + gap
     h = lh * len(items) + 70
     im = panel(w, h)
@@ -90,7 +111,8 @@ def bullet_list(items, size=60, width=None, gap=34, mark="◆"):
     for i, s in enumerate(items):
         y = 45 + i * lh + size // 2 + 4
         d.text((50, y), mark, font=_f(round(size * 0.6)), fill=L.GOLD, anchor="lm")
-        d.text((50 + size * 1.2, y), s, font=f, fill=INK, anchor="lm")
+        x = 50 + size * 1.2
+        put(d, (x, y), s, fit(s, size, w - x - 40), INK, "lm", (14, 14, w - 14, h - 14))
     return im
 
 
@@ -128,7 +150,7 @@ def table(header, rows, col_w, row_h=96, highlight=None, size=44):
     d.rectangle((3, 3, w + 2, row_h), fill=(70, 52, 20, 230))
     x = 3
     for c, cw in zip(header, col_w):
-        d.text((x + cw / 2, row_h / 2 + 3), c, font=fh, fill=L.GOLD, anchor="mm")
+        put(d, (x + cw / 2, row_h / 2 + 3), c, fit(c, size, cw - 24), L.GOLD, "mm", (x, 3, x + cw, row_h))
         x += cw
     for r, row in enumerate(rows):
         y0 = 3 + row_h * (r + 1)
@@ -139,7 +161,8 @@ def table(header, rows, col_w, row_h=96, highlight=None, size=44):
             for k, part in enumerate(str(c).split("\n")):
                 n = len(str(c).split("\n"))
                 yy = y0 + row_h / 2 + (k - (n - 1) / 2) * (size * 1.1)
-                d.text((x + cw / 2, yy), part, font=fb, fill=INK, anchor="mm")
+                put(d, (x + cw / 2, yy), part, fit(part, size, cw - 24, "NotoSansJP-Bold.ttf"), INK, "mm",
+                    (x, y0, x + cw, y0 + row_h))
             x += cw
         d.line((3, y0, w + 2, y0), fill=L.GOLD + (110,), width=2)
     d.rectangle((0, 0, w + 5, h + 5), outline=L.GOLD + (255,), width=3)
@@ -198,9 +221,10 @@ def option_cards(left, right, title=None, w=700, gap=120):
         x = i * (w + gap)
         p = panel(w, h)
         im.alpha_composite(p, (x, th))
-        d.text((x + w / 2, th + 80), head, font=_f(48, "NotoSansJP-Bold.ttf"), fill=DIM, anchor="mm")
+        box = (x + 14, th + 14, x + w - 14, th + h - 14)
+        put(d, (x + w / 2, th + 80), head, fit(head, 48, w - 60, "NotoSansJP-Bold.ttf"), DIM, "mm", box)
         for k, part in enumerate(body.split("\n")):
-            d.text((x + w / 2, th + 175 + k * 80), part, font=_f(70), fill=L.WHITE, anchor="mm")
+            put(d, (x + w / 2, th + 175 + k * 80), part, fit(part, 70, w - 60), L.WHITE, "mm", box)
     d.text((w + gap / 2, th + h / 2), "or", font=_f(60), fill=L.GOLD, anchor="mm")
     return im
 
@@ -215,7 +239,7 @@ def money_bars(rows, unit="億円", w=1400, vmax=None):
     lab_w = 420 if w >= 1200 else 230  # 狭い画面 (ショート) ではラベル欄を詰める
     for i, (lab, v, hi) in enumerate(rows):
         y = 10 + i * lh
-        d.text((lab_w - 20, y + 45), lab, font=f, fill=INK, anchor="rm")
+        d.text((lab_w - 20, y + 45), lab, font=fit(lab, 46, lab_w - 30, "NotoSansJP-Bold.ttf"), fill=INK, anchor="rm")
         bw = (w - lab_w - 260) * v / vmax
         col = L.GOLD if hi else (150, 150, 155)
         d.rectangle((lab_w, y + 10, lab_w + bw, y + 80), fill=col + (235,))
@@ -225,7 +249,8 @@ def money_bars(rows, unit="億円", w=1400, vmax=None):
 
 
 def rank_card(rank, name, lines, amount, photo=None, focus=(0.5, 0.25), h=430, w=1180):
-    """ランキングの札: 順位・写真・名前・移籍・金額。2枚並べるときは h を小さく"""
+    """ランキングの札: 順位・写真・名前・移籍・金額。
+    左に順位・名前・移籍、右下に金額。金額が左の文字に重ならないよう、文字の幅を測って縮める"""
     im = panel(w, h, width=4)
     d = ImageDraw.Draw(im)
     x = 40
@@ -235,13 +260,34 @@ def rank_card(rank, name, lines, amount, photo=None, focus=(0.5, 0.25), h=430, w
         im.paste(ph, (40, 40))
         d.rectangle((40, 40, 40 + pw, h - 40), outline=L.GOLD, width=3)
         x = 80 + pw
-    top = 95 if h >= 430 else 80
-    d.text((x, top), f"第{rank}位", font=_f(64), fill=L.GOLD, anchor="ls")
-    d.text((x, top + 105), name, font=_f(86), fill=L.WHITE, anchor="ls")
-    for k, s in enumerate(lines):
-        d.text((x, top + 165 + k * 50), s, font=_f(38, "NotoSansJP-Bold.ttf"), fill=DIM, anchor="ls")
-    g = L.gold(amount, size=78)
-    im.alpha_composite(g, (w - g.width + 30, h - g.height + 30))
+    box = (x, 20, w - 30, h - 20)
+    avail = w - x - 50
+    k = h / 430  # 小さい札では文字も小さく
+    rank_f = _f(round(64 * k))
+    name_f = fit(name, round(86 * k), avail)
+    line_f = _f(round(38 * k), "NotoSansJP-Bold.ttf")
+    y_rank = round(95 * k)
+    y_name = y_rank + round(105 * k)
+    put(d, (x, y_rank), f"第{rank}位", rank_f, L.GOLD, "ls", box)
+    put(d, (x, y_name), name, name_f, L.WHITE, "ls", box)
+    y = y_name + round(58 * k)
+    for s in lines:
+        put(d, (x, y), s, fit(s, round(38 * k), avail, "NotoSansJP-Bold.ttf"), DIM, "ls", box)
+        y += round(50 * k)
+    # 金額は残りの高さに収まる大きさで、右下にそろえる
+    room = h - 30 - (y - round(30 * k))
+    size = round(78 * k)
+    while True:
+        g = L.gold(amount, size=size)
+        bb = g.split()[3].point(lambda v: 255 if v > 40 else 0).getbbox()
+        gw, gh = bb[2] - bb[0], bb[3] - bb[1]
+        if (gw <= avail and gh <= room) or size <= 30:
+            break
+        size -= 4
+    gx, gy = w - 40 - gw - bb[0], h - 30 - gh - bb[1]
+    im.alpha_composite(g, (max(0, gx), max(0, gy)), (max(0, -gx), max(0, -gy)))
+    if gy + bb[1] < y - round(30 * k):
+        OVERFLOWS.append((amount, "金額が上の行に重なる", box))
     return im
 
 
@@ -261,9 +307,10 @@ def name_plate(name, sub=None):
     h = 200 if sub else 140
     im = panel(w, h)
     d = ImageDraw.Draw(im)
-    d.text((w / 2, 75), name, font=f, fill=L.WHITE, anchor="mm")
+    box = (12, 8, w - 12, h - 8)
+    put(d, (w / 2, 75), name, f, L.WHITE, "mm", box)
     if sub:
-        d.text((w / 2, 150), sub, font=_f(38, "NotoSansJP-Bold.ttf"), fill=DIM, anchor="mm")
+        put(d, (w / 2, 150), sub, _f(38, "NotoSansJP-Bold.ttf"), DIM, "mm", box)
     return im
 
 
