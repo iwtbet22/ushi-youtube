@@ -74,7 +74,10 @@ def timeline(scenes):
 
 
 def pages(text):
-    """字幕を2行ずつのページに分ける"""
+    """字幕を2行ずつのページに分ける。文の途中に句点があって長いときは、まず句点で分ける"""
+    mid = text.find("。")
+    if 0 < mid < len(text) - 1 and len(text) > look.SUB_MAX:
+        return pages(text[:mid + 1]) + pages(text[mid + 1:])
     lines = ui._hang(ui.wrap(text, look.SUB_MAX))
     if len(lines) <= 2:
         return ["".join(lines)]
@@ -168,6 +171,17 @@ class SceneRenderer:
                 im.alpha_composite(sp, look.subtitle_pos(sp))
         im.alpha_composite(look.grain(no))
         return im.convert("RGB")
+
+
+def qa_frames(args):
+    """見た目の点検用に、各文の終わり近く (要素が出そろったところ) のコマを小さく保存する"""
+    i, mod_name, items, out_dir = args
+    scenes = importlib.import_module(mod_name).SCENES
+    sc, item = scenes[i], items[i]
+    r = SceneRenderer(sc, item, i)
+    ts = [s["start"] + s["dur"] * 0.85 for s in item["sents"]] or [item["dur"] * 0.8]
+    for k, t in enumerate(ts):
+        r.frame(min(t, item["dur"] - 0.05), 0).resize((640, 360)).save(out_dir / f"{i:03d}_{k:02d}.png")
 
 
 def render_scene(args):
@@ -346,6 +360,7 @@ def main():
     ap.add_argument("module")
     ap.add_argument("--stills", action="store_true")
     ap.add_argument("--check", action="store_true")
+    ap.add_argument("--qa", action="store_true", help="各文のコマを output/qa_<名前>/ に出して、4x3 の一覧にまとめる")
     ap.add_argument("--jobs", type=int, default=4)
     ap.add_argument("--only", help="この番号のシーンだけ描き直してつなぎ直す (例: 3,7,12)。ほかは前回の書き出しを使う")
     args = ap.parse_args()
@@ -354,6 +369,19 @@ def main():
     print(f"total {total:.1f}s, {len(scenes)} scenes", flush=True)
     if args.check:
         check(scenes, items)
+        return
+    if args.qa:
+        qd = OUT / f"qa_{args.module}"
+        qd.mkdir(parents=True, exist_ok=True)
+        with Pool(args.jobs) as p:
+            list(p.imap_unordered(qa_frames, [(i, args.module, items, qd) for i in range(len(scenes))]))
+        frames = sorted(qd.glob("[0-9]*_[0-9]*.png"))
+        for k in range(0, len(frames), 12):
+            sheet = Image.new("RGB", (640 * 4, 360 * 3))
+            for j, fp in enumerate(frames[k:k + 12]):
+                sheet.paste(Image.open(fp), ((j % 4) * 640, (j // 4) * 360))
+            sheet.save(qd / f"sheet_{k // 12:02d}.jpg", quality=85)
+        print(f"qa: {len(frames)} frames, {(len(frames) + 11) // 12} sheets in {qd}")
         return
     seg = OUT / f"segments_{args.module}"
     seg.mkdir(parents=True, exist_ok=True)

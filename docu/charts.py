@@ -235,13 +235,14 @@ def money_bars(rows, unit="億円", w=1400, vmax=None):
     lh = 120
     im = Image.new("RGBA", (w, lh * len(rows) + 20), (0, 0, 0, 0))
     d = ImageDraw.Draw(im)
+    d.rounded_rectangle((0, 0, w - 1, im.height - 1), radius=12, fill=(6, 6, 8, 170))  # 写真の上でも数字が読めるように
     f, fv = _f(46, "NotoSansJP-Bold.ttf"), _f(56)
     lab_w = 420 if w >= 1200 else 230  # 狭い画面 (ショート) ではラベル欄を詰める
     for i, (lab, v, hi) in enumerate(rows):
         y = 10 + i * lh
-        d.text((lab_w - 20, y + 45), lab, font=fit(lab, 46, lab_w - 30, "NotoSansJP-Bold.ttf"), fill=INK, anchor="rm")
+        d.text((lab_w - 20, y + 45), lab, font=fit(lab, 46, lab_w - 40, "NotoSansJP-Bold.ttf"), fill=INK, anchor="rm")
         bw = (w - lab_w - 260) * v / vmax
-        col = L.GOLD if hi else (150, 150, 155)
+        col = L.GOLD if hi else (175, 175, 182)
         d.rectangle((lab_w, y + 10, lab_w + bw, y + 80), fill=col + (235,))
         vs = f"{v:g}{unit}"
         d.text((lab_w + bw + 20, y + 45), vs, font=fv, fill=col, anchor="lm")
@@ -317,3 +318,123 @@ def name_plate(name, sub=None):
 def quote(s, size=58):
     """「」つきの引用 (白い文字に金のかぎかっこ)"""
     return L.text(f"「{s}」", "NotoSerifJP-Black.ttf", size, L.WHITE)
+
+
+# ---- 3本目（契約更改）で使う部品 ----------------------------------------------
+def case_card(no, year, title, who):
+    """事件簿の扉: 「CASE 03」「1994年」「野茂英雄と任意引退」を、事件ファイルのように見せる"""
+    w, h = 1300, 520
+    im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    # 書類の紙 (少し傾けたファイルの見た目は回転で出す)
+    d.rectangle((0, 40, w - 1, h - 1), fill=(222, 210, 180, 245), outline=(120, 90, 50, 255), width=4)
+    d.rectangle((40, 0, 420, 60), fill=(222, 210, 180, 245), outline=(120, 90, 50, 255), width=4)  # 見出しのつまみ
+    d.rectangle((44, 44, 416, 60), fill=(222, 210, 180, 255))
+    ink = (50, 32, 22)
+    box = (30, 50, w - 30, h - 20)
+    put(d, (80, 34), f"事件簿 {no:02d}", fit(f"事件簿 {no:02d}", 40, 320), (120, 40, 30), "lm", (40, 0, 420, 60))
+    put(d, (80, 140), year, _f(64), (120, 40, 30), "lm", box)
+    put(d, (80, 270), title, fit(title, 96, w - 160 - 300), ink, "lm", box)  # 右下のはんこを避ける
+    put(d, (80, 390), who, fit(who, 52, w - 420, "NotoSansJP-Bold.ttf"), (90, 70, 50), "lm", box)
+    # 「極秘」風のはんこ
+    st = Image.new("RGBA", (260, 260), (0, 0, 0, 0))
+    sd = ImageDraw.Draw(st)
+    sd.ellipse((10, 10, 250, 250), outline=(190, 30, 30, 230), width=12)
+    sd.text((130, 130), "銭闘", font=_f(84), fill=(190, 30, 30, 230), anchor="mm")
+    st = st.rotate(-14, resample=Image.BICUBIC)
+    im.alpha_composite(st, (w - 330, h - 320))
+    return im.rotate(1.5, resample=Image.BICUBIC, expand=True)
+
+
+def contract_doc(amount="", name="選手名", stamped=False, scale=0.72):
+    """統一契約書の紙。amount を空にすると「金額は空欄」の見た目になる。scale で全体を縮める"""
+    w, h = 760, 900
+    im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    d.rectangle((0, 0, w - 1, h - 1), fill=(244, 240, 228, 250), outline=(90, 80, 60, 255), width=3)
+    ink = (40, 36, 30)
+    box = (20, 20, w - 20, h - 20)
+    put(d, (w / 2, 90), "統一契約書", _f(64), ink, "mm", box)
+    d.line((60, 140, w - 60, 140), fill=ink, width=2)
+    rows = [("選手", name), ("契約期間", "1年"), ("参稼報酬", amount)]
+    for i, (k, v) in enumerate(rows):
+        y = 230 + i * 130
+        put(d, (70, y), k, _f(40, "NotoSansJP-Bold.ttf"), (110, 100, 80), "lm", box)
+        d.line((300, y + 34, w - 60, y + 34), fill=(150, 140, 120), width=2)
+        if v:
+            put(d, (310, y), v, fit(v, 52, w - 380), ink, "lm", box)
+    for k in range(5):  # 本文の行 (読めない細い線)
+        y = 650 + k * 34
+        d.line((70, y, w - 70 - (k % 3) * 60, y), fill=(190, 182, 165), width=6)
+    if stamped:
+        sd = Image.new("RGBA", (200, 200), (0, 0, 0, 0))
+        s2 = ImageDraw.Draw(sd)
+        s2.ellipse((10, 10, 190, 190), outline=(200, 30, 30, 235), width=10)
+        s2.text((100, 100), "印", font=_f(96), fill=(200, 30, 30, 235), anchor="mm")
+        im.alpha_composite(sd.rotate(-10, resample=Image.BICUBIC), (w - 260, h - 260))
+    return im.resize((round(w * scale), round(h * scale)), Image.LANCZOS)
+
+
+def vbars(rows, unit="万円", h=560, bw=150, gap=70, vmax=None, note_between=None):
+    """縦の棒グラフ。rows = [(下のラベル, 値, 表示する文字, 金色か)]。
+    note_between = (左の棒の番号, 文字) で、その棒と次の棒の間に注記を入れる"""
+    vmax = vmax or max(v for _, v, _, _ in rows)
+    n = len(rows)
+    w = n * bw + (n - 1) * gap + 80
+    top = 90
+    im = Image.new("RGBA", (w, h + 140), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    base = top + h
+    d.line((20, base, w - 20, base), fill=(200, 190, 170, 220), width=4)
+    for i, (lab, v, txt, hi) in enumerate(rows):
+        x = 40 + i * (bw + gap)
+        bh = h * v / vmax
+        col = L.GOLD if hi else (150, 150, 158)
+        d.rectangle((x, base - bh, x + bw, base), fill=col + (235,))
+        vf = fit(txt, 46, bw + gap - 10)
+        d.text((x + bw / 2, base - bh - 18), txt, font=vf, fill=col, anchor="ms")
+        d.text((x + bw / 2, base + 50), lab, font=fit(lab, 42, bw + gap - 10, "NotoSansJP-Bold.ttf"), fill=INK,
+               anchor="ms")
+    if note_between:
+        i, s = note_between
+        x = 40 + i * (bw + gap) + bw + gap / 2
+        d.text((x, base - 40), s, font=fit(s, 30, gap + bw, "NotoSansJP-Bold.ttf"), fill=DIM, anchor="ms")
+    return im
+
+
+def flow(steps, hi=None, w_box=330, h_box=150, arrow=90):
+    """箱と矢印の流れ図。steps = [文字, ...] (\\n で改行)。hi は強調する箱の番号"""
+    n = len(steps)
+    w = n * w_box + (n - 1) * arrow
+    im = Image.new("RGBA", (w, h_box), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    for i, s in enumerate(steps):
+        x = i * (w_box + arrow)
+        col = L.GOLD if i == hi else (200, 190, 170)
+        p = panel(w_box, h_box, border=col)
+        im.alpha_composite(p, (x, 0))
+        parts = s.split("\n")
+        for k, part in enumerate(parts):
+            yy = h_box / 2 + (k - (len(parts) - 1) / 2) * 52
+            put(d, (x + w_box / 2, yy), part, fit(part, 44, w_box - 40), L.WHITE if i == hi else INK, "mm",
+                (x + 12, 8, x + w_box - 12, h_box - 8))
+        if i < n - 1:
+            ax = x + w_box + 12
+            d.line((ax, h_box / 2, ax + arrow - 34, h_box / 2), fill=L.GOLD, width=6)
+            d.polygon([(ax + arrow - 38, h_box / 2 - 16), (ax + arrow - 12, h_box / 2), (ax + arrow - 38, h_box / 2 + 16)],
+                      fill=L.GOLD)
+    return im
+
+
+def big_number(top, bottom, size=150):
+    """「2億円」→「400万円」のように、上下2段で数字を見せる (下が金色)"""
+    a = L.text(top, "NotoSerifJP-Black.ttf", round(size * 0.7), (200, 195, 185))
+    arrow = L.text("↓", "NotoSerifJP-Black.ttf", round(size * 0.6), L.GOLD)
+    b = L.gold(bottom, size=size)
+    w = max(a.width, b.width, arrow.width)
+    im = Image.new("RGBA", (w, a.height + arrow.height + b.height - 120), (0, 0, 0, 0))
+    y = 0
+    for s in (a, arrow, b):
+        im.alpha_composite(s, ((w - s.width) // 2, y))
+        y += s.height - 60
+    return im

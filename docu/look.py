@@ -154,6 +154,7 @@ def text(s, name="NotoSansJP-Black.ttf", size=80, fill=WHITE, stroke=0, stroke_f
     f = font(name, size)
     box = ImageDraw.Draw(Image.new("L", (1, 1))).multiline_textbbox((0, 0), s, font=f, stroke_width=stroke,
                                                                      spacing=size // 5, align="center")
+    box = [round(v) for v in box]  # 複数行のときは小数になる
     im = Image.new("RGBA", (box[2] - box[0] + pad * 2, box[3] - box[1] + pad * 2), (0, 0, 0, 0))
     ImageDraw.Draw(im).multiline_text((pad - box[0], pad - box[1]), s, font=f, fill=fill, stroke_width=stroke,
                                       stroke_fill=stroke_fill, spacing=size // 5, align="center")

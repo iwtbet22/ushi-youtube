@@ -102,10 +102,19 @@ _PARTICLES = set("はがをにでともへのてや")
 _HIRA = lambda c: "ぁ" <= c <= "ゖ"
 
 
+# 途中で切ると読みにくい語 (字幕の改行で割らない)
+_KEEP = ("プロ野球", "日本ハム", "ソフトバンク", "チャンネル登録", "ドラフト会議", "メジャーリーグ", "契約更改",
+         "年俸調停", "減額制限", "自由契約", "任意引退", "個人事業主", "日本シリーズ", "選手会", "代理人")
+
+
 def _cut_cost(text, i, ideal):
     """text[:i] / text[i:] で切るときのコスト (小さいほど自然)"""
     a, b = text[i - 1], text[i]
     cost = abs(i - ideal) * 1.0
+    for w in _KEEP:
+        j = text.find(w, max(0, i - len(w) + 1))
+        if 0 <= j < i < j + len(w):
+            cost += 100
     if a in "、。":
         cost -= 14
     elif a in _PARTICLES and not _HIRA(b):
@@ -116,6 +125,8 @@ def _cut_cost(text, i, ideal):
         cost += 100        # 行頭禁則
     if (a.isdigit() or a in "〜") and (b.isdigit() or b in "万億円位年倍〜%"):
         cost += 100        # 数字や「1億円」を割らない
+    if a in "万億" and (b.isdigit() or b in "円ドル"):
+        cost += 100        # 「8000万|円」「2億|5000万円」を割らない
     if _HIRA(a) and _HIRA(b) and a not in _PARTICLES:
         cost += 6          # 「でしょ|うか」のような語の途中
     if not _HIRA(a) and not _HIRA(b) and a not in "、。" and b not in "、。":
@@ -130,9 +141,12 @@ def wrap(text: str, n: int = SUB_MAX):
     if len(text) <= n:
         return [text]
     k = -(-len(text) // n)
-    ideal = len(text) / k
-    lo, hi = max(1, len(text) - n * (k - 1)), min(n, len(text) - 1)
-    best = min(range(lo, hi + 1), key=lambda i: _cut_cost(text, i, ideal))
+    for kk in (k, k + 1):  # どこで切っても数字などを割ってしまうときは、1行増やして切る場所を広げる
+        ideal = len(text) / kk
+        lo, hi = max(1, len(text) - n * (kk - 1)), min(n, len(text) - 1)
+        best = min(range(lo, hi + 1), key=lambda i: _cut_cost(text, i, ideal))
+        if _cut_cost(text, best, ideal) < 50:
+            break
     return [text[:best]] + wrap(text[best:], n)
 
 
