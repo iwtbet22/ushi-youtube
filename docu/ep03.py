@@ -17,10 +17,10 @@ film.TAIL = 0.42  # 3本目は文と文の間を少し長めにとり、ドキ�
 
 NOMO = "投げます__31879540_.jpg"
 SORIANO = "Alfonso_Soriano-Yankees-11092013.jpg"
-NAKAMURA_N = "Norihiro_Nakamura_May_6__2005__7045029123___cropped_.jpg"
+NAKAMURA_N = "Norihiro_Nakamura__infielder_of_the_Yokohama_BayStars__at_Yokohama_Stadium.jpg"  # 横浜時代
 FUKUDOME = "Kosuke_Fukudome_-_2008_-_cropped.jpg"
 SUGIUCHI_H = "HAWKS-No47-Toshiya.Sugiuchi.JPG"
-SUGIUCHI_G = "Toshiya_Sugiuchi_on_March_24__2012.jpg"
+SUGIUCHI_G = "Sugiuchi_Toshiya__Beijing_2008.jpg"  # 北京五輪の日本代表
 WAKUI = "Hideaki_Wakui_200916.jpg"
 KANEKO = "金子千尋20110913.jpg"
 NAKAJIMA = "Giants_Hiroyuki_Nakajima_20210610.jpg"
@@ -32,7 +32,6 @@ OKAMOTO = "Giants_okamoto38.JPG"
 TAKAGI = "Yutaka_Takagi_on_February_5__2012.jpg"
 SASAKI = "K_Sasaki.JPG"
 SUGANO = "Giants_sugano.jpg"
-KAIKEN = "20221028kaikei09k.jpg"
 
 
 def big(s, size=110, color=L.WHITE):
@@ -90,6 +89,7 @@ OPEN = [
     S(["年俸2億円から400万円になった強打者がいます。"],
       ph(NAKAMURA_N, "dark", layout="right", focus=(0.5, 0.25), seed=302), move="in", els=[
           E(P(C.big_number, "2億円", "400万円", 150), 640, 470, anim="rise", sfx="boom"),
+          E(P(C.note, "※写真は横浜時代", 28), 1860, 860, anchor="br"),
       ]),
     S(["年俸調停まで争って、それでも敗れた三冠王がいます。"],
       ph(OCHIAI, "sepia", layout="right", focus=(0.5, 0.3)), move="in", els=[
@@ -102,7 +102,7 @@ OPEN = [
           E(big("海を渡った投手", 120, L.GOLD), 960, 420, delay=0.8, anim="glitch", sfx="boom"),
       ]),
     S(["毎年冬になると、交渉のテーブルでは数字をめぐる戦いが起きています。"],
-      ph(KAIKEN, "cold", seed=303), move="in", els=[
+      ph(SCOREBOARD, "cold", seed=303), move="in", els=[
           E(P(L.gold, "銭闘", size=260), 960, 420, delay=1.2, anim="slam", sfx="boom"),
       ]),
     S(["今回は契約更改の仕組みと年俸の移り変わり、そして歴史に残る契約更改の事件簿をまとめて解説します。"],
@@ -138,7 +138,7 @@ BODY = [
     S(["交渉は11月ごろから始まります。",
        "二軍の選手の多くは交渉の余地がほとんどなく、提示額にサインして終わるといいます。",
        "一方で主力の選手は、交渉のあとに記者会見を開くのが恒例です。"],
-      ph(KAIKEN, "dark", seed=313), move="in", tag=T1, els=[
+      ph(DRAFT, "dark", seed=313), move="in", tag=T1, els=[
           E(P(L.gold, "11月ごろ スタート", size=110), 960, 380, until=0, anim="slam", sfx="boom"),
           E(P(C.option_cards, ("二軍の選手", "提示額に\nサイン"), ("主力の選手", "交渉のあと\n記者会見")), 960, 420,
             at=1, anim="rise"),
@@ -147,7 +147,7 @@ BODY = [
        "ニュースで流れる年俸は、ほとんどが推定です。",
        "球団が発表した金額ではなく、記者たちが会見のやり取りから推し量った数字なのです。",
        "それでも大きく外れることは少ないと言われています。"],
-      ph(KAIKEN, "cold", layout="blur", seed=314), move="in", tag=T1, els=[
+      ph(DRAFT, "cold", layout="blur", seed=314), move="in", tag=T1, els=[
           E(big("意外な事実", 130, L.GOLD), 960, 400, until=0, anim="glitch", sfx="boom"),
           E(P(L.gold, "年俸（推定）", size=170), 960, 380, at=1, until=1, anim="slam", sfx="boom"),
           E(P(C.flow, ["記者会見", "やり取りから\n推し量る", "推定年俸"], 2), 960, 420, at=2, until=2, anim="rise"),
@@ -242,7 +242,7 @@ BODY = [
     S(["みっつ目は代理人です。",
        "選手は、交渉を代理人に任せることができます。",
        "日本人選手の代理人は、弁護士に限られています。"],
-      ph(KAIKEN, "dark", layout="blur", seed=335), move="in", tag=T3, els=[
+      ph(BATS, "dark", layout="blur", seed=335), move="in", tag=T3, els=[
           E(P(L.scroll, "代理人", "ルール その3"), 960, 400, until=1, anim="zoom", sfx="boom"),
           E(big("日本人選手の代理人は、弁護士", 96, L.GOLD), 960, 420, at=2, anim="rise"),
       ]),
@@ -381,7 +381,7 @@ BODY = [
        "話し合いはまとまらず、落合選手は年俸調停に持ち込みます。"],
       ph(OCHIAI, "sepia", layout="right", focus=(0.5, 0.3)), move="in", tag=T6, els=[
           name_v("落合博満", at=1, until=1),
-          E(P(C.money_bars, [("希望", 2.7, True), ("球団の提示", 2.2, False)], "億円", 1050), 600, 640, at=2, until=3,
+          E(P(C.money_bars, [("希望", 2.7, True), ("球団の提示", 2.2, False)], "億円", 820), 600, 640, at=2, until=3,
             anim="rise"),
           E(P(L.gold, "年俸調停へ", size=110), 600, 420, at=4, anim="slam", sfx="boom"),
           E(P(C.note, "※写真は中日監督時代", 28), 1860, 860, anchor="br"),
@@ -443,7 +443,7 @@ BODY = [
        "ソリアーノ選手はこれを拒み、任意引退の扱いとなります。"],
       ph(SORIANO, "dark", layout="right", focus=(0.5, 0.25), seed=370), move="in", tag=T6, els=[
           E(P(L.vertical, "ソリアーノ", 100), 440, 60, at=1, until=1, anim="wipe", anchor="t"),
-          E(P(C.money_bars, [("希望", 2145, False), ("球団の提示", 585, True)], "万円", 1050), 600, 640, at=2, until=2,
+          E(P(C.money_bars, [("希望", 2145, False), ("球団の提示", 585, True)], "万円", 820), 600, 640, at=2, until=2,
             anim="rise"),
           E(P(L.gold, "結論 585万円", size=100), 600, 420, at=3, until=3, anim="slam", sfx="boom"),
           E(P(L.gold, "拒否 → 任意引退", size=100), 600, 420, at=4, anim="slam", sfx="boom"),
@@ -462,7 +462,7 @@ BODY = [
        "ただし当初は、まず試しに行うという扱いでした。",
        "選手が球団と一対一で向き合うしかなかった時代から、専門家の力を借りられる時代へ。",
        "それでも今も、代理人を立てる選手は多くないと言われています。"],
-      ph(KAIKEN, "dark", layout="blur", seed=372), move="in", tag=T6, els=[
+      ph(SCOREBOARD, "dark", layout="blur", seed=372), move="in", tag=T6, els=[
           E(P(C.timeline, [("1985", "選手会が\n労働組合に"), ("1994", "野茂が\n代理人を希望"), ("2000", "代理人交渉\nが正式に")], 0, 1500),
             960, 380, at=1, until=1, anim="fade"),
           E(P(C.timeline, [("1985", "選手会が\n労働組合に"), ("1994", "野茂が\n代理人を希望"), ("2000", "代理人交渉\nが正式に")], 2, 1500),
@@ -480,6 +480,7 @@ BODY = [
        "交渉は年を越し、2007年1月、オリックスは中村選手を自由契約にすると発表しました。"],
       ph(NAKAMURA_N, "dark", layout="right", focus=(0.5, 0.25), seed=374), move="in", tag=T6, els=[
           name_v("中村紀洋", at=1),
+          E(P(C.note, "※写真は横浜時代", 28), 1860, 860, anchor="br"),
           E(P(L.gold, "60%減の提示", size=110), 600, 700, at=1, until=1, delay=1.5, anim="slam", sfx="boom"),
           E(P(C.note, "減額制限は40%まで", 30), 600, 830, at=1, until=1, delay=2.2),
           E(big("いてまえ打線の主砲", 90, L.GOLD), 600, 760, at=2, until=2, anim="rise"),
@@ -538,7 +539,7 @@ BODY = [
       ph(WAKUI if has(WAKUI) else VICTORY, "dark", layout="right" if has(WAKUI) else "full", focus=(0.5, 0.25),
          seed=380), move="in", tag=T6, els=[
           name_v("涌井秀章", at=1, until=1),
-          E(P(C.money_bars, [("希望", 2.7, False), ("結論", 2.53, True), ("球団の提示", 2.2, False)], "億円", 1050), 600,
+          E(P(C.money_bars, [("希望", 2.7, False), ("結論", 2.53, True), ("球団の提示", 2.2, False)], "億円", 820), 600,
             640, at=2, until=3, anim="rise"),
           E(P(L.gold, "最後の年俸調停", size=110), 600, 420, at=4, anim="slam", sfx="boom"),
       ]),
@@ -570,7 +571,7 @@ BODY = [
        "さらに、調停のあとに契約した選手は、その後3年以内に、全員がチームを離れています。",
        "トレード、FA、そして戦力外通告。",
        "調停の結果がどうであれ、球団との関係には、溝が残ったのかもしれません。"],
-      ph(KAIKEN, "dark", layout="blur", seed=399), move="in", tag=T9, els=[
+      ph(NAGOYA, "dark", layout="blur", seed=399), move="in", tag=T9, els=[
           E(P(L.gold, "上積みは 3人だけ", size=130), 960, 380, until=0, anim="slam", sfx="boom"),
           E(P(L.gold, "3年以内に 全員が退団", size=120), 960, 380, at=1, until=2, anim="slam", sfx="boom"),
           E(big("トレード・FA・戦力外通告", 90), 960, 580, at=2, until=2, anim="rise"),
@@ -619,6 +620,7 @@ BODY = [
           E(P(L.gold, "当時 史上最大の減額", size=96), 640, 420, at=4, until=4, anim="slam", sfx="boom"),
           E(big("自ら申し出た", 130, L.GOLD), 640, 420, at=5, until=5, anim="glitch", sfx="boom"),
           E(P(C.quote, "働けなかった分は受け取れない", 58), 640, 440, at=6, anim="zoom"),
+          E(P(C.note, "※写真は北京五輪の日本代表（2008年）", 28), 1860, 860, anchor="br"),
           note(),
       ]),
     case(9, "2018年オフ", "史上最大の5億円減", "オリックス・金子千尋投手", 384),
@@ -697,7 +699,7 @@ BODY = [
        "2011年のオフには22人、2012年のオフには19人が、一度は保留しています。",
        "しかし最近は、本番の前に下交渉で条件をすり合わせることが増えました。",
        "そのため、保留する選手は少なくなったと言われています。"],
-      ph(KAIKEN, "dark", layout="blur", seed=393), move="in", tag=T8, els=[
+      ph(DRAFT, "dark", layout="blur", seed=393), move="in", tag=T8, els=[
           E(P(C.vbars, [("2011年オフ", 22, "22人", True), ("2012年オフ", 19, "19人", False)], "人", 420, 200, 120),
             960, 420, at=1, until=1, anim="rise"),
           E(P(C.flow, ["下交渉で\nすり合わせ", "本番の\n契約更改", "保留が減る"], 2), 960, 420, at=2, anim="rise"),

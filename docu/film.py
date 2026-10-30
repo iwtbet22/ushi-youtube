@@ -200,7 +200,7 @@ def render_scene(args):
         prev = pr.frame(items[i - 1]["dur"] - 1 / FPS, 0)
     proc = subprocess.Popen(["ffmpeg", "-y", "-loglevel", "error", "-f", "rawvideo", "-pix_fmt", "rgb24",
                              "-s", f"{W}x{H}", "-r", str(FPS), "-i", "-", "-c:v", "libx264", "-preset", "medium",
-                             "-crf", "18", "-pix_fmt", "yuv420p", str(out_path)], stdin=subprocess.PIPE)
+                             "-crf", "20", "-tune", "grain", "-pix_fmt", "yuv420p", str(out_path)], stdin=subprocess.PIPE)
     start_no = round(item["start"] * FPS)
     for f in range(n):
         t = f / FPS
