@@ -7,6 +7,7 @@ YouTube の表示 (下の再生バー、右下の透かし、右上のカード)
 from __future__ import annotations
 
 import math
+import os
 import random
 import sys
 from functools import lru_cache
@@ -19,7 +20,10 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "explainer"))
 import ui  # noqa: E402  (字幕の改行ルールを共用)
 
-W, H = 1920, 1080
+# DOCU_VERTICAL=1 で縦長 (ショート動画 1080x1920)。右側のボタンと下側のタイトル欄を避けて文字を置く
+VERTICAL = os.environ.get("DOCU_VERTICAL") == "1"
+W, H = (1080, 1920) if VERTICAL else (1920, 1080)
+SAFE_CX = 480 if VERTICAL else W // 2  # ショートは右のボタンを避けて、少し左を中心にする
 IMG = ROOT / "assets" / "ep02" / "img"
 GOLD = (232, 196, 110)
 GOLD_DK = (150, 110, 40)
@@ -27,8 +31,9 @@ RED = (214, 40, 40)
 WHITE = (255, 255, 255)
 
 SUB_BOTTOM = 40          # 字幕帯の下端と画面下の距離 (再生バーにかからない)
-SUB_SIZE = 46
-SUB_MAX = 26
+SUB_SIZE = 58 if VERTICAL else 46
+SUB_MAX = 13 if VERTICAL else 26
+SUB_LOW = 1430           # 縦長のときの字幕帯の下端 (下のタイトル欄より上)
 
 
 @lru_cache(maxsize=64)
@@ -217,6 +222,8 @@ def subtitle(s):
 
 
 def subtitle_pos(sprite):
+    if VERTICAL:
+        return SAFE_CX - sprite.width // 2, SUB_LOW - sprite.height
     return (W - sprite.width) // 2, H - SUB_BOTTOM - sprite.height
 
 
@@ -253,9 +260,9 @@ def bubble_v(s, size=56):
     return im
 
 
-def scroll(s, sub=None):
-    """用語の巻物カード (ドラフトの「謀反」カードのようなもの)"""
-    w, h = 1100, 360
+def scroll(s, sub=None, w=None):
+    """用語の巻物カード (ドラフトの「謀反」カードのようなもの)。縦長の画面では幅を狭める"""
+    w, h = w or (820 if VERTICAL else 1100), 360
     im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     d = ImageDraw.Draw(im)
     d.rectangle((40, 20, w - 40, h - 20), fill=(232, 220, 190, 250))

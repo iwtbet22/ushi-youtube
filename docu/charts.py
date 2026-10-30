@@ -186,9 +186,9 @@ def protect_grid(protected=28, total=70, cols=14, highlight=None):
     return im
 
 
-def option_cards(left, right, title=None):
-    """「AかBか」の2択カード。left/right = (見出し, 中身)"""
-    w, h, gap = 700, 330, 120
+def option_cards(left, right, title=None, w=700, gap=120):
+    """「AかBか」の2択カード。left/right = (見出し, 中身)。w は1枚の幅"""
+    h = 330
     th = 110 if title else 0
     im = Image.new("RGBA", (w * 2 + gap, h + th), (0, 0, 0, 0))
     d = ImageDraw.Draw(im)
@@ -212,7 +212,7 @@ def money_bars(rows, unit="億円", w=1400, vmax=None):
     im = Image.new("RGBA", (w, lh * len(rows) + 20), (0, 0, 0, 0))
     d = ImageDraw.Draw(im)
     f, fv = _f(46, "NotoSansJP-Bold.ttf"), _f(56)
-    lab_w = 420
+    lab_w = 420 if w >= 1200 else 230  # 狭い画面 (ショート) ではラベル欄を詰める
     for i, (lab, v, hi) in enumerate(rows):
         y = 10 + i * lh
         d.text((lab_w - 20, y + 45), lab, font=f, fill=INK, anchor="rm")
@@ -224,9 +224,8 @@ def money_bars(rows, unit="億円", w=1400, vmax=None):
     return im
 
 
-def rank_card(rank, name, lines, amount, photo=None, focus=(0.5, 0.25), h=430):
+def rank_card(rank, name, lines, amount, photo=None, focus=(0.5, 0.25), h=430, w=1180):
     """ランキングの札: 順位・写真・名前・移籍・金額。2枚並べるときは h を小さく"""
-    w = 1180
     im = panel(w, h, width=4)
     d = ImageDraw.Draw(im)
     x = 40
