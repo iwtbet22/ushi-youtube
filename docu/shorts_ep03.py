@@ -39,7 +39,7 @@ def name_v(s, at=0, until=None, delay=0.3):
     return E(P(L.vertical, s, 110), 150, 450, at=at, until=until, delay=delay, anim="wipe", anchor="t")
 
 
-def note(s="※金額は報道による推定", y=1360):
+def note(s="※金額は報道による推定", y=400):
     return E(P(C.note, s, 32), CX, y)
 
 
@@ -95,7 +95,7 @@ SHORT2 = [
       ph(NAKAMURA_N, "dark", focus=(0.5, 0.25)), move="in", trans="cut", els=[
           E(head("2億円から…"), CX, 300),
           E(fit(P(C.big_number, "2億円", "400万円", 150)), CX, 820, delay=1.2, anim="rise", sfx="boom"),
-          E(P(C.note, "※写真は横浜時代", 30), CX, 1360),
+          E(P(C.note, "※写真は横浜時代", 30), CX, 400),
       ]),
     S(["2006年のオフ、オリックスの中村紀洋選手は、60%減の提示を受けたと報じられました。",
        "中村選手はこれを受け入れず、自由契約になります。"],
@@ -105,7 +105,7 @@ SHORT2 = [
           E(gold("60%減の提示", 130), CX, 1080, delay=2.5, until=0, anim="slam", sfx="boom"),
           E(P(C.note, "減額制限は40%まで", 34), CX, 1200, delay=3.0, until=0),
           E(big("自由契約に", 120, L.GOLD), CX, 800, at=1, anim="rise"),
-          E(P(C.note, "※写真は横浜時代", 30), CX, 1360),
+          E(P(C.note, "※写真は横浜時代", 30), CX, 400),
       ]),
     S(["手を差し伸べたのは、中日でした。",
        "入団テストを経て結んだのは、育成選手としての契約。",
@@ -120,7 +120,7 @@ SHORT2 = [
        "そのシーズン、中日は日本一に。",
        "日本シリーズのMVPに選ばれたのは、中村紀洋選手でした。"],
       ph(NAGOYA, "gold", layout="blur", seed=313), move="in", els=[
-          E(head("その年"), CX, 300),
+          E(head("その後"), CX, 300),
           E(big("ここから、這い上がる", 100), CX, 780, until=0, anim="rise"),
           E(gold("2007年 中日 日本一", 110), CX, 780, at=1, until=1, anim="slam", sfx="boom"),
           E(gold("日本シリーズ MVP", 120), CX, 780, at=2, anim="slam", sfx="boom"),
@@ -143,14 +143,14 @@ SHORT3 = [
           E(head("2010年 育成4位"), CX, 300),
           name_v("千賀滉大", until=0, delay=2.0),
           E(gold("年俸270万円", 140), CX, 800, at=1, anim="slam", sfx="boom"),
-          E(P(C.note, "※写真はメッツ時代", 30), CX, 1360),
+          E(P(C.note, "※写真はメッツ時代", 30), CX, 400),
       ]),
     S(["2年目に支配下の選手になると、毎年の契約更改で、年俸を積み上げていきます。",
        "そして2022年、年俸は6億円に。",
        "およそ220倍です。"],
       P(L.bokeh, 315), move="in", els=[
           E(head("契約更改のたびに"), CX, 300),
-          E(fit(P(C.flow, ["育成", "支配下", "年俸\n6億円"], 2, 240, 140, 60)), CX, 780, until=0, anim="rise"),
+          E(gold("育成 → 支配下", 110), CX, 780, until=0, anim="rise"),
           E(gold("2022年 6億円", 130), CX, 780, at=1, until=1, anim="slam", sfx="boom"),
           E(gold("約220倍", 200), CX, 780, at=2, anim="slam", sfx="boom"),
           note(),
@@ -160,7 +160,7 @@ SHORT3 = [
           E(head("そして世界へ"), CX, 300),
           E(fit(P(C.move, "ソフトバンク", "メッツ", "5年 7500万ドル", 56, 820)), CX, 900, delay=1.5, anim="rise",
             sfx="whoosh"),
-          E(P(C.note, "※写真はメッツ時代", 30), CX, 1360),
+          E(P(C.note, "※写真はメッツ時代", 30), CX, 400),
       ]),
     S(["契約更改の歴史に残る事件は、関連動画の契約更改事件簿で。"],
       P(L.bokeh, 316), move="in", hold=1.0, els=to_main()),
