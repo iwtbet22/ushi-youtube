@@ -13,6 +13,7 @@ from functools import partial as P
 
 import charts as C
 import look as L
+import news as N
 from ep02 import BALL, DOME, FANS, NAGOYA, ph, pic
 import film
 from film import E, S
@@ -74,7 +75,9 @@ def chap(no, title, seed):
 
 
 def cast(name, role, bg, color):
-    """登場人物紹介の1カット (ナレーションなし、音楽と効果音だけ)"""
+    """登場人物紹介の1カット (ナレーションなし、音楽と効果音だけ)。写真がなければ、その人の色で文字が流れる背景"""
+    if getattr(bg, "func", None) is L.bokeh:
+        bg = P(N.code_rain, bg.args[0], color)
     return S([], bg, move="in", hold=1.25, trans="cut", els=[
         E(P(L.vertical, name, 150, "YujiBoku-Regular.ttf", color), 1500, 110, anim="glitch", anchor="t", sfx="whoosh"),
         E(kw(role, 84, WHITE), 640, 760, delay=0.25, anim="slam"),
@@ -153,7 +156,7 @@ CH0 = [
        "もちろん違法です。当時、その裏には暴力団がいたと報じられています。"],
       ph(BALL, "dark"), move="in", tag=T0, els=[
           E(kw("お金の流れ", 140, GOLD), 960, 420, until=0, anim="slam"),
-          E(P(C.flow, ["客", "胴元", "試合の\n勝ち負け"], 1), 960, 420, at=1, until=1, anim="rise"),
+          E(P(N.pict, [("group", "客"), ("money", "胴元"), ("ball", "試合の勝ち負け")], 1), 960, 470, at=1, until=1, anim="rise"),
           E(kw("違法", 220, RED), 960, 420, at=2, anim="slam", sfx="boom"),
       ]),
     S(["賭ける側がいちばん欲しいのは、試合の結果を前もって知ることです。",
@@ -169,7 +172,7 @@ CH0 = [
        "実際、この事件で重い処分を受けた選手は、みな投手でした。",
        "試合の勝ち負けを、いちばん左右しやすい立場です。"],
       ph(DOME, "dark"), move="in", tag=T0, els=[
-          E(P(C.flow, ["選手に\n数十万円", "わざと負ける", "賭けで\n大もうけ"], 2), 960, 420, until=0, anim="rise"),
+          E(P(N.pict, [("money", "選手に数十万円"), ("person", "わざと負ける"), ("group", "賭けで大もうけ")], 2), 960, 470, until=0, anim="rise"),
           E(kw("狙われたのは投手", 140, RED), 960, 420, at=1, anim="slam", sfx="boom"),
       ]),
     S(["アメリカでも1919年、ワールドシリーズでの八百長で、8人の選手が永久追放されました。",
@@ -238,7 +241,9 @@ CH1 = [
         f"ところが、その日から、{NAGAYASU}投手は姿を消してしまいます。"),
        "球界は、本人に話を聞こうにも、本人がいない、という状態になりました。"],
       P(L.bokeh, 424, (120, 120, 140)), move="in", tag=T1, els=[
-          E(kw("10月8日 報道", 140), 960, 420, until=0, anim="slam", sfx="boom"),
+          E(P(N.paper, "西鉄・永易投手が八百長", None, "読売新聞 1969年10月8日"), 1380, 470, until=0, anim="zoom", sfx="boom"),
+          E(kw("10月8日 報道", 120), 640, 640, until=0, delay=0.6, anim="slam"),
+          E(P(C.note, "※見出しは当時の報道より（再現）", 28), 1860, 118, until=0, anchor="tr"),
           E(kw("失踪", 260, RED), 960, 420, at=1, until=1, anim="glitch", sfx="boom"),
           E(tsukkomi("本人、どこ行った！？"), 1480, 230, at=2, anim="slam"),
           E(kw("本人不在", 170), 960, 440, at=2, anim="rise"),
@@ -380,8 +385,10 @@ CH2 = [
        "しかし5月、西鉄の社長とオーナーを辞任します。"],
       P(L.bokeh, 437, (200, 160, 80)), move="in", tag=T2, els=[
           E(kw("オーナーが認めた", 150, RED), 960, 420, until=0, anim="glitch", sfx="boom"),
-          E(P(L.gold, "550万円", size=230), 960, 420, at=1, until=1, anim="slam", sfx="boom"),
-          E(kw("ぴたり一致", 190, RED), 960, 420, at=2, until=2, anim="slam", sfx="boom"),
+          E(P(N.paper, "五百五十万円を渡す", "永易発言とぴたり一致", "朝日新聞 1970年4月30日"), 1380, 470, at=1, until=2, anim="zoom", sfx="boom"),
+          E(P(L.gold, "550万円", size=190), 640, 460, at=1, until=1, anim="slam", sfx="boom"),
+          E(kw("ぴたり一致", 170, RED), 640, 460, at=2, until=2, anim="slam", sfx="boom"),
+          E(P(C.note, "※見出しは当時の報道より（再現）", 28), 1860, 118, at=1, until=2, anchor="tr"),
           E(P(C.quote, "泣きつかれたので渡した", 86), 960, 420, at=3, until=3, anim="zoom"),
           E(kw("オーナー辞任", 170), 960, 420, at=4, anim="slam", sfx="boom"),
       ]),
@@ -418,7 +425,7 @@ CH3 = [
        "そして、池永投手に、八百長を頼むお金として100万円を渡した、と話したのです。"],
       P(L.bokeh, 443, (190, 60, 60)), move="in", tag=T3, els=[
           E(kw("プロ野球でも八百長", 140, RED), 960, 420, until=0, anim="slam", sfx="boom"),
-          E(P(C.flow, ["田中勉", "100万円", "池永正明"], 1), 960, 420, at=1, anim="rise", sfx="whoosh"),
+          E(P(N.pict, [("person", "田中勉"), ("money", "100万円"), ("person", "池永正明")], 1), 960, 470, at=1, anim="rise", sfx="whoosh"),
       ]),
     S(["ここで、第1章の裁判を思い出してください。",
        "週刊誌を名誉毀損で訴えていた、あの田中投手です。",
@@ -528,7 +535,9 @@ CH4 = [
        "さらに、誘われたことを報告しなかったことも、理由に挙げられました。",
        ("第0章で見た、あの一文です。", "第ゼロ章で見た、あの一文です。")],
       P(L.plain), move="in", tag=T4, els=[
-          E(brush("永久追放", 250, RED), 960, 420, until=0, delay=1.8, anim="zoom", sfx="boom"),
+          E(P(N.paper, "永久追放与田・益田・池永", "西鉄六選手に裁決", "朝日新聞 1970年5月26日"), 1400, 470, until=0, delay=1.2, anim="zoom", sfx="boom"),
+          E(brush("永久追放", 220, RED), 620, 460, until=0, delay=1.8, anim="zoom"),
+          E(P(C.note, "※見出しは当時の報道より（再現）", 28), 1860, 118, until=0, anchor="tr"),
           E(kw("100万円を返さなかった", 130), 960, 420, at=1, until=1, anim="slam"),
           E(kw("返さない＝引き受けた", 140, RED), 960, 420, at=2, until=2, anim="slam", sfx="boom"),
           E(kw("報告しなかった", 150), 960, 420, at=3, until=3, anim="slam"),
@@ -631,7 +640,7 @@ CH6 = [
        "永久という言葉に、初めて出口が作られたのです。"],
       P(L.plain), move="in", tag=T6, els=[
           E(kw("2005年 協約改正", 150, GOLD), 960, 420, until=0, anim="slam", sfx="boom"),
-          E(P(C.flow, ["処分から\n15年", "本人が\n申請", "反省が\n認められる"], 2), 960, 420, at=1, until=1, anim="rise"),
+          E(P(N.pict, [("paper", "処分から15年"), ("person", "本人が申請"), ("paper", "反省が認められる")], 2), 960, 470, at=1, until=1, anim="rise"),
           E(brush("「永久」に出口", 190, GOLD), 960, 420, at=2, anim="zoom", sfx="boom"),
       ]),
     S(["2005年4月25日。池永さんの処分は解かれました。",
@@ -678,6 +687,72 @@ ENDING = [
       ]),
 ]
 
+# ---- 報道ドキュメンタリー風への置き換え ----------------------------------------
+# 光の粒の背景は、章ごとの写真を資料映像風にしたものに替える
+POOLS = {
+    None: ["Kawasaki_1989_02.jpg", "Hanshin_Koshien_Stadium_2009.jpg", "Baseball-2.jpg"],
+    T0: ["Baseball-2.jpg", "fourbats.jpg", "Kawasaki_1989_02.jpg"],
+    T1: [NAKANISHI, "Kawasaki_1989_02.jpg", IKENAGA],
+    T2: [DIET, NAKANISHI, "Kawasaki_1989_02.jpg"],
+    T3: [AUTORACE, "Kawasaki_1989_02.jpg", "Hanshin_Koshien_Stadium_2009.jpg"],
+    T4: [IKENAGA, "Kawasaki_1989_02.jpg", NAKANISHI],
+    T5: ["Kawasaki_1989_02.jpg", NAKANISHI, "Meiji_Jingu_Stadium_2019c.jpg"],
+    T6: ["Meiji_Jingu_Stadium_2019c.jpg", "Kawasaki_1989_02.jpg", "Baseball-2.jpg"],
+}
+
+
+def _outlined(fn, px=8):
+    return N._outline(fn(), px)
+
+
+def _restyle(scenes):
+    for i, sc in enumerate(scenes):
+        bg = sc["bg"]
+        f = getattr(bg, "func", None)
+        photo = True
+        if f is L.bokeh:
+            pool = POOLS.get(sc["tag"], POOLS[None])
+            seed = bg.args[0] if bg.args else i
+            sc["bg"] = P(N.archive, pool[seed % len(pool)], seed=seed, bright=0.5)
+        elif f is L.plate:
+            if bg.args[0] == DOME:  # 東京ドームは1970年の話に合わないので、古い球場の写真に替える
+                bg = P(L.plate, ["Meiji_Jingu_Stadium_2019c.jpg", "Hanshin_Koshien_Stadium_2009.jpg"][i % 2], *bg.args[1:],
+                       **bg.keywords)
+            sc["bg"] = P(N.archive, bg.args[0], bg.keywords.get("focus", (0.5, 0.4)), seed=i,
+                         bright=0.58 if bg.args[1:2] != ("gold",) else 0.66,
+                         tint=(1.08, 1.0, 0.86) if bg.args[1:2] == ("gold",) else (1.0, 0.97, 0.92))
+        elif f is L.plain:
+            sc["bg"] = P(N.dark, i)
+            photo = False
+        else:
+            photo = f is N.archive
+        for e in sc["els"]:
+            fn = e["fn"]
+            ff = getattr(fn, "func", None)
+            a = fn.args if ff else ()
+            if ff is L.text and a[1:2] == ("DelaGothicOne-Regular.ttf",):
+                text, size, color = a[0], a[2], a[3]
+                if color == RED:
+                    e["fn"] = P(N.tel_red, text, round(size * 0.92))
+                elif color == GOLD:
+                    e["fn"] = P(N.tel_gold, text, round(size * 0.92))
+                else:
+                    e["fn"] = P(N.tel, text, round(size * 0.92), color)
+            elif ff is L.text and a[1:2] == ("YujiBoku-Regular.ttf",):
+                e["fn"] = P(_outlined, fn)
+            elif ff is L.text and a[1:2] == ("NotoSerifJP-Black.ttf",) and len(a) > 3 and a[2] >= 100:
+                e["fn"] = P(_outlined, fn)
+            elif ff is L.gold:
+                e["fn"] = P(N.tel_gold, a[0], round(fn.keywords.get("size", 160) * 0.9))
+            elif ff is C.quote:
+                e["fn"] = P(N.tel, f"「{a[0]}」", a[1] if len(a) > 1 else 58)
+            elif ff is C.name_plate:
+                e["fn"] = P(N.card, a[0], [a[1]] if len(a) > 1 and a[1] else [])
+            # 写真の上では、真ん中の文字を少し下 (下3分の1) に寄せる
+            if photo and e["anchor"] == "c" and 360 <= e["y"] <= 480 and e["x"] in (960, 1000) and ff is not C.flow:
+                e["y"] += 190
+    return scenes
+
 
 def _shrink(fn, maxw):
     """画像が maxw より広ければ縮める"""
@@ -710,4 +785,4 @@ def _arrange(scenes):
     return scenes
 
 
-SCENES = _arrange(OPEN + CH0 + CH1 + CH2 + CH3 + CH4 + CH5 + CH6 + ENDING)
+SCENES = _arrange(_restyle(OPEN + CH0 + CH1 + CH2 + CH3 + CH4 + CH5 + CH6 + ENDING))
