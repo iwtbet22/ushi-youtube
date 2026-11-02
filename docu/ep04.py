@@ -75,9 +75,26 @@ def chap(no, title, seed):
     ]), chapter=f"第{no}章 {title}")
 
 
+# ---- 人物カード ---------------------------------------------------------------
+# 使える写真がある人だけ顔写真。肖像は同じ人の目印なので、場面をまたいで出てよい (check_unique の対象外)
+FACES = {"池永正明": IKENAGA, "稲尾和久": "Kazuhisa_Inao_1956_IMG_20220326_0001.jpg"}
+TEAM = {"西鉄": (120, 170, 255), "中日": (90, 140, 230), "東映": (230, 120, 90), "巨人": (255, 140, 40),
+        "近鉄": (230, 70, 70), "阪神": (255, 210, 60)}
+
+
+def PF(name, sub=None, photo=None):
+    """名前の札 → 人物カード。photo=False なら写真なし (背景がすでにその人の写真のとき)"""
+    key = name.split(" ")[0]
+    face = None if photo is False else (photo or FACES.get(key))
+    color = next((c for t, c in TEAM.items() if t in (sub or "")), (200, 170, 90))
+    return R.profile(name, sub, face, color, rot=-2.0 if len(key) % 2 else 1.6, seed=len(name))
+
+
 def cast(name, role, seed, color):
     """登場人物紹介の1カット (ナレーションなし、音楽と効果音だけ)。その人の色で文字が流れる背景に人影"""
-    bg = P(N.compose, P(N.code_rain, seed, color), (P(R.fit, P(N.silhouette, "", None, color, seed), 560, 600), 620, 400))
+    face = FACES.get(name)
+    fig = P(R.print_photo, face, 520, -3, (0.5, 0.3)) if face else P(N.silhouette, "", None, color, seed)
+    bg = P(N.compose, P(N.code_rain, seed, color), (P(R.fit, fig, 600, 640), 620, 420))
     return S([], bg, move="in", hold=1.25, trans="cut", els=[
         E(P(L.vertical, name, 150, "YujiBoku-Regular.ttf", color), 1500, 110, anim="glitch", anchor="t", sfx="whoosh"),
         E(kw(role, 84, WHITE), 640, 900, delay=0.25, anim="slam"),
@@ -221,7 +238,7 @@ CH1 = [
        "ウチには、わざとエラーする選手がいる。",
        "チームの主砲から、まさかの内部告発です。"],
       P(L.bokeh, 422), move="in", tag=T1, els=[
-          E(P(C.name_plate, "カール・ボレス", "西鉄の主砲"), 960, 400, until=0, anim="rise"),
+          E(P(PF, "カール・ボレス", "西鉄の主砲"), 960, 400, until=0, anim="rise"),
           E(P(C.quote, "ウチには、わざとエラーする選手がいる", 76), 960, 420, at=1, until=1, anim="zoom", sfx="boom"),
           E(kw("まさかの内部告発", 140, RED), 960, 420, at=2, anim="slam"),
       ]),
@@ -231,7 +248,7 @@ CH1 = [
         f"球団の社長が本人を問いただすと、{NAGAYASU}投手は肯定も否定もせず、ただ震えていたといいます。")],
       P(L.bokeh, 423, (190, 60, 60)), move="in", tag=T1, els=[
           name_v("永易将之", color=(255, 150, 150)),
-          E(P(C.name_plate, "永易将之 投手", "西鉄"), 1000, 400, until=0, delay=1.5, anim="rise"),
+          E(P(PF, "永易将之 投手", "西鉄"), 1000, 400, until=0, delay=1.5, anim="rise"),
           E(kw("肯定も否定もせず", 120), 1000, 360, at=1, anim="rise"),
           E(kw("ただ震えていた", 140, RED), 1000, 540, at=1, delay=2.4, anim="slam", sfx="boom"),
       ]),
@@ -281,8 +298,8 @@ CH1 = [
        "誰もがそう思っていました。",
        "しかし、本当の嵐はここからでした。"],
       ph(NAKANISHI, "dark", focus=(0.5, 0.3), seed=425), move="in", tag=T1, els=[
-          E(P(C.name_plate, "中西太 監督", "このシーズン限りで退任"), 960, 400, until=0, anim="rise"),
-          E(P(C.name_plate, "稲尾和久 新監督", "西鉄の大エース"), 960, 400, at=1, until=1, anim="rise"),
+          E(P(PF, "中西太 監督", "このシーズン限りで退任", False), 960, 400, until=0, anim="rise"),
+          E(P(PF, "稲尾和久 新監督", "西鉄の大エース", False), 960, 400, at=1, until=1, anim="rise"),
           E(kw("これで片づいた…？", 140), 960, 420, at=2, until=3, anim="rise"),
           E(brush("本当の嵐は、ここから", 150, RED), 960, 420, at=4, anim="zoom", sfx="boom"),
       ]),
@@ -295,7 +312,7 @@ CH2 = [
        "新聞の見出しは、ジャイアンツよ、お前もか。",
        "球界と暴力団の近さが、いよいよ社会問題になっていきます。"],
       ph(DOME, "cold", seed=438), move="in", tag=T2, els=[
-          E(P(C.name_plate, "藤田元司", "巨人の投手コーチ（当時）"), 960, 400, until=0, delay=1.5, anim="rise"),
+          E(P(PF, "藤田元司", "巨人の投手コーチ（当時）"), 960, 400, until=0, delay=1.5, anim="rise"),
           E(P(C.quote, "ジャイアンツよ、お前もか", 100), 960, 420, at=1, until=1, anim="zoom", sfx="boom"),
           E(kw("社会問題へ", 180, RED), 960, 420, at=2, anim="slam"),
       ]),
@@ -346,7 +363,7 @@ CH2 = [
           E(kw("4月10日 開幕前日", 130, GOLD), 960, 420, until=0, anim="slam"),
           E(kw("議員会館で会見", 140), 960, 420, at=1, until=1, anim="rise"),
           E(kw("仲間の実名を挙げる", 130, RED), 960, 420, at=2, until=2, anim="slam", sfx="boom"),
-          E(P(C.name_plate, "池永正明", "西鉄のエース"), 960, 420, at=3, anim="rise", sfx="whoosh"),
+          E(P(PF, "池永正明", "西鉄のエース"), 960, 420, at=3, anim="rise", sfx="whoosh"),
       ]),
     S(["名前を言うのをためらう永易投手に、記者たちは厳しく迫りました。",
        "ここは国会の中だ。特定の記者に話したことを、ここで言えないのは失礼だと思わないか。",
@@ -409,13 +426,13 @@ CH3 = [
       ph(AUTORACE, "dark", seed=441), move="in", tag=T3, els=[
           E(brush("オートレース", 200), 960, 420, until=0, anim="zoom", sfx="boom"),
           E(kw("買収して順位を操る", 130, RED), 960, 420, at=1, until=1, anim="slam"),
-          E(P(C.name_plate, "田中勉", "元中日の投手"), 960, 380, at=2, anim="rise"),
+          E(P(PF, "田中勉", "元中日の投手"), 960, 380, at=2, anim="rise"),
           E(kw("逮捕", 200, RED), 960, 600, at=2, delay=1.6, anim="glitch", sfx="boom"),
       ]),
     S(["5月6日には、中日のエース、小川健太郎投手が、現役のまま逮捕されました。",
        "現役のプロ野球選手の逮捕に、ファンは大きな衝撃を受けます。"],
       ph(NAGOYA, "cold", seed=442), move="in", tag=T3, els=[
-          E(P(C.name_plate, "小川健太郎", "中日のエース"), 960, 380, until=0, anim="rise"),
+          E(P(PF, "小川健太郎", "中日のエース"), 960, 380, until=0, anim="rise"),
           E(kw("現役のまま逮捕", 150, RED), 960, 600, until=0, delay=2.4, anim="glitch", sfx="boom"),
           E(kw("前代未聞の衝撃", 150), 960, 420, at=1, anim="slam"),
       ]),
@@ -453,7 +470,7 @@ CH3 = [
        "そりゃあそうでしょうね、と答えました。",
        "そして、やがて目に涙を浮かべ、ファンの一人ひとりに土下座したい、と語りました。"],
       P(L.bokeh, 444, (160, 90, 200)), move="in", tag=T3, els=[
-          E(P(C.name_plate, "森安敏明", "東映フライヤーズ"), 960, 380, until=0, anim="rise"),
+          E(P(PF, "森安敏明", "東映フライヤーズ"), 960, 380, until=0, anim="rise"),
           E(P(L.gold, "50万円", size=200), 960, 620, until=0, delay=2.6, anim="slam", sfx="boom"),
           E(P(C.quote, "たかが50万円で、バカなことを？", 80), 960, 420, at=1, until=1, anim="zoom"),
           E(P(C.quote, "そりゃあそうでしょうね", 90), 960, 420, at=2, until=2, anim="zoom"),
@@ -476,7 +493,7 @@ CH3 = [
        "しかし、断りきれなかった、あるいは、お金を返しそびれた選手を待っていたのは、厳しい処分でした。"],
       ph(DOME, "dark", seed=446), move="in", tag=T3, els=[
           E(kw("断った選手もいた", 140, GOLD), 960, 420, until=0, anim="rise"),
-          E(P(C.name_plate, "鈴木啓示", "近鉄のエース"), 960, 400, at=1, until=1, anim="rise"),
+          E(P(PF, "鈴木啓示", "近鉄のエース"), 960, 400, at=1, until=1, anim="rise"),
           E(kw("断れば、終わる", 150), 960, 420, at=2, until=2, anim="slam"),
           E(kw("返しそびれた選手は…", 140, RED), 960, 420, at=3, anim="slam", sfx="boom"),
       ]),
@@ -487,7 +504,7 @@ CH3 = [
       P(L.bokeh, 449), move="in", tag=T3, els=[
           E(P(C.quote, "これで終わりと言い切る自信はない", 80), 960, 420, until=1, delay=2.0, anim="zoom"),
           E(kw("処分は続いた", 170, RED), 960, 420, at=2, until=2, anim="slam", sfx="boom"),
-          E(P(C.name_plate, "江夏豊", "阪神・戒告処分（1970年）"), 960, 420, at=3, anim="rise"),
+          E(P(PF, "江夏豊", "阪神・戒告処分（1970年）"), 960, 420, at=3, anim="rise"),
       ]),
 ]
 
@@ -512,7 +529,7 @@ CH4 = [
        "尾崎さんは、池永投手を見て、あんなすごいやつがいたら、自分が野球で成功するのは無理だと思った、と語っています。",
        "ゴルフ界のスターに、野球をあきらめさせた投手。それが池永正明でした。"],
       P(L.bokeh, 456, (120, 180, 120)), move="in", tag=T4, els=[
-          E(P(C.name_plate, "尾崎将司", "1965年 西鉄に投手で入団"), 960, 400, until=0, delay=1.5, anim="rise"),
+          E(P(PF, "尾崎将司", "1965年 西鉄に投手で入団"), 960, 400, until=0, delay=1.5, anim="rise"),
           E(kw("のちのジャンボ尾崎", 140, GOLD), 960, 420, at=1, until=1, anim="slam", sfx="boom"),
           E(P(C.quote, "あんなすごいやつがいたら、無理だと思った", 70), 960, 420, at=2, until=2, anim="zoom"),
           E(kw("野球をあきらめさせた男", 130), 960, 420, at=3, anim="rise"),
@@ -598,7 +615,7 @@ CH5 = [
           E(kw("人生が変わった選手", 140, GOLD), 960, 420, until=0, anim="rise"),
           E(kw("野手転向も考えた", 140), 960, 420, at=1, until=1, anim="rise"),
           E(kw("一軍で投げ続ける", 140), 960, 420, at=2, until=2, anim="slam"),
-          E(P(C.name_plate, "東尾修", "通算251勝"), 960, 420, at=3, until=3, anim="rise", sfx="whoosh"),
+          E(P(PF, "東尾修", "通算251勝"), 960, 420, at=3, until=3, anim="rise", sfx="whoosh"),
           E(P(C.quote, "最大のチャンスだった", 100), 960, 420, at=4, anim="zoom"),
       ]),
 ]
@@ -614,7 +631,7 @@ CH6 = [
       P(L.bokeh, 471, (200, 160, 80)), move="in", tag=T6, els=[
           E(kw("2001年", 170, GOLD), 960, 420, until=0, anim="slam"),
           E(kw("再びマウンドへ", 160), 960, 420, at=1, until=1, anim="rise"),
-          E(P(C.name_plate, "稲尾和久 監督", "福岡ドンタクズ"), 960, 420, at=2, until=2, anim="rise"),
+          E(P(PF, "稲尾和久 監督", "福岡ドンタクズ"), 960, 420, at=2, until=2, anim="rise"),
           E(kw("3回 ノーヒット", 160, GOLD), 960, 420, at=3, until=3, anim="slam", sfx="boom"),
           E(P(C.quote, "もういい加減、許していただけないだろうか", 70), 960, 420, at=4, anim="zoom"),
       ]),
@@ -774,7 +791,8 @@ def stamp(s, color=RED, under=None):
 VIS = {
     "100万円。": ([(0, D(P(R.bills, 1)))], []),
     "このお金を受け取り": ([(0, G(SIDE(sil((150, 30, 30)), 960, 520, 520))),
-                    (1, G(SIDE(P(R.stamp_on, sil((150, 30, 30)), "永久追放", RED, 120, 0, -40), 960, 900, 540)))], []),
+                    (1, G(SIDE(P(R.stamp_on, P(R.print_photo, IKENAGA, 560, 3, (0.5, 0.3)), "永久追放", RED, 120, 0, 60), 960, 900, 600)))],
+                   [(1, "※池永正明（1965年）")]),
     "新人でいきなり": ([(0, A(NIGHT54, (0.5, 0.5)))], [(0, "※写真は1954年、平和台球場で初めてのナイター")]),
     "舞台は、1969年": ([(0, A(AIR56, (0.5, 0.5))), (1, FOG(REDF)), (2, D(P(R.bills, 3))),
                     (3, P(N.code_rain, 31, (200, 40, 40))), (4, D(P(R.envelope, "口止め料"))),
@@ -1002,7 +1020,7 @@ def check_unique(scenes):
             _photos(b, names)
         for e in sc["els"]:
             _photos(e["fn"], names)
-        for n in set(names):
+        for n in set(names) - set(FACES.values()):
             assert n not in seen, f"写真 {n} が場面 {seen[n]} と {i} で重複"
             seen[n] = i
     return seen

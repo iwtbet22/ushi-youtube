@@ -365,3 +365,38 @@ def silhouette_name(name, sub=None, color=(150, 30, 30)):
         o2.alpha_composite(u, ((o2.width - u.width) // 2, out.height - 10))
         return o2
     return out
+
+
+def profile(name, sub=None, photo=None, color=(200, 170, 90), rot=-2.0, focus=(0.5, 0.3), seed=0):
+    """人物カード: 左に顔写真 (なければその人の色の人影)、右に名前と肩書き。名前だけの札より「誰か」が伝わる"""
+    pw, ph_ = 330, 400
+    if photo:
+        face = L.cover(L.photo(photo), pw, ph_, focus).convert("L").convert("RGB")
+        face = N._grain(face, 12, seed + 3).convert("RGBA")
+    else:
+        face = Image.new("RGBA", (pw, ph_), (0, 0, 0, 255))
+        g = Image.new("RGB", (pw, ph_), tuple(int(c * 0.35) for c in color))
+        m = Image.radial_gradient("L").resize((pw, ph_)).point(lambda v: 255 - v)
+        face.paste(g, (0, 0), m)
+        s = N.silhouette("", None, color, seed)
+        s = s.resize((round(s.width * 0.56), round(s.height * 0.56)), Image.LANCZOS)
+        face.alpha_composite(s, ((pw - s.width) // 2, ph_ - s.height + 40))
+    nm = N.tel(name, 92 if len(name) <= 5 else 76, WHITE, 6)
+    sb = N.tel(sub, 44, GOLD, 4) if sub else None
+    tw = max(nm.width, sb.width if sb else 0)
+    b = 18
+    w, h = pw + b * 2 + 40 + tw + 30, ph_ + b * 2
+    im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    d.rectangle((0, 0, w - 1, h - 1), fill=(14, 14, 16, 235))
+    d.rectangle((0, 0, 9, h - 1), fill=color + (255,))
+    d.rectangle((b - 4, b - 4, b + pw + 3, b + ph_ + 3), fill=(232, 226, 210, 255))
+    im.alpha_composite(face, (b, b))
+    x = b + pw + 40
+    y = h // 2 - (nm.height + (sb.height - 16 if sb else 0)) // 2
+    im.alpha_composite(nm, (x, y))
+    if sb:
+        d.line((x + 10, y + nm.height - 4, x + tw - 10, y + nm.height - 4), fill=color + (200,), width=3)
+        im.alpha_composite(sb, (x, y + nm.height + 4))
+    im = im.rotate(rot, expand=True, resample=Image.BICUBIC)
+    return _shadow(im)
