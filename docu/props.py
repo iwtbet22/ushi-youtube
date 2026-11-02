@@ -369,8 +369,10 @@ def silhouette_name(name, sub=None, color=(150, 30, 30)):
 
 def profile(name, sub=None, photo=None, color=(200, 170, 90), rot=-2.0, focus=(0.5, 0.3), seed=0):
     """人物カード: 左に顔写真 (なければその人の色の人影)、右に名前と肩書き。名前だけの札より「誰か」が伝わる"""
-    pw, ph_ = 330, 400
-    if photo:
+    pw, ph_ = (330, 400) if photo is not False else (0, 220)
+    if photo is False:
+        face = None
+    elif photo:
         face = L.cover(L.photo(photo), pw, ph_, focus).convert("L").convert("RGB")
         face = N._grain(face, 12, seed + 3).convert("RGBA")
     else:
@@ -390,9 +392,10 @@ def profile(name, sub=None, photo=None, color=(200, 170, 90), rot=-2.0, focus=(0
     d = ImageDraw.Draw(im)
     d.rectangle((0, 0, w - 1, h - 1), fill=(14, 14, 16, 235))
     d.rectangle((0, 0, 9, h - 1), fill=color + (255,))
-    d.rectangle((b - 4, b - 4, b + pw + 3, b + ph_ + 3), fill=(232, 226, 210, 255))
-    im.alpha_composite(face, (b, b))
-    x = b + pw + 40
+    if face is not None:
+        d.rectangle((b - 4, b - 4, b + pw + 3, b + ph_ + 3), fill=(232, 226, 210, 255))
+        im.alpha_composite(face, (b, b))
+    x = b + pw + 40 if face is not None else 50
     y = h // 2 - (nm.height + (sb.height - 16 if sb else 0)) // 2
     im.alpha_composite(nm, (x, y))
     if sb:

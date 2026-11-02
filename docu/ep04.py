@@ -85,7 +85,7 @@ TEAM = {"西鉄": (120, 170, 255), "中日": (90, 140, 230), "東映": (230, 120
 def PF(name, sub=None, photo=None):
     """名前の札 → 人物カード。photo=False なら写真なし (背景がすでにその人の写真のとき)"""
     key = name.split(" ")[0]
-    face = None if photo is False else (photo or FACES.get(key))
+    face = False if photo is False else (photo or FACES.get(key))
     color = next((c for t, c in TEAM.items() if t in (sub or "")), (200, 170, 90))
     return R.profile(name, sub, face, color, rot=-2.0 if len(key) % 2 else 1.6, seed=len(name))
 
@@ -93,7 +93,7 @@ def PF(name, sub=None, photo=None):
 def cast(name, role, seed, color):
     """登場人物紹介の1カット (ナレーションなし、音楽と効果音だけ)。その人の色で文字が流れる背景に人影"""
     face = FACES.get(name)
-    fig = P(R.print_photo, face, 520, -3, (0.5, 0.3)) if face else P(N.silhouette, "", None, color, seed)
+    fig = P(R.print_photo, face, 520, -3, (0.45, 0.3), 1.12) if face else P(N.silhouette, "", None, color, seed)
     bg = P(N.compose, P(N.code_rain, seed, color), (P(R.fit, fig, 600, 640), 620, 420))
     return S([], bg, move="in", hold=1.25, trans="cut", els=[
         E(P(L.vertical, name, 150, "YujiBoku-Regular.ttf", color), 1500, 110, anim="glitch", anchor="t", sfx="whoosh"),
@@ -427,13 +427,13 @@ CH3 = [
           E(brush("オートレース", 200), 960, 420, until=0, anim="zoom", sfx="boom"),
           E(kw("買収して順位を操る", 130, RED), 960, 420, at=1, until=1, anim="slam"),
           E(P(PF, "田中勉", "元中日の投手"), 960, 380, at=2, anim="rise"),
-          E(kw("逮捕", 200, RED), 960, 600, at=2, delay=1.6, anim="glitch", sfx="boom"),
+          E(kw("逮捕", 200, RED), 960, 770, at=2, delay=1.6, anim="glitch", sfx="boom"),
       ]),
     S(["5月6日には、中日のエース、小川健太郎投手が、現役のまま逮捕されました。",
        "現役のプロ野球選手の逮捕に、ファンは大きな衝撃を受けます。"],
       ph(NAGOYA, "cold", seed=442), move="in", tag=T3, els=[
           E(P(PF, "小川健太郎", "中日のエース"), 960, 380, until=0, anim="rise"),
-          E(kw("現役のまま逮捕", 150, RED), 960, 600, until=0, delay=2.4, anim="glitch", sfx="boom"),
+          E(kw("現役のまま逮捕", 150, RED), 960, 770, until=0, delay=2.4, anim="glitch", sfx="boom"),
           E(kw("前代未聞の衝撃", 150), 960, 420, at=1, anim="slam"),
       ]),
     S(["さらに田中投手は、取り調べで、プロ野球の試合でも八百長をしたと認めます。",
@@ -790,8 +790,8 @@ def stamp(s, color=RED, under=None):
 # 場面の最初の文 → [(文の番号, 背景)]、写真の説明 [(文の番号, 説明)]、写真の上の文字を下げるか
 VIS = {
     "100万円。": ([(0, D(P(R.bills, 1)))], []),
-    "このお金を受け取り": ([(0, G(SIDE(sil((150, 30, 30)), 960, 520, 520))),
-                    (1, G(SIDE(P(R.stamp_on, P(R.print_photo, IKENAGA, 560, 3, (0.5, 0.3)), "永久追放", RED, 120, 0, 60), 960, 900, 600)))],
+    "このお金を受け取り": ([(0, FOG(dark=0.8)),
+                    (1, G((P(R.print_photo, IKENAGA, 620, 3, (0.5, 0.3)), 960, 330, 760, 470)))],
                    [(1, "※池永正明（1965年）")]),
     "新人でいきなり": ([(0, A(NIGHT54, (0.5, 0.5)))], [(0, "※写真は1954年、平和台球場で初めてのナイター")]),
     "舞台は、1969年": ([(0, A(AIR56, (0.5, 0.5))), (1, FOG(REDF)), (2, D(P(R.bills, 3))),
@@ -817,15 +817,15 @@ VIS = {
     "そしてこの条文には": ([(0, D(P(N.document, "第355条（敗退行為）",
                                 ["わざと負ける、負けようとする、最善の努力を怠る者は、永久に職務を停止される。",
                                  "敗退行為に誘われたのに、報告しなかった者も同じとする。"], ["報告しなかった"]))),
-                   (2, G(SIDE(sil((200, 200, 210)), 960, 520, 520))), (3, P(N.code_rain, 33, (90, 160, 230)))],
+                   (2, FOG(dark=0.8)), (3, P(N.code_rain, 33, (90, 160, 230)))],
                   [(0, "※条文の趣旨をやさしく言い換えたもの")]),
     # 第1章
     "1969年のシーズン中": ([(0, A(LIONS54, (0.5, 0.45))), (1, A(HEIWA61, (0.5, 0.5))), (2, FOG(REDF))],
                      [(0, "※1954年、初優勝した西鉄ライオンズ"), (1, "※1961年の平和台球場")]),
-    "きっかけの1つは": ([(0, G(SIDE(sil((90, 140, 220))))),
+    "きっかけの1つは": ([(0, FOG(dark=0.8)),
                    (1, G(TOP(P(R.notebook, ["ボレス「ウチには", "わざとエラーする選手がいる」"]), 1100, 430))),
                    (2, FOG(REDF))], [(1, "※記者のメモ（イメージ）")]),
-    "球団がひそかに": ([(0, G(SIDE(sil((190, 50, 50))))), (1, FOG(REDF, 0.7))], []),
+    "球団がひそかに": ([(0, FOG(dark=0.8)), (1, FOG(REDF, 0.7))], []),
     "10月8日、読売新聞": ([(0, cal(1969, 10, 8, x=520)), (1, G(TOP(P(R.poster, "たずね人", "永易将之", "1969年10月から行方不明"),
                                                             600, 470))), (2, FOG())], [(1, "※イメージ")]),
     "数日後、夕刊フジ": ([(0, A(YS11)), (1, G(TOP(P(N.japan, ["福岡", "大阪"], ("福岡", "大阪")), 700, 470))),
@@ -847,13 +847,13 @@ VIS = {
     "ところが本人は、恋人と": ([(0, G(TOP(P(N.japan, ["札幌"], None, hi="札幌"), 700, 470), base=P(R.snow, 1))),
                       (1, P(R.snow, 2))], []),
     "そして春。": ([(0, FOG(REDF)), (2, FOG(dark=0.7)), (3, D(P(R.bills, 5)))], []),
-    "永易投手によれば": ([(0, G(SIDE(sil((220, 180, 60))))),
+    "永易投手によれば": ([(0, FOG(dark=0.8)),
                    (1, D(P(R.envelope, "一生の保証", 0, True), 900, 450))], [(1, "※イメージ")]),
     "4月10日。開幕の前日": ([(0, cal(1970, 4, 10, "開幕前日")), (1, G(TOP(P(R.mics, 9, 2)))), (2, FOG(REDF)),
                      (3, FOG(BLUEF))], []),
-    "名前を言うのをためらう": ([(0, G(TOP(P(R.people, 14, 0, 7)))), (1, FOG()), (2, G(SIDE(sil((200, 60, 60))))),
+    "名前を言うのをためらう": ([(0, G(TOP(P(R.people, 14, 0, 7)))), (1, FOG()), (2, FOG(dark=0.8)),
                       (3, FOG(dark=1.1))], []),
-    "西鉄の球団は、名前の": ([(0, stamp("シロ", (235, 235, 235))), (1, G(SIDE(sil((230, 190, 70)))))], []),
+    "西鉄の球団は、名前の": ([(0, stamp("シロ", (235, 235, 235))), (1, FOG(dark=0.8))], []),
     "ところが新聞の取材で": ([(0, FOG(GOLDF, 0.7)), (1, D(P(R.envelope, "残金", 3, True), 900, 450)), (2, FOG(GOLDF)),
                     (3, FOG(dark=1.1))], []),
     "ところが4月末。": ([(0, G(TOP(P(N.tv, ["西鉄のオーナー", "550万円を渡したと", "認める"])))), (1, FOG()),
@@ -871,10 +871,10 @@ VIS = {
     "では、八百長を仕組んだ側": ([(0, D(P(R.bills, 4))), (1, FOG()), (2, G(TOP(P(R.tally, 10, 2), 760, 400))),
                        (3, D(P(R.ledger, [("西鉄の選手の買収", "10回"), ("うまくいった", "2回")], "借金 約4500万円"))),
                        (4, FOG(REDF))], []),
-    "東映フライヤーズでも": ([(0, G(SIDE(sil((160, 90, 200))))), (1, FOG(BLUEF)), (2, FOG(dark=0.7)),
+    "東映フライヤーズでも": ([(0, FOG(dark=0.8)), (1, FOG(BLUEF)), (2, FOG(dark=0.7)),
                      (3, FOG(BLUEF, 1.1))], []),
     "こうして、最も重い": ([(0, FOG()), (2, G(TOP(P(R.people, 16, 6, 8), 1100, 430)))], []),
-    "一方で、誘いを": ([(0, FOG(GOLDF)), (1, G(SIDE(sil((200, 170, 60))))), (2, FOG(GOLDF, 0.6)), (3, FOG(REDF))],
+    "一方で、誘いを": ([(0, FOG(GOLDF)), (1, FOG(dark=0.8)), (2, FOG(GOLDF, 0.6)), (3, FOG(REDF))],
                 []),
     "処分を発表した": ([(0, G(TOP(P(R.mics, 5, 7)))), (2, FOG(REDF)), (3, A(KOSHIEN))], [(3, "※甲子園球場（阪神の本拠地）")]),
     # 第4章
@@ -884,7 +884,7 @@ VIS = {
                     (3, G((P(R.scoreboard, [("5年で", "99勝"), ("本塁打", "13本")]), 1400, 470, 820, 600))),
                     (4, A(AIR93, (0.5, 0.5)))],
                    [(0, "※写真は1965年、20勝を挙げた日"), (1, "※下関の街並み（現在）"), (4, "※平和台球場（1993年）")]),
-    "ちなみに、池永投手と同じ年": ([(0, G(SIDE(sil((90, 190, 110))))), (1, FOG(GREENF)), (2, FOG(GREENF, 0.7)),
+    "ちなみに、池永投手と同じ年": ([(0, FOG(dark=0.8)), (1, FOG(GREENF)), (2, FOG(GREENF, 0.7)),
                          (3, FOG(dark=1.0))], []),
     "そんな池永投手に": ([(0, D(P(R.envelope, "100万円", 5))), (2, D(P(R.envelope, "", 6, True), 900, 450)),
                    (3, FOG(BLUEF))], [(0, "※イメージ")]),
@@ -903,7 +903,7 @@ VIS = {
     "ライオンズはその後": ([(0, FOG()), (1, A(SEIBUDOME)), (2, A(SEIBUWIN))],
                   [(1, "※所沢の西武ドーム"), (2, "※現在の埼玉西武ライオンズ")]),
     "ところが、この大ピンチで": ([(0, FOG(GOLDF)), (1, FOG(dark=0.7)), (2, A(TOKYODOME, (0.5, 0.6))),
-                       (3, G(TOP(P(R.scoreboard, [("東尾修 通算", "251勝")]), 1100, 430))), (4, FOG(GOLDF, 1.1))],
+                       (3, FOG(GOLDF, 0.8)), (4, FOG(GOLDF, 1.1))],
                       [(2, "※イメージ")]),
     # 第6章
     "時は流れ、2001年": ([(0, FOG(GOLDF)), (1, FOG(dark=0.7)), (2, FOG(BLUEF)),
