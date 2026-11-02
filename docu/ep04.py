@@ -960,7 +960,7 @@ def _restyle(scenes):
                 busy.append(_busy(cur))
             for k, s in notes:
                 until = next((j - 1 for j, _ in plan if j > k), None)
-                sc["els"].append(E(P(C.note, s, 28), 40, 1050, at=k, until=until, anchor="bl", anim="fade"))
+                sc["els"].append(E(P(C.note, s, 28), 960, 26, at=k, until=until, anchor="t", anim="fade"))
         elif sc.get("chapter"):
             no = int(sc["chapter"][1])
             sc["bg"] = FOG(CHAP_TINT.get(no), 1.0)
