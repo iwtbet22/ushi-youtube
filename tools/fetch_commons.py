@@ -48,10 +48,27 @@ def license_of(raw):
     return a, sorted({l.strip() for l in lic})
 
 
+def api_info(name, width):
+    """API で作者・ライセンス・縮小画像の URL を取る (ファイル名に括弧や日本語があっても確実)"""
+    title = urllib.parse.quote("File:" + name.replace("_", " "))
+    body = get(f"https://commons.wikimedia.org/w/api.php?action=query&format=json&prop=imageinfo"
+               f"&iiprop=url|extmetadata&iiurlwidth={width}&titles={title}")
+    page = next(iter(json.loads(body)["query"]["pages"].values()))
+    if "imageinfo" not in page:
+        raise RuntimeError("missing")
+    ii = page["imageinfo"][0]
+    m = ii.get("extmetadata", {})
+    author = re.sub(r"<[^>]+>", " ", m.get("Artist", {}).get("value", ""))
+    author = re.sub(r"\s+", " ", author).strip()
+    lic = [m.get("LicenseShortName", {}).get("value", "")]
+    return author, lic, ii.get("thumburl") or ii["url"]
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("files", nargs="+")
     ap.add_argument("--width", type=int, default=1280)  # 標準のサムネイル幅 (それ以外は断られやすい)
+    ap.add_argument("--api", action="store_true")  # API で情報を取る (raw が取れないファイル名向け)
     args = ap.parse_args()
     OUT.mkdir(parents=True, exist_ok=True)
     cred_path = OUT / "credits.json"
@@ -64,9 +81,14 @@ def main():
         if (OUT / local).exists() and local in credits:
             continue
         try:
-            raw = get(f"https://commons.wikimedia.org/w/index.php?title=File:{q}&action=raw")
-            author, lic = license_of(raw)
-            img = get(f"https://commons.wikimedia.org/wiki/Special:FilePath/{q}?width={args.width}", binary=True)
+            if args.api:
+                author, lic, thumb = api_info(name, args.width)
+                time.sleep(15)
+                img = get(thumb, binary=True)
+            else:
+                raw = get(f"https://commons.wikimedia.org/w/index.php?title=File:{q}&action=raw")
+                author, lic = license_of(raw)
+                img = get(f"https://commons.wikimedia.org/wiki/Special:FilePath/{q}?width={args.width}", binary=True)
         except RuntimeError as e:
             print("skip", name, e, flush=True)
             failed.append(name)
@@ -76,7 +98,7 @@ def main():
                           "url": f"https://commons.wikimedia.org/wiki/File:{q}"}
         cred_path.write_text(json.dumps(credits, ensure_ascii=False, indent=1))
         print(f"{local}  {author}  {lic}", flush=True)
-        time.sleep(10)
+        time.sleep(25)
     if failed:
         print("failed:", " ".join(failed))
 

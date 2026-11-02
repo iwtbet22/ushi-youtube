@@ -14,7 +14,8 @@ from functools import partial as P
 import charts as C
 import look as L
 import news as N
-from ep02 import BALL, DOME, FANS, NAGOYA, ph, pic
+import props as R
+from ep02 import BALL, DOME, FANS, NAGOYA, has, ph, pic
 import film
 from film import E, S
 
@@ -74,13 +75,12 @@ def chap(no, title, seed):
     ]), chapter=f"第{no}章 {title}")
 
 
-def cast(name, role, bg, color):
-    """登場人物紹介の1カット (ナレーションなし、音楽と効果音だけ)。写真がなければ、その人の色で文字が流れる背景"""
-    if getattr(bg, "func", None) is L.bokeh:
-        bg = P(N.code_rain, bg.args[0], color)
+def cast(name, role, seed, color):
+    """登場人物紹介の1カット (ナレーションなし、音楽と効果音だけ)。その人の色で文字が流れる背景に人影"""
+    bg = P(N.compose, P(N.code_rain, seed, color), (P(R.fit, P(N.silhouette, "", None, color, seed), 560, 600), 620, 400))
     return S([], bg, move="in", hold=1.25, trans="cut", els=[
         E(P(L.vertical, name, 150, "YujiBoku-Regular.ttf", color), 1500, 110, anim="glitch", anchor="t", sfx="whoosh"),
-        E(kw(role, 84, WHITE), 640, 760, delay=0.25, anim="slam"),
+        E(kw(role, 84, WHITE), 640, 790, delay=0.25, anim="slam"),
     ])
 
 
@@ -135,12 +135,12 @@ OPEN = [
           E(P(L.gold, "お金と制度の目線で", size=110), 960, 440, at=2, anim="rise"),
       ]),
     # 登場人物紹介 (ナレーションなし)
-    cast("永易将之", "消えた投手", P(L.bokeh, 402, (190, 60, 60)), (255, 120, 120)),
-    cast("池永正明", "100万円のエース", ph(IKENAGA, "cold", focus=(0.5, 0.3)), (140, 220, 255)),
-    cast("田中勉", "100万円を渡した男", P(L.bokeh, 403, (120, 160, 220)), (150, 255, 200)),
-    cast("小川健太郎", "現役のまま逮捕", P(L.bokeh, 404, (200, 160, 80)), (255, 220, 110)),
-    cast("森安敏明", "受け取った50万円", P(L.bokeh, 405, (160, 90, 200)), (230, 160, 255)),
-    cast("西鉄オーナー", "口止め料550万円", ph(HEIWADAI2, "cold", seed=406), (255, 140, 90)),
+    cast("永易将之", "消えた投手", 402, (255, 120, 120)),
+    cast("池永正明", "100万円のエース", 407, (140, 220, 255)),
+    cast("田中勉", "100万円を渡した男", 403, (150, 255, 200)),
+    cast("小川健太郎", "現役のまま逮捕", 404, (255, 220, 110)),
+    cast("森安敏明", "受け取った50万円", 405, (230, 160, 255)),
+    cast("西鉄オーナー", "口止め料550万円", 406, (255, 140, 90)),
     S([], P(L.plain), move="in", hold=3.0, trans="fade", els=[
         E(brush("黒い霧事件", 220), 960, 420, anim="zoom", sfx="boom"),
         E(P(L.text, "プロ野球 史上最大のスキャンダル", "NotoSerifJP-Black.ttf", 60, GOLD), 960, 640, delay=0.6,
@@ -347,8 +347,7 @@ CH2 = [
           E(kw("4月10日 開幕前日", 130, GOLD), 960, 420, until=0, anim="slam"),
           E(kw("議員会館で会見", 140), 960, 420, at=1, until=1, anim="rise"),
           E(kw("仲間の実名を挙げる", 130, RED), 960, 420, at=2, until=2, anim="slam", sfx="boom"),
-          E(pic(IKENAGA, "池永正明", "西鉄のエース", (0.5, 0.3), 380, 470), 960, 400, at=3, anim="rise", sfx="whoosh"),
-          E(kw("池永正明", 90, (140, 220, 255)), 960, 720, at=3, delay=0.6, anim="slam"),
+          E(P(C.name_plate, "池永正明", "西鉄のエース"), 960, 420, at=3, anim="rise", sfx="whoosh"),
       ]),
     S(["名前を言うのをためらう永易投手に、記者たちは厳しく迫りました。",
        "ここは国会の中だ。特定の記者に話したことを、ここで言えないのは失礼だと思わないか。",
@@ -508,7 +507,6 @@ CH4 = [
           E(kw("新人王・最多勝", 100, GOLD), 700, 560, at=2, until=2, delay=1.5, anim="rise"),
           E(P(L.gold, "5年で99勝", size=140), 700, 420, at=3, until=3, anim="slam", sfx="boom"),
           E(kw("稲尾の後継者", 130), 700, 420, at=4, anim="rise"),
-          E(P(C.note, "※写真は1965年、20勝を挙げた日", 28), 1860, 860, anchor="br"),
       ]),
     S(["ちなみに、池永投手と同じ年に西鉄に入った選手に、尾崎将司さんがいます。",
        "そう、のちのプロゴルファー、ジャンボ尾崎さんです。",
@@ -687,71 +685,326 @@ ENDING = [
       ]),
 ]
 
-# ---- 報道ドキュメンタリー風への置き換え ----------------------------------------
-# 光の粒の背景は、章ごとの写真を資料映像風にしたものに替える
-POOLS = {
-    None: ["Kawasaki_1989_02.jpg", "Hanshin_Koshien_Stadium_2009.jpg", "Baseball-2.jpg"],
-    T0: ["Baseball-2.jpg", "fourbats.jpg", "Kawasaki_1989_02.jpg"],
-    T1: [NAKANISHI, "Kawasaki_1989_02.jpg", IKENAGA],
-    T2: [DIET, NAKANISHI, "Kawasaki_1989_02.jpg"],
-    T3: [AUTORACE, "Kawasaki_1989_02.jpg", "Hanshin_Koshien_Stadium_2009.jpg"],
-    T4: [IKENAGA, "Kawasaki_1989_02.jpg", NAKANISHI],
-    T5: ["Kawasaki_1989_02.jpg", NAKANISHI, "Meiji_Jingu_Stadium_2019c.jpg"],
-    T6: ["Meiji_Jingu_Stadium_2019c.jpg", "Kawasaki_1989_02.jpg", "Baseball-2.jpg"],
+# ---- 画づくり: 場面ごと・文ごとに違う絵を割り当てる ------------------------------
+# 同じ写真は動画全体で1度しか使わない (最後に assert で確かめる)。
+# 写真のない文は、その文の中身を表す絵 (カレンダー・札束・会見のマイク・地図など) か、
+# 色と模様の違う「黒い霧」にする。写真はすべて Wikimedia Commons の自由ライセンス (credits.json)
+def _f(s):
+    return s.replace(" ", "_")
+
+
+NIGHT54 = "1954_0602_Heiwadai_Baseball_stadium_1st_night_geme__Attraction_.jpg"
+LIONS54 = "1954_Nishitetsu-Lions_1st-Pacific-League-Champion.jpg"
+AIR56 = "Heiwadai_Stadium_aerial_photograph_1956.jpg"
+HEIWA61 = "Heiwadai_1961.png"
+AIR93 = "Heiwadai_Stadium_aerial_photograph_1993.jpg"
+INAO56 = "Kazuhisa_Inao_1956_IMG_20220326_0001.jpg"
+INAO3 = "Inao_Shimabara_Hata_1956_Scan10008.JPG"
+OSAKA53 = "南海難波駅と大阪球場_1953年_.jpg"
+KORA51 = "Korakuen_Stadium_Nighter_1951.jpg"
+KORA74 = "Kourakuen_suidobashi_1974.jpg"
+KORA47 = "Korakuen_stadium_aerial_photograph_1947.jpg"
+CHUNICHI56 = "Chunichi_Stadium_1956.jpg"
+YS11 = "YS-11_JA8717.jpg"
+POLICE = "Keishicho.jpg"
+FUNABASHI = "船橋オートレース場全景.jpg"
+SEIBUDOME = "Seibu-dome.jpg"
+SHIMONOSEKI = "Shimonoseki_20190101_152113.jpg"
+ROTHSTEIN = "Arnold_Rothstein_Chicago_1919.jpg"
+SOX19 = "1919_Chicago_White_Sox.jpg"
+TRIAL = "Black_Sox_at_trial.jpeg"
+SEIBUWIN = "Moment_of_Saitama_Seibu_Lions_Victory_at_MetLife_Dome.jpg"
+TOKYODOME = "Tokyo_Dome_2007-12.jpg"
+KOSHIEN = "Hanshin_Koshien_Stadium_2009.jpg"
+JINGU = "Meiji_Jingu_Stadium_2019c.jpg"
+KAWASAKI = "Kawasaki_1989_02.jpg"
+
+_fogn = [0]
+
+
+def FOG(tint=(1.0, 1.0, 1.0), dark=0.9):
+    """黒い霧 (毎回ちがう模様)"""
+    _fogn[0] += 1
+    return P(R.fog, 900 + _fogn[0], tint, dark)
+
+
+REDF, BLUEF, GOLDF, GREENF = (1.25, 0.75, 0.7), (0.75, 0.9, 1.25), (1.2, 1.05, 0.75), (0.8, 1.15, 0.85)
+
+
+def A(name, focus=(0.5, 0.4), bright=0.6, tint=(1.0, 0.97, 0.92)):
+    """資料映像風の写真。まだ取れていない写真なら霧にする"""
+    if not has(name):
+        return FOG()
+    return P(N.archive, name, focus, tint, bright, _fogn[0])
+
+
+def G(*items, base=None, desk=False):
+    """霧 (または机) の上に絵を置く。items = (絵, x, y, 幅, 高さ)。既定は画面の上半分 (文字は下3分の1)"""
+    if base is None:
+        base = P(N._table, len(items) + _fogn[0]) if desk else FOG(dark=0.55)
+    return P(N.compose, base, *[(P(R.fit, fn, w, h), x, y) for fn, x, y, w, h in items])
+
+
+def TOP(fn, w=1500, h=430):
+    return (fn, 960, 290, w, h)
+
+
+def SIDE(fn, x=1420, w=760, h=760):
+    return (fn, x, 470, w, h)
+
+
+def D(fn, w=1300, h=440):
+    """机の上 (お金・書類)"""
+    return G(TOP(fn, w, h), desk=True)
+
+
+def sil(color, seed=0):
+    return P(N.silhouette, "", None, color, seed)
+
+
+def cal(y, m, d, note=None, x=960):
+    return G((P(R.calendar, y, m, d, note), x, 300, 600, 460))
+
+
+def stamp(s, color=RED, under=None):
+    base = FOG(REDF, 0.5) if under is None else under
+    return G((P(N.stamp, s, color, 190), 960, 300, 1200, 440), base=base)
+
+
+# 場面の最初の文 → [(文の番号, 背景)]、写真の説明 [(文の番号, 説明)]、写真の上の文字を下げるか
+VIS = {
+    "100万円。": ([(0, D(P(R.bills, 1)))], []),
+    "このお金を受け取り": ([(0, G(SIDE(sil((150, 30, 30)), 960, 700, 520))),
+                    (1, G(SIDE(P(R.stamp_on, sil((150, 30, 30)), "永久追放", RED, 120, 0, -40), 960, 900, 540)))], []),
+    "新人でいきなり": ([(0, A(NIGHT54, (0.5, 0.5)))], [(0, "※写真は1954年、平和台球場で初めてのナイター")]),
+    "舞台は、1969年": ([(0, A(AIR56, (0.5, 0.5))), (1, FOG(REDF)), (2, D(P(R.bills, 3))),
+                    (3, P(N.code_rain, 31, (200, 40, 40))), (4, D(P(R.envelope, "口止め料"))),
+                    (5, G(TOP(P(N.tv, ["国会で", "黒い霧を追及"])))), (6, G(TOP(P(N._icon, "cuffs", 300))))],
+                   [(0, "※1956年の平和台球場（西鉄の本拠地）")]),
+    "プロ野球の歴史で最大": ([(0, FOG(dark=1.2))], []),
+    "なぜ選手たちは": ([(0, A(KORA51)), (1, A(OSAKA53)), (2, A(KORA47, (0.5, 0.5)))],
+                [(0, "※1951年の後楽園球場"), (1, "※1953年の大阪球場"), (2, "※1947年の後楽園球場")]),
+    "2025年には": ([(0, G(TOP(P(R.phone, ["ONLINE CASINO", "賭ける"]), 600, 470))), (1, A(FANS)), (2, FOG(GOLDF))],
+                 [(0, "※イメージ")]),
+    # 第0章
+    "物語に入る前に": ([(0, D(P(R.bills, 2))), (1, FOG()), (2, A(POLICE))], [(2, "※警視庁")]),
+    "賭ける側が": ([(0, A(ROTHSTEIN, (0.5, 0.3))), (1, G(TOP(P(R.scoreboard, [("西鉄", "？"), ("相手", "？")], "今夜の試合")))),
+               (2, A(BALL)), (3, P(N.code_rain, 32, (220, 60, 50)))],
+              [(0, "※1919年の八百長の黒幕とされる賭博師、アーノルド・ロススタイン")]),
+    "選手に数十万円": ([(0, FOG()), (1, A(KAWASAKI)), (2, FOG(BLUEF))], [(1, "※川崎球場（1989年）")]),
+    "アメリカでも1919年": ([(0, A(SOX19)), (1, A(BLACKSOX, (0.5, 0.35))), (2, A(TRIAL))],
+                     [(0, "※1919年のシカゴ・ホワイトソックス"), (1, "※永久追放された8人"), (2, "※裁判に出る選手たち")]),
+    "一方の日本のプロ野球": ([(0, A(JINGU)), (1, D(P(N.document, "日本プロフェッショナル野球協約",
+                                              ["第355条　敗退行為", "（ほかの条文は省略）"]))),
+                    (2, FOG()), (3, stamp("永久に職務停止"))], []),
+    "そしてこの条文には": ([(0, D(P(N.document, "第355条（敗退行為）",
+                                ["わざと負ける、負けようとする、最善の努力を怠る者は、永久に職務を停止される。",
+                                 "敗退行為に誘われたのに、報告しなかった者も同じとする。"], ["報告しなかった"]))),
+                   (2, G(SIDE(sil((200, 200, 210)), 960, 700, 520))), (3, P(N.code_rain, 33, (90, 160, 230)))],
+                  [(0, "※条文の趣旨をやさしく言い換えたもの")]),
+    # 第1章
+    "1969年のシーズン中": ([(0, A(LIONS54, (0.5, 0.45))), (1, A(HEIWA61, (0.5, 0.5))), (2, FOG(REDF))],
+                     [(0, "※1954年、初優勝した西鉄ライオンズ"), (1, "※1961年の平和台球場")]),
+    "きっかけの1つは": ([(0, G(SIDE(sil((90, 140, 220))))),
+                   (1, G(TOP(P(R.notebook, ["ボレス「ウチには", "わざとエラーする選手がいる」"]), 1100, 430))),
+                   (2, FOG(REDF))], [(1, "※記者のメモ（イメージ）")]),
+    "球団がひそかに": ([(0, G(SIDE(sil((190, 50, 50)), 1420))), (1, FOG(REDF, 0.7))], []),
+    "10月8日、読売新聞": ([(0, cal(1969, 10, 8, x=520)), (1, G(TOP(P(R.poster, "たずね人", "永易将之", "1969年10月から行方不明"),
+                                                            600, 470))), (2, FOG())], [(1, "※イメージ")]),
+    "数日後、夕刊フジ": ([(0, A(YS11)), (1, G(TOP(P(N.japan, ["福岡", "大阪"], ("福岡", "大阪")), 700, 470))),
+                  (2, FOG(BLUEF))], [(0, "※写真は当時の国内線の旅客機 YS-11（イメージ）")]),
+    "騒ぎに火をつけた": ([(0, G(TOP(P(R.magazine, ["実名で告発！", "疑わしい選手 8人", "広めたのは…"]), 600, 470))),
+                   (2, D(P(N.document, "訴状", ["名誉毀損による損害賠償の請求", "原告　田中勉"]))), (3, FOG(GOLDF))],
+                  [(0, "※イメージ")]),
+    "本人がいないまま": ([(0, cal(1969, 11, 28)), (1, stamp("永久追放")),
+                   (2, G(TOP(P(N.tv, ["史上初", "わざと負けたことで", "永久追放"]))))], []),
+    "チームの成績も落ち込み": ([(0, A(NAKANISHI, (0.5, 0.3))), (1, A(INAO56, (0.5, 0.3))), (2, A(INAO3, (0.5, 0.35))),
+                      (4, FOG(REDF, 1.1))],
+                     [(0, "※中西太（1954年）"), (1, "※稲尾和久（1956年）"), (2, "※稲尾和久（中央、1956年）")]),
+    # 第2章
+    "1970年2月には": ([(0, A(KORA74)), (1, FOG()), (2, G(TOP(P(N.tv, ["球界と暴力団", "社会問題に"]))))],
+                  [(0, "※後楽園球場（巨人の本拠地、1974年）")]),
+    "そして3月。": ([(0, FOG(dark=0.7)), (1, A(DIET)), (2, D(P(N.document, "国会の会議録（イメージ）",
+                                                              ["プロ野球と暴力団の関係について", "政府の見解をただす"]))),
+               (3, P(N.code_rain, 34, (160, 40, 40)))], [(1, "※国会議事堂")]),
+    "ところが本人は、恋人と": ([(0, G(TOP(P(N.japan, ["札幌"], None, hi="札幌"), 700, 470), base=P(R.snow, 1))),
+                      (1, P(R.snow, 2))], []),
+    "そして春。": ([(0, FOG(REDF)), (2, FOG(dark=0.7)), (3, D(P(R.bills, 5)))], []),
+    "永易投手によれば": ([(0, G(SIDE(sil((220, 180, 60)), 1420))),
+                   (1, D(P(R.envelope, "一生の保証", 0, True), 900, 450))], [(1, "※イメージ")]),
+    "4月10日。開幕の前日": ([(0, cal(1970, 4, 10, "開幕前日")), (1, G(TOP(P(R.mics, 9, 2)))), (2, FOG(REDF)),
+                     (3, FOG(BLUEF))], []),
+    "名前を言うのをためらう": ([(0, G(TOP(P(R.people, 14, 0, 7)))), (1, FOG()), (2, G(SIDE(sil((200, 60, 60)), 1420))),
+                      (3, FOG(dark=1.1))], []),
+    "西鉄の球団は、名前の": ([(0, stamp("シロ", (235, 235, 235))), (1, G(SIDE(sil((230, 190, 70)), 1500)))], []),
+    "ところが新聞の取材で": ([(0, FOG(GOLDF, 0.7)), (1, D(P(R.envelope, "残金", 3, True), 900, 450)), (2, FOG(GOLDF)),
+                    (3, FOG(dark=1.1))], []),
+    "ところが4月末。": ([(0, G(TOP(P(N.tv, ["西鉄のオーナー", "550万円を渡したと", "認める"])))), (1, FOG()),
+                  (3, FOG(GOLDF)), (4, stamp("辞任"))], []),
+    "否定していた側が": ([(0, FOG(dark=0.8)), (2, G(TOP(P(N.japan, ["福岡", "大阪", "名古屋", "東京"]), 700, 470)))], []),
+    # 第3章
+    "次の舞台は、オートレース": ([(0, A(AUTORACE)), (1, A(FUNABASHI)), (2, G(TOP(P(N._icon, "cuffs", 300))))],
+                       [(0, "※オートレースのイメージ"), (1, "※船橋オートレース場")]),
+    "5月6日には": ([(0, A(CHUNICHI56)), (1, G(TOP(P(N.tv, ["現役のプロ野球選手", "逮捕"]))))],
+               [(0, "※中日球場（中日の本拠地、1956年）")]),
+    "さらに田中投手は": ([(0, FOG(REDF)), (1, FOG())], []),
+    "ここで、第1章の裁判": ([(0, FOG(GOLDF)), (2, stamp("事実")), (3, D(P(N.document, "取下書",
+                                                                  ["名誉毀損の訴えを取り下げる", "原告　田中勉"])))],
+                    [(3, "※イメージ")]),
+    "では、八百長を仕組んだ側": ([(0, D(P(R.bills, 4))), (1, FOG()), (2, G(TOP(P(R.tally, 10, 2), 900, 430))),
+                       (3, D(P(R.ledger, [("西鉄の選手の買収", "10回"), ("うまくいった", "2回")], "借金 約4500万円"))),
+                       (4, FOG(REDF))], []),
+    "東映フライヤーズでも": ([(0, G(SIDE(sil((160, 90, 200)), 1500))), (1, FOG(BLUEF)), (2, FOG(dark=0.7)),
+                     (3, FOG(BLUEF, 1.1))], []),
+    "こうして、最も重い": ([(0, FOG()), (2, G(TOP(P(R.people, 16, 6, 8), 1100, 430)))], []),
+    "一方で、誘いを": ([(0, FOG(GOLDF)), (1, G(SIDE(sil((200, 170, 60)), 1500))), (2, FOG(GOLDF, 0.6)), (3, FOG(REDF))],
+                []),
+    "処分を発表した": ([(0, G(TOP(P(R.mics, 5, 7)))), (2, FOG(REDF)), (3, A(KOSHIEN))], [(3, "※甲子園球場（阪神の本拠地）")]),
+    # 第4章
+    "ここで、冒頭のエース": ([(0, G((P(R.print_photo, IKENAGA, 700, -3, (0.5, 0.35)), 1400, 470, 900, 760))),
+                    (1, A(SHIMONOSEKI)),
+                    (2, G((P(R.scoreboard, [("1年目", "20勝"), ("新人王", "◎")], "池永正明"), 1400, 470, 820, 600))),
+                    (3, G((P(R.scoreboard, [("5年で", "99勝"), ("本塁打", "13本")]), 1400, 470, 820, 600))),
+                    (4, A(AIR93, (0.5, 0.5)))],
+                   [(0, "※写真は1965年、20勝を挙げた日"), (1, "※下関の街並み（現在）"), (4, "※平和台球場（1993年）")]),
+    "ちなみに、池永投手と同じ年": ([(0, G(SIDE(sil((90, 190, 110)), 1500))), (1, FOG(GREENF)), (2, FOG(GREENF, 0.7)),
+                         (3, FOG(dark=1.0))], []),
+    "そんな池永投手に": ([(0, D(P(R.envelope, "100万円", 5))), (2, D(P(R.envelope, "", 6, True), 900, 450)),
+                   (3, FOG(BLUEF))], [(0, "※イメージ")]),
+    "1970年5月25日": ([(0, cal(1970, 5, 25, x=520)), (1, D(P(R.bills, 1, 9))), (2, FOG(REDF)), (3, FOG()),
+                    (4, FOG(dark=1.1))], []),
+    "同じく永久追放となった": ([(0, FOG(BLUEF)), (2, FOG(REDF)), (3, FOG(dark=0.6)),
+                      (4, G(TOP(P(R.scoreboard, [("通算", "103勝")], "池永正明"), 1100, 430)))], []),
+    "球界を去った池永さんは": ([(0, G(TOP(P(R.neon, "BAR"), 1000, 430))),
+                      (1, G(TOP(P(R.wall_notes, ["がんばれ", "また投げて", "待ってるぞ"]), 1500, 470))),
+                      (2, FOG(GOLDF))], [(1, "※イメージ")]),
+    "1997年には": ([(0, G(TOP(P(N.signatures, "処分取り消しを求める署名"), 1100, 430))), (1, stamp("却下")), (3, FOG(dark=1.1))], []),
+    # 第5章
+    "事件の傷は": ([(0, FOG()), (1, G(TOP(P(N.standings, [("1969", 5, False), ("1970", 6, True), ("1971", 6, True),
+                                                    ("1972", 6, True)], title="西鉄の順位"), 1300, 470))),
+               (3, stamp("身売り"))], []),
+    "ライオンズはその後": ([(0, FOG()), (1, A(SEIBUDOME)), (2, A(SEIBUWIN))],
+                  [(1, "※所沢の西武ドーム"), (2, "※現在の埼玉西武ライオンズ")]),
+    "ところが、この大ピンチで": ([(0, FOG(GOLDF)), (1, FOG(dark=0.7)), (2, A(TOKYODOME, (0.5, 0.6))),
+                       (3, G(TOP(P(R.scoreboard, [("東尾修 通算", "251勝")]), 1100, 430))), (4, FOG(GOLDF, 1.1))],
+                      [(2, "※イメージ")]),
+    # 第6章
+    "時は流れ、2001年": ([(0, FOG(GOLDF)), (1, FOG(dark=0.7)), (2, FOG(BLUEF)),
+                    (3, G(TOP(P(R.scoreboard, [("3回", "無安打")], "2001年 OBのリーグ"), 1100, 430))), (4, FOG())], []),
+    "同じころ、巨人の": ([(0, G(TOP(P(N.tv, ["いつまで永久追放に", "しているんだ"])))), (1, FOG(GOLDF))], []),
+    "2004年、新しいコミッショナー": ([(0, G(TOP(P(R.mics, 6, 11)))), (1, FOG()), (2, FOG(dark=1.1))], []),
+    "そして2005年、プロ野球は": ([(0, D(P(N.document, "野球協約の改正（2005年）",
+                                     ["永久追放の処分を受けた者も、15年がたてば、復帰を申請できる。"], ["15年"]))),
+                       (1, FOG()), (2, FOG(GOLDF))], [(0, "※改正の内容をやさしく言い換えたもの")]),
+    "2005年4月25日": ([(0, cal(2005, 4, 25, "復権")), (1, G(TOP(P(R.timeline, "1970年", "2005年", "35年"), 1300, 400))),
+                    (2, FOG(dark=1.0))], []),
+    "黒い霧事件を、お金と": ([(0, FOG())], []),
+    "2025年のオンラインカジノ": ([(0, A("YokohamaStadium_view.jpg")), (1, FOG(GOLDF)), (2, FOG(REDF, 1.1))], []),
+    "最後まで見ていただき": ([(0, P(N.dark, 72))], []),
 }
+
+CHAP_TINT = {0: REDF, 1: BLUEF, 2: (1.0, 1.0, 1.0), 3: REDF, 4: GOLDF, 5: BLUEF, 6: GOLDF}
 
 
 def _outlined(fn, px=8):
     return N._outline(fn(), px)
 
 
+def _restyle_text(e):
+    fn = e["fn"]
+    ff = getattr(fn, "func", None)
+    a = fn.args if ff else ()
+    if ff is L.text and a[1:2] == ("DelaGothicOne-Regular.ttf",):
+        text, size, color = a[0], a[2], a[3]
+        if color == RED:
+            e["fn"] = P(N.tel_red, text, round(size * 0.92))
+        elif color == GOLD:
+            e["fn"] = P(N.tel_gold, text, round(size * 0.92))
+        else:
+            e["fn"] = P(N.tel, text, round(size * 0.92), color)
+    elif ff is L.text and a[1:2] == ("YujiBoku-Regular.ttf",):
+        e["fn"] = P(_outlined, fn)
+    elif ff is L.text and a[1:2] == ("NotoSerifJP-Black.ttf",) and len(a) > 3 and a[2] >= 100:
+        e["fn"] = P(_outlined, fn)
+    elif ff is L.gold:
+        e["fn"] = P(N.tel_gold, a[0], round(fn.keywords.get("size", 160) * 0.9))
+    elif ff is C.quote:
+        e["fn"] = P(N.tel, f"「{a[0]}」", a[1] if len(a) > 1 else 58)
+    elif ff is C.name_plate:
+        e["fn"] = P(N.card, a[0], [a[1]] if len(a) > 1 and a[1] else [])
+    return ff
+
+
+def _busy(bg):
+    """背景に写真か絵が入っているか (入っていれば真ん中の文字を下3分の1へ)"""
+    f = getattr(bg, "func", None)
+    return f in (N.archive, N.compose)
+
+
 def _restyle(scenes):
     for i, sc in enumerate(scenes):
-        bg = sc["bg"]
-        f = getattr(bg, "func", None)
-        photo = True
-        if f is L.bokeh:
-            pool = POOLS.get(sc["tag"], POOLS[None])
-            seed = bg.args[0] if bg.args else i
-            sc["bg"] = P(N.archive, pool[seed % len(pool)], seed=seed, bright=0.5)
-        elif f is L.plate:
-            if bg.args[0] == DOME:  # 東京ドームは1970年の話に合わないので、古い球場の写真に替える
-                bg = P(L.plate, ["Meiji_Jingu_Stadium_2019c.jpg", "Hanshin_Koshien_Stadium_2009.jpg"][i % 2], *bg.args[1:],
-                       **bg.keywords)
-            sc["bg"] = P(N.archive, bg.args[0], bg.keywords.get("focus", (0.5, 0.4)), seed=i,
-                         bright=0.58 if bg.args[1:2] != ("gold",) else 0.66,
-                         tint=(1.08, 1.0, 0.86) if bg.args[1:2] == ("gold",) else (1.0, 0.97, 0.92))
-        elif f is L.plain:
-            sc["bg"] = P(N.dark, i)
-            photo = False
-        else:
-            photo = f is N.archive
+        busy = []
+        sc["right"] = getattr(sc["bg"], "keywords", {}).get("layout") == "right"
+        if sc["lines"]:
+            first = sc["lines"][0]
+            first = first[0] if isinstance(first, tuple) else first
+            key = next((k for k in VIS if first.startswith(k)), None)
+            assert key, f"場面 {i} の絵がない: {first}"
+            plan, notes = VIS[key]
+            sc["bg"] = plan[0][1]
+            sc["bgs"] = [(k, b) for k, b in plan[1:]]
+            n = len(sc["lines"])
+            cur = plan[0][1]
+            marks = dict(plan)
+            for k in range(n):
+                cur = marks.get(k, cur)
+                busy.append(_busy(cur))
+            for k, s in notes:
+                until = next((j - 1 for j, _ in plan if j > k), None)
+                sc["els"].append(E(P(C.note, s, 28), 1860, 40, at=k, until=until, anchor="tr", anim="fade"))
+        elif sc.get("chapter"):
+            no = int(sc["chapter"][1])
+            sc["bg"] = FOG(CHAP_TINT.get(no), 1.0)
+        elif getattr(sc["bg"], "func", None) is L.plain:
+            sc["bg"] = FOG(dark=1.1)
         for e in sc["els"]:
-            fn = e["fn"]
-            ff = getattr(fn, "func", None)
-            a = fn.args if ff else ()
-            if ff is L.text and a[1:2] == ("DelaGothicOne-Regular.ttf",):
-                text, size, color = a[0], a[2], a[3]
-                if color == RED:
-                    e["fn"] = P(N.tel_red, text, round(size * 0.92))
-                elif color == GOLD:
-                    e["fn"] = P(N.tel_gold, text, round(size * 0.92))
-                else:
-                    e["fn"] = P(N.tel, text, round(size * 0.92), color)
-            elif ff is L.text and a[1:2] == ("YujiBoku-Regular.ttf",):
-                e["fn"] = P(_outlined, fn)
-            elif ff is L.text and a[1:2] == ("NotoSerifJP-Black.ttf",) and len(a) > 3 and a[2] >= 100:
-                e["fn"] = P(_outlined, fn)
-            elif ff is L.gold:
-                e["fn"] = P(N.tel_gold, a[0], round(fn.keywords.get("size", 160) * 0.9))
-            elif ff is C.quote:
-                e["fn"] = P(N.tel, f"「{a[0]}」", a[1] if len(a) > 1 else 58)
-            elif ff is C.name_plate:
-                e["fn"] = P(N.card, a[0], [a[1]] if len(a) > 1 and a[1] else [])
-            # 写真の上では、真ん中の文字を少し下 (下3分の1) に寄せる
-            if photo and e["anchor"] == "c" and 360 <= e["y"] <= 480 and e["x"] in (960, 1000) and ff is not C.flow:
-                e["y"] += 190
+            ff = _restyle_text(e)
+            if e["anchor"] == "c" and 360 <= e["y"] <= 480 and e["x"] in (960, 1000) and ff is not C.flow and busy:
+                lo = e["at"] or 0
+                hi = e["until"] if e["until"] is not None else len(busy) - 1
+                if any(busy[lo:hi + 1]):
+                    e["y"] += 190
     return scenes
+
+
+def _photos(fn, out):
+    """背景や絵の部品に含まれる写真のファイル名を集める"""
+    if isinstance(fn, str):
+        if fn.lower().endswith((".jpg", ".jpeg", ".png")):
+            out.append(fn)
+    elif isinstance(fn, P):
+        _photos(fn.func, out)
+        for a in list(fn.args) + list(fn.keywords.values()):
+            _photos(a, out)
+    elif isinstance(fn, (list, tuple)):
+        for a in fn:
+            _photos(a, out)
+
+
+def check_unique(scenes):
+    """同じ写真が2つの場面で使われていないか"""
+    seen = {}
+    for i, sc in enumerate(scenes):
+        names = []
+        _photos(sc["bg"], names)
+        for _, b in sc.get("bgs", []):
+            _photos(b, names)
+        for e in sc["els"]:
+            _photos(e["fn"], names)
+        for n in set(names):
+            assert n not in seen, f"写真 {n} が場面 {seen[n]} と {i} で重複"
+            seen[n] = i
+    return seen
 
 
 def _shrink(fn, maxw):
@@ -768,7 +1021,7 @@ def _arrange(scenes):
     人物写真が右にある場面では、左側の文字を x=700 に寄せて幅 820 以内に縮める。
     それ以外の文字も、画面からはみ出さないよう幅 1700 以内に縮める"""
     for sc in scenes:
-        right = getattr(sc["bg"], "keywords", {}).get("layout") == "right"
+        right = sc.get("right")
         for e in sc["els"]:
             fn = e["fn"]
             if e["dyn"]:
@@ -786,3 +1039,4 @@ def _arrange(scenes):
 
 
 SCENES = _arrange(_restyle(OPEN + CH0 + CH1 + CH2 + CH3 + CH4 + CH5 + CH6 + ENDING))
+PHOTOS = check_unique(SCENES)
