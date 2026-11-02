@@ -67,6 +67,7 @@ def used_images(mod):
     found = set()
     for sc in mod.SCENES:
         _files(sc["bg"], found)
+        _files([fn for _, fn in sc.get("bgs", [])], found)
         for e in sc["els"]:
             _files(e["fn"], found)
     return [n for n in sorted(found) if (look.IMG / n).exists()]

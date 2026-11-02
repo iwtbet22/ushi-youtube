@@ -121,15 +121,39 @@ class SceneRenderer:
     def __init__(self, sc, item, index):
         self.sc, self.item, self.index = sc, item, index
         self.base = sc["bg"]()
+        # bgs = [(文の番号, 背景), ...] があれば、その文の頭で背景を切り替える (同じ絵を長く見せないため)
+        self.bases = [(0.0, self.base)]
+        for at, fn in sc.get("bgs", []):
+            st = item["sents"][at]["start"] if at < len(item["sents"]) else 0.0
+            self.bases.append((st, fn()))
+        self.bases.sort(key=lambda x: x[0])
         # dyn=True の要素は、毎フレーム fn(出てからの秒数) で描き直す
         self.sprites = [None if e["dyn"] else e["fn"]() for e in sc["els"]]
         self.subs = [(a, b, look.subtitle(p)) for s in item["sents"] for a, b, p in sub_pages(s)]
         self.tag = look.chapter_tag(sc["tag"]) if sc["tag"] else None
         self.times = [el_times(e, item) for e in sc["els"]]
 
+    def _background(self, t):
+        if len(self.bases) == 1:
+            u = t / self.item["dur"]
+            return look.ken_burns(self.base, u, self.sc["move"]).convert("RGBA")
+        k = max(i for i, (st, _) in enumerate(self.bases) if st <= t)
+        ends = [st for st, _ in self.bases[1:]] + [self.item["dur"]]
+
+        def kb(i, tt):
+            st, base = self.bases[i]
+            u = (tt - st) / max(0.5, ends[i] - st)
+            return look.ken_burns(base, min(1.0, max(0.0, u)), ("in", "out")[i % 2]).convert("RGBA")
+
+        im = kb(k, t)
+        fade = 0.3
+        if k > 0 and t - self.bases[k][0] < fade:  # 切り替えの直後は前の絵からクロスフェード
+            prev = kb(k - 1, t)
+            im = Image.blend(prev, im, (t - self.bases[k][0]) / fade)
+        return im
+
     def frame(self, t, no):
-        u = t / self.item["dur"]
-        im = look.ken_burns(self.base, u, self.sc["move"]).convert("RGBA")
+        im = self._background(t)
         im.alpha_composite(look.vignette())
         for e, sp, (t0, t1) in zip(self.sc["els"], self.sprites, self.times):
             if not t0 <= t < t1:
