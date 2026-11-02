@@ -13,7 +13,7 @@ from functools import partial as P
 
 import charts as C
 import look as L
-from ep02 import BALL, DOME, FANS, NAGOYA, ph
+from ep02 import BALL, DOME, FANS, NAGOYA, ph, pic
 import film
 from film import E, S
 
@@ -45,7 +45,9 @@ def kw(s, size=150, color=WHITE):
 
 
 def brush(s, size=200, color=WHITE):
-    """筆文字 (冒頭の一言、章の題)"""
+    """筆文字 (冒頭の一言、章の題)。筆の書体は数字が崩れて読みにくいので、数字を含むときは明朝にする"""
+    if any(c.isdigit() for c in s):
+        return P(L.text, s, "NotoSerifJP-Black.ttf", round(size * 0.9), color)
     return P(L.text, s, "YujiBoku-Regular.ttf", size, color)
 
 
@@ -95,7 +97,7 @@ OPEN = [
           E(kw("返さなかった", 130), 960, 420, until=0, anim="slam", sfx="boom"),
           E(kw("永久追放", 190, RED), 960, 420, at=1, anim="glitch", sfx="boom"),
       ]),
-    S(["新人でいきなり20勝。入団から5年で99勝。",
+    S([("新人でいきなり20勝。入団から5年で99勝。", "新人でいきなり20しょう。入団から5年で99勝。"),  # 20勝 は にじゅっかち と読まれる
        "300勝も夢ではないと言われた投手でした。"],
       ph(IKENAGA, "gold", focus=(0.5, 0.3)), move="in", els=[
           E(P(L.gold, "新人 20勝", size=150), 960, 380, until=0, anim="slam", sfx="boom"),
@@ -340,7 +342,7 @@ CH2 = [
           E(kw("4月10日 開幕前日", 130, GOLD), 960, 420, until=0, anim="slam"),
           E(kw("議員会館で会見", 140), 960, 420, at=1, until=1, anim="rise"),
           E(kw("仲間の実名を挙げる", 130, RED), 960, 420, at=2, until=2, anim="slam", sfx="boom"),
-          E(P(C.portrait, IKENAGA, (0.5, 0.3), 380, 470), 960, 400, at=3, anim="rise", sfx="whoosh"),
+          E(pic(IKENAGA, "池永正明", "西鉄のエース", (0.5, 0.3), 380, 470), 960, 400, at=3, anim="rise", sfx="whoosh"),
           E(kw("池永正明", 90, (140, 220, 255)), 960, 720, at=3, delay=0.6, anim="slam"),
       ]),
     S(["名前を言うのをためらう永易投手に、記者たちは厳しく迫りました。",
@@ -476,7 +478,7 @@ CH3 = [
     S(["処分を発表したコミッショナー委員会の委員長は、こう語ったとされます。",
        "これで終わりかと言われたら、そう言い切る自信はない。",
        "その言葉どおり、その後も賭博がらみの処分は続きました。",
-       "のちに名投手となる阪神の江夏豊投手も、賭博に関わる人物と付き合っていたとして、戒告を受けています。"],
+       "当時、阪神のエースだった江夏豊投手も、賭博に関わる人物と付き合っていたとして、戒告を受けています。"],
       P(L.bokeh, 449), move="in", tag=T3, els=[
           E(P(C.quote, "これで終わりと言い切る自信はない", 80), 960, 420, until=1, delay=2.0, anim="zoom"),
           E(kw("処分は続いた", 170, RED), 960, 420, at=2, until=2, anim="slam", sfx="boom"),
@@ -489,7 +491,7 @@ CH4 = [
     chap(4, "100万円", 450),
     S(["ここで、冒頭のエースの話に戻りましょう。",
        "池永正明。山口県の下関商業から、1965年に西鉄に入った投手です。",
-       "1年目から20勝を挙げて新人王。3年目には最多勝。",
+       ("1年目から20勝を挙げて新人王。3年目には最多勝。", "1年目から20しょうを挙げて新人王。3年目には最多勝。"),
        "入団から5年で99勝。打っても、通算で13本のホームランを打っています。",
        "西鉄の大エース、稲尾和久さんの後継者と言われた投手でした。"],
       ph(IKENAGA, "gold", layout="right", focus=(0.5, 0.3), seed=451), move="in", tag=T4, els=[
@@ -524,7 +526,7 @@ CH4 = [
        "理由は、受け取った100万円を返さなかったこと。",
        "返さなかったのは、八百長を引き受けたのと同じだ、と見なされたのです。",
        "さらに、誘われたことを報告しなかったことも、理由に挙げられました。",
-       "第0章で見た、あの一文です。"],
+       ("第0章で見た、あの一文です。", "第ゼロ章で見た、あの一文です。")],
       P(L.plain), move="in", tag=T4, els=[
           E(brush("永久追放", 250, RED), 960, 420, until=0, delay=1.8, anim="zoom", sfx="boom"),
           E(kw("100万円を返さなかった", 130), 960, 420, at=1, until=1, anim="slam"),
