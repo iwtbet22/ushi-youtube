@@ -426,14 +426,14 @@ CH3 = [
       ph(AUTORACE, "dark", seed=441), move="in", tag=T3, els=[
           E(brush("オートレース", 200), 960, 420, until=0, anim="zoom", sfx="boom"),
           E(kw("買収して順位を操る", 130, RED), 960, 420, at=1, until=1, anim="slam"),
-          E(P(PF, "田中勉", "元中日の投手"), 960, 380, at=2, anim="rise"),
-          E(kw("逮捕", 200, RED), 960, 770, at=2, delay=1.6, anim="glitch", sfx="boom"),
+          E(P(PF, "田中勉", "元中日の投手"), 960, 320, at=2, anim="rise"),
+          E(kw("逮捕", 160, RED), 960, 740, at=2, delay=1.6, anim="glitch", sfx="boom"),
       ]),
     S(["5月6日には、中日のエース、小川健太郎投手が、現役のまま逮捕されました。",
        "現役のプロ野球選手の逮捕に、ファンは大きな衝撃を受けます。"],
       ph(NAGOYA, "cold", seed=442), move="in", tag=T3, els=[
-          E(P(PF, "小川健太郎", "中日のエース"), 960, 380, until=0, anim="rise"),
-          E(kw("現役のまま逮捕", 150, RED), 960, 770, until=0, delay=2.4, anim="glitch", sfx="boom"),
+          E(P(PF, "小川健太郎", "中日のエース"), 960, 320, until=0, anim="rise"),
+          E(kw("現役のまま逮捕", 120, RED), 960, 740, until=0, delay=2.4, anim="glitch", sfx="boom"),
           E(kw("前代未聞の衝撃", 150), 960, 420, at=1, anim="slam"),
       ]),
     S(["さらに田中投手は、取り調べで、プロ野球の試合でも八百長をしたと認めます。",
