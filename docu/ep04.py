@@ -959,6 +959,8 @@ def _restyle(scenes):
                 cur = marks.get(k, cur)
                 busy.append(_busy(cur))
             for k, s in notes:
+                if not _busy(marks.get(k)) or getattr(marks.get(k), "func", None) is not N.archive:
+                    continue  # 写真が取れていなければ説明も出さない
                 until = next((j - 1 for j, _ in plan if j > k), None)
                 sc["els"].append(E(P(C.note, s, 28), 960, 26, at=k, until=until, anchor="t", anim="fade"))
         elif sc.get("chapter"):
