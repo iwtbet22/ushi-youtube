@@ -27,7 +27,13 @@ LIC = {"cc-by-2.0": "CC BY 2.0", "cc-by-2.5": "CC BY 2.5", "cc-by-sa-2.0": "CC B
 def chapters(mod):
     items, _ = film.timeline(mod.SCENES)
     out = ["0:00 オープニング"]
+    named = any("chapter" in sc for sc in mod.SCENES)  # 章の名前を場面に持たせている回 (4本目から)
     for sc, it in zip(mod.SCENES, items):
+        if named:
+            if "chapter" in sc:
+                t = int(it["start"])
+                out.append(f"{t // 60}:{t % 60:02d} {sc['chapter']}")
+            continue
         if sc["lines"]:
             continue
         fn = sc["els"][0]["fn"]  # 章の扉 / 事件簿の扉

@@ -66,11 +66,11 @@ def note(s="※金額は報道・証言による"):
 
 
 def chap(no, title, seed):
-    """章の扉 (ナレーションなし)"""
-    return S([], P(L.plain), move="in", hold=2.6, trans="fade", els=[
+    """章の扉 (ナレーションなし)。概要欄のチャプター名を chapter に持たせる"""
+    return dict(S([], P(L.plain), move="in", hold=2.6, trans="fade", els=[
         E(P(L.text, f"第{no}章", "NotoSerifJP-Black.ttf", 64, GOLD), 960, 330, anim="rise"),
         E(brush(f"「{title}」", 170), 960, 520, delay=0.3, anim="zoom", sfx="boom"),
-    ])
+    ]), chapter=f"第{no}章 {title}")
 
 
 def cast(name, role, bg, color):
