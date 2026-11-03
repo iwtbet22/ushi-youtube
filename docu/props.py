@@ -418,7 +418,7 @@ def fee_tiers(total, upto=None):
             rows.append((a, top, r, c, (top - a) * r))
     n = len(rows) if upto is None else min(upto, len(rows))
     w, x0, bw = 1500, 40, 1420
-    h = 200 + 78 * len(rows) + 190
+    h = 200 + 78 * 3 + 190  # 段階の数によらず同じ高さ (場面の中で大きさが変わらないように)
     im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     d = ImageDraw.Draw(im)
 
