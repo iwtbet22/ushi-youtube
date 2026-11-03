@@ -86,16 +86,26 @@ def G(*items, base=None, desk=False):
     """霧 (または机) の上に絵を置く。items = (絵, x, y, 幅, 高さ)"""
     if base is None:
         base = P(N._table, _seed()) if desk else FOG(dark=0.55)
-    return P(N.compose, base, *[(P(R.fit, fn, w, h), x, y) for fn, x, y, w, h in items])
+    return P(N.compose, base, *[(P(_fit_up, fn, w, h), x, y) for fn, x, y, w, h in items])
+
+
+def _fit_up(fn, w, h, up=1.8):
+    """絵を w x h に収める。小さすぎる図は up 倍まで大きくする (読める大きさにするため)"""
+    from PIL import Image
+    im = fn()
+    k = min(w / im.width, h / im.height, up)
+    if abs(k - 1) < 0.02:
+        return im
+    return im.resize((round(im.width * k), round(im.height * k)), Image.LANCZOS)
 
 
 def TOP(fn, w=1500, h=440):
     return (fn, 960, 300, w, h)
 
 
-def D(fn, w=1300, h=440):
+def D(fn, w=1300, h=500):
     """机の上 (お金・書類)"""
-    return G(TOP(fn, w, h), desk=True)
+    return G((fn, 960, 330, max(w, 1300), max(h, 560)), desk=True)
 
 
 def TV(*lines):
@@ -119,7 +129,7 @@ def DOORS(hi=None):
 
 
 def FEE(total, upto=None):
-    return G(TOP(P(R.fee_tiers, total, upto), 1500, 520))
+    return G((P(R.fee_tiers, total, upto), 960, 380, 1640, 700))
 
 
 def CLAUSE(hi):
@@ -137,9 +147,9 @@ def card(name, sub, at=0, until=None, color=GOLD, y=340, delay=0.6):
     return E(PF(name, sub, color), 960, y, at=at, until=until, delay=delay, anim="rise", sfx="whoosh")
 
 
-def trio(name, sub, at, until, color, x, delay):
+def trio(name, sub, at, until, color, x, delay, y=330):
     """3人を横に並べる小さめの名札"""
-    return E(P(_shrink_to, PF(name, sub, color), 580), x, 330, at=at, until=until, delay=delay, anim="rise", sfx="whoosh")
+    return E(P(_shrink_to, PF(name, sub, color), 580), x, y, at=at, until=until, delay=delay, anim="rise", sfx="whoosh")
 
 
 def _shrink_to(fn, maxw):
@@ -174,7 +184,8 @@ def SC(lines, plan, els=(), tag=None, notes=(), **k):
 def chap(no, title):
     return dict(S([], P(R.fog, 480 + no, [REDF, BLUEF, GOLDF, GREENF][no % 4], 1.0), move="in", hold=2.6, els=[
         E(P(L.text, f"第{no}章", "NotoSerifJP-Black.ttf", 64, GOLD), 960, 330, anim="rise"),
-        E(brush(f"「{title}」", 170), 960, 520, delay=0.3, anim="zoom", sfx="boom"),
+        E(brush(f"「{title}」", 170) if not re.search("[A-Za-z0-9]", title)
+          else P(L.text, f"「{title}」", "NotoSerifJP-Black.ttf", 150, WHITE), 960, 520, delay=0.3, anim="zoom", sfx="boom"),
     ]), chapter=f"第{no}章 {title}")
 
 
@@ -454,7 +465,7 @@ CH2 = [
         "ドジャースとのマイナー契約で、契約金は650万ドル。",
         "マイナー契約の場合、譲渡金は契約金の25%なので、ロッテに入ったのは、162万5000ドルでした。"],
        [(0, A(ZOZO, (0.5, 0.5))), (1, G(TOP(P(R.meter, 650, 803, "佐々木朗希の契約金"), 1300, 300))),
-        (2, G(TOP(P(R.scoreboard, [("契約金", "650万ドル"), ("× 25%", "162万5000ドル")], "ロッテに入る譲渡金"), 1200, 470)))], tag=T[2], els=[
+        (2, G(TOP(P(R.scoreboard, [("契約金", "650万ドル"), ("その25%", "162万5000ドル")], "ロッテに入る譲渡金"), 1200, 470)))], tag=T[2], els=[
            card("佐々木朗希", "2025年 ロッテ → ドジャース", 0, 0, (60, 60, 70), 340, 0.6),
            W("契約金の25%", 2, GOLD, 150, 720),
        ], notes=[(0, "※ロッテの本拠地")]),
@@ -854,9 +865,9 @@ CH9 = [
         "本来なら、交渉の期限は12月中旬です。"],
        [(0, FOG(GOLDF)), (1, CAL(2026, 11, 2, "公示")), (2, G(TOP(P(R.countdown, 45, 45, "期限は12月中旬"), 1300, 440)))],
        tag=T[9], els=[
-           trio("佐藤輝明", "阪神", 1, 1, (255, 210, 60), 330, 0.6),
-           trio("平良海馬", "西武", 1, 1, (90, 150, 230), 960, 1.4),
-           trio("伊藤大海", "日本ハム", 1, 1, (90, 170, 230), 1590, 2.2),
+           trio("佐藤輝明", "阪神", 1, 1, (255, 210, 60), 330, 0.6, 680),
+           trio("平良海馬", "西武", 1, 1, (90, 150, 230), 960, 1.4, 680),
+           trio("伊藤大海", "日本ハム", 1, 1, (90, 170, 230), 1590, 2.2, 680),
        ]),
     SC(["ところが今年は、メジャーの労使協定が、12月1日で切れます。",
         "新しい協定がまとまらず、オーナー側がロックアウト、つまり締め出しに踏み切れば、選手との交渉はすべて止まります。"],
@@ -954,6 +965,32 @@ def _fix_speech(scenes):
     return scenes
 
 
+# 絵が霧だけになる文に出す要の単語 (文の頭 → (単語, 色))
+EXTRA = {
+    "今日は、日本人選手が": ("すべて解説", GOLD), "まず、大前提": ("大前提", WHITE), "流れはこうです": ("流れ", WHITE),
+    "そして2017年。": ("2017年", GOLD), "ポスティングには、うまくいかなかった": ("うまくいかない例も", RED),
+    "ポスティングには、もう1つ": ("もう1つの条件", GOLD), "もし25歳まで": ("25歳まで待てば…", GOLD),
+    "しかし球団にとっては": ("譲渡金は少ない", RED), "その後も、直接": ("その後も続く挑戦", WHITE),
+    "結城投手は": ("公式戦で投げないまま", RED), "そして2025年のオフ。": ("2025年オフ", GOLD),
+    "1つ目。": ("その1", GOLD), "2つ目。": ("その2", GOLD), "3つ目。": ("その3", GOLD),
+    "一方で、全員が": ("全員ではない", RED), "メジャーに上がれば": ("最低年俸は保証", GOLD),
+    "入団前の検査で": ("ひじに不安", RED), "活躍すれば、もっと": ("もっといい契約へ", GOLD),
+    "言葉も文化も": ("大事な条項", GOLD), "マイナー契約にも、大事な": ("マイナー契約の条項", WHITE),
+    "マイナー契約から挑む": ("次のチャンス", GOLD), "最後に、今まさに": ("今年のオフ", GOLD),
+    "2021年のオフにも": ("2021年にも", WHITE), "こちらも、今年": ("大きな注目", GOLD),
+}
+
+
+def _extra(scenes):
+    for sc in scenes:
+        for k, line in enumerate(sc["lines"]):
+            text = line[0] if isinstance(line, tuple) else line
+            for head, (word, color) in EXTRA.items():
+                if text.startswith(head):
+                    sc["els"].append(W(word, k, color, 170 if len(word) <= 6 else 140))
+    return scenes
+
+
 def _finish(scenes):
     """写真の説明を出し、写真の上の真ん中の文字を下3分の1へ下げ、文字の見た目をそろえる"""
     for sc in scenes:
@@ -1012,5 +1049,5 @@ def check_unique(scenes):
     return seen
 
 
-SCENES = _arrange(_finish(_fix_speech(OPEN + CH0 + CH1 + CH2 + CH3 + CH4 + CH5 + CH6 + CH7 + CH8 + CH9 + ENDING)))
+SCENES = _arrange(_finish(_extra(_fix_speech(OPEN + CH0 + CH1 + CH2 + CH3 + CH4 + CH5 + CH6 + CH7 + CH8 + CH9 + ENDING))))
 PHOTOS = check_unique(SCENES)
