@@ -4,6 +4,7 @@
 見た目は4本目 (黒い霧事件) と同じ作り: 文ごとに要の単語を大きく出し、文ごとに背景の絵を替える。
 同じ写真は動画全体で1度しか使わない (最後に確かめる)。写真のない文は、その文の中身を表す図や小道具にする。
 """
+import re
 from functools import partial as P
 
 import charts as C
@@ -136,8 +137,23 @@ def card(name, sub, at=0, until=None, color=GOLD, y=340, delay=0.6):
     return E(PF(name, sub, color), 960, y, at=at, until=until, delay=delay, anim="rise", sfx="whoosh")
 
 
+def trio(name, sub, at, until, color, x, delay):
+    """3人を横に並べる小さめの名札"""
+    return E(P(_shrink_to, PF(name, sub, color), 580), x, 330, at=at, until=until, delay=delay, anim="rise", sfx="whoosh")
+
+
+def _shrink_to(fn, maxw):
+    from PIL import Image
+    im = fn()
+    if im.width <= maxw:
+        return im
+    return im.resize((maxw, round(im.height * maxw / im.width)), Image.LANCZOS)
+
+
 def W(word, i, color=WHITE, size=150, y=440, until="same", **k):
-    """i 番目の文で出す要の単語"""
+    """i 番目の文で出す要の単語。絵の下に出すとき (y が大きいとき) は、字幕にかからないよう小さめにする"""
+    if y >= 690:
+        y, size = 700, min(size, 140)
     return E(kw(word, size, color), 960, y, at=i, until=i if until == "same" else until, anim=k.pop("anim", "slam"),
              sfx=k.pop("sfx", "boom"), **k)
 
@@ -175,9 +191,9 @@ OPEN = [
         "ところが今年は、その期間が途中で打ち切られるかもしれないのです。"],
        [(0, A(KOSHIEN, (0.5, 0.5))), (1, G(TOP(P(R.countdown, 45, 45, "交渉期間 45日"), 1300, 440))),
         (2, G(TOP(P(R.countdown, 15, 45, "途中で打ち切り？"), 1300, 440)))], els=[
-           card("佐藤輝明", "阪神", 0, 0, (255, 210, 60), 300, 0.4),
-           card("平良海馬", "西武", 0, 0, (90, 150, 230), 560, 1.6),
-           card("伊藤大海", "日本ハム", 0, 0, (90, 170, 230), 820, 2.8),
+           trio("佐藤輝明", "阪神", 0, 0, (255, 210, 60), 330, 0.4),
+           trio("平良海馬", "西武", 0, 0, (90, 150, 230), 960, 1.6),
+           trio("伊藤大海", "日本ハム", 0, 0, (90, 170, 230), 1590, 2.8),
            W("打ち切り？", 2, RED, 170),
        ], notes=[(0, "※阪神甲子園球場")]),
     SC(["理由は、メジャーの労使協定が、12月1日で切れるから。",
@@ -838,9 +854,9 @@ CH9 = [
         "本来なら、交渉の期限は12月中旬です。"],
        [(0, FOG(GOLDF)), (1, CAL(2026, 11, 2, "公示")), (2, G(TOP(P(R.countdown, 45, 45, "期限は12月中旬"), 1300, 440)))],
        tag=T[9], els=[
-           card("佐藤輝明", "阪神", 1, 1, (255, 210, 60), 300, 0.6),
-           card("平良海馬", "西武", 1, 1, (90, 150, 230), 560, 1.4),
-           card("伊藤大海", "日本ハム", 1, 1, (90, 170, 230), 820, 2.2),
+           trio("佐藤輝明", "阪神", 1, 1, (255, 210, 60), 330, 0.6),
+           trio("平良海馬", "西武", 1, 1, (90, 150, 230), 960, 1.4),
+           trio("伊藤大海", "日本ハム", 1, 1, (90, 170, 230), 1590, 2.2),
        ]),
     SC(["ところが今年は、メジャーの労使協定が、12月1日で切れます。",
         "新しい協定がまとまらず、オーナー側がロックアウト、つまり締め出しに踏み切れば、選手との交渉はすべて止まります。"],
@@ -848,7 +864,7 @@ CH9 = [
            W("交渉がすべて止まる", 1, RED, 140, 760),
        ]),
     SC(["2021年のオフにも、同じことがありました。",
-        "このときは、ポスティング中の選手の交渉期間が、ロックアウトの間だけ止められました。",
+        "このときは、ポスティング中の選手の交渉期間が、ロックアウトが終わるまで止められました。",
         "広島の鈴木誠也選手は、ロックアウトが終わった翌年の3月に、カブスと契約しています。"],
        [(0, FOG(BLUEF)), (1, G(TOP(P(R.countdown, 20, 45, "交渉期間を一時停止"), 1300, 440))), (2, CAL(2022, 3, 16, "カブスと契約"))],
        tag=T[9], els=[
@@ -912,6 +928,32 @@ ENDING = [
 
 
 # ---- 仕上げ ---------------------------------------------------------------------
+# この回で読み間違えると分かった語 (tools/check_kana.py と、かなで書いた文との聞き比べで確かめた)
+SPEECH_FIX = {
+    "決まった日": "決まったひ",          # にち と読まれる
+    "最後の年": "最後のとし",            # ねん と読まれる
+    "その年の": "そのとしの",
+    "ある年の": "あるとしの",
+    "終わった後の": "終わったあとの",      # のち と読まれる
+    "1シーズン": "ひとシーズン",          # いちシーズン と読まれる
+    "新日本石油": "しんにほん石油",        # しんにっぽん と読まれる
+}
+
+
+def _fix_speech(scenes):
+    import readings
+    for sc in scenes:
+        out = []
+        for line in sc["lines"]:
+            text, sp = (line if isinstance(line, tuple) else (line, readings.speech(line)))
+            for k, v in SPEECH_FIX.items():
+                sp = sp.replace(k, v)
+            sp = re.sub(r"(?<![0-9])7年", "なな年", sp)  # 7年契約 (1997年 などはそのまま)
+            out.append((text, sp) if sp != text else text)
+        sc["lines"] = out
+    return scenes
+
+
 def _finish(scenes):
     """写真の説明を出し、写真の上の真ん中の文字を下3分の1へ下げ、文字の見た目をそろえる"""
     for sc in scenes:
@@ -970,5 +1012,5 @@ def check_unique(scenes):
     return seen
 
 
-SCENES = _arrange(_finish(OPEN + CH0 + CH1 + CH2 + CH3 + CH4 + CH5 + CH6 + CH7 + CH8 + CH9 + ENDING))
+SCENES = _arrange(_finish(_fix_speech(OPEN + CH0 + CH1 + CH2 + CH3 + CH4 + CH5 + CH6 + CH7 + CH8 + CH9 + ENDING)))
 PHOTOS = check_unique(SCENES)
