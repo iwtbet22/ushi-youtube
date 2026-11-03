@@ -403,3 +403,167 @@ def profile(name, sub=None, photo=None, color=(200, 170, 90), rot=-2.0, focus=(0
         im.alpha_composite(sb, (x, y + nm.height + 4))
     im = im.rotate(rot, expand=True, resample=Image.BICUBIC)
     return _shadow(im)
+
+
+# ---- 5本目 (メジャー移籍の方法) で使う部品 ---------------------------------------
+def fee_tiers(total, upto=None):
+    """ポスティングの譲渡金の計算 (単位は百万ドル)。上に段階で色分けした棒、下に段階ごとの計算と合計。
+    upto = 何段階目まで見せるか (None ならすべてと合計)"""
+    tiers = [(0, 25, 0.20, (230, 190, 80)), (25, 50, 0.175, (90, 170, 240)), (50, None, 0.15, (230, 90, 80))]
+    vmax = max(total, 60) * 1.02
+    rows = []
+    for k, (a, b, r, c) in enumerate(tiers):
+        top = total if b is None else min(b, total)
+        if top > a:
+            rows.append((a, top, r, c, (top - a) * r))
+    n = len(rows) if upto is None else min(upto, len(rows))
+    w, x0, bw = 1500, 40, 1420
+    h = 200 + 78 * len(rows) + 190
+    im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+
+    def sx(v):
+        return x0 + bw * v / vmax
+
+    d.text((x0, 30), f"契約総額 {_musd(total)}", font=L.font(SERIF, 52), fill=(255, 255, 255, 255), anchor="lm",
+           stroke_width=4, stroke_fill=(0, 0, 0, 255))
+    d.rounded_rectangle((x0 - 6, 70, x0 + bw + 6, 150), radius=12, fill=(30, 30, 34, 230),
+                        outline=(160, 160, 160, 255), width=3)
+    for k, (a, top, r, c, part) in enumerate(rows):
+        d.rectangle((sx(a), 76, sx(top), 144), fill=(c if k < n else (80, 80, 80)) + (255,))
+        if sx(top) - sx(a) > 150:
+            d.text(((sx(a) + sx(top)) / 2, 110), f"{r * 100:g}%", font=L.font(SANS, 44), fill=(10, 10, 10, 255),
+                   anchor="mm")
+    y = 200
+    f = L.font(SERIF, 52)
+    for k, (a, top, r, c, part) in enumerate(rows[:n]):
+        d.text((x0 + 20, y), f"{r * 100:g}%", font=f, fill=c + (255,), anchor="lm", stroke_width=4,
+               stroke_fill=(0, 0, 0, 255))
+        d.text((x0 + 230, y), f"× {_musd(top - a)}", font=f, fill=(240, 240, 240, 255), anchor="lm", stroke_width=4,
+               stroke_fill=(0, 0, 0, 255))
+        d.text((w - 30, y), f"= {_musd(part)}", font=f, fill=c + (255,), anchor="rm", stroke_width=4,
+               stroke_fill=(0, 0, 0, 255))
+        y += 78
+    if n == len(rows):
+        d.line((x0 + 20, y - 20, w - 30, y - 20), fill=(220, 220, 220, 255), width=4)
+        t = N.tel_gold(f"譲渡金 {_musd(sum(x[4] for x in rows))}", 84)
+        im.alpha_composite(t, (w - t.width - 10, y))
+    return im
+
+
+def _musd(m):
+    """百万ドル単位の数 → 「997万5000ドル」「3億2500万ドル」"""
+    v = round(m * 1_000_000)
+    oku, rest = divmod(v, 100_000_000)
+    man, one = divmod(rest, 10_000)
+    s = (f"{oku}億" if oku else "") + (f"{man}万" if man else "") + (f"{one}" if one else "")
+    return s + "ドル"
+
+
+def route_doors(labels, hi=None):
+    """メジャーへの道 (扉が並ぶ)。hi 番目の扉だけ開いて光る"""
+    n = len(labels)
+    dw, dh, gap = 300, 470, 60
+    w, h = n * dw + (n - 1) * gap, dh + 150
+    im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    for k, s in enumerate(labels):
+        x = k * (dw + gap)
+        on = hi is None or k == hi
+        frame = (255, 214, 90, 255) if (hi is not None and k == hi) else (150, 150, 160, 255)
+        d.rectangle((x, 20, x + dw, 20 + dh), fill=(16, 16, 20, 255), outline=frame, width=10)
+        if hi is not None and k == hi:
+            d.rectangle((x + 14, 34, x + dw - 14, 6 + dh), fill=(255, 236, 170, 255))
+            d.polygon([(x + 14, 34), (x + 120, 70), (x + 120, dh - 30), (x + 14, 6 + dh)], fill=(90, 70, 40, 255))
+        else:
+            d.rectangle((x + 14, 34, x + dw - 14, 6 + dh), fill=(60, 50, 44, 255) if on else (40, 40, 44, 255))
+            d.ellipse((x + dw - 70, dh // 2, x + dw - 44, dh // 2 + 26), fill=(200, 170, 90, 255))
+        f = L.font(SERIF, 56 if len(s) <= 5 else 46)
+        d.text((x + dw // 2, dh + 85), s, font=f, fill=(255, 255, 255, 255) if on else (130, 130, 130, 255),
+               anchor="mm", stroke_width=4, stroke_fill=(0, 0, 0, 255))
+    return _shadow(im)
+
+
+def checklist(rows, title=None):
+    """条件の確認表。rows = [(条件, True/False/None)]  ○・×・空欄"""
+    w = 1200
+    h = 60 + 120 * len(rows) + (110 if title else 0)
+    im = _paper(w, h, len(rows) * 7, (240, 236, 224))
+    d = ImageDraw.Draw(im)
+    y = 40
+    if title:
+        d.text((w // 2, y + 30), title, font=L.font(SERIF, 60), fill=INK + (255,), anchor="mm")
+        d.line((60, y + 80, w - 60, y + 80), fill=INK + (255,), width=3)
+        y += 110
+    for s, ok in rows:
+        d.rectangle((60, y + 15, 150, y + 105), outline=INK + (255,), width=5)
+        if ok is True:
+            d.ellipse((72, y + 27, 138, y + 93), outline=(30, 110, 50, 255), width=10)
+        elif ok is False:
+            d.line((70, y + 25, 140, y + 95), fill=RED + (255,), width=12)
+            d.line((140, y + 25, 70, y + 95), fill=RED + (255,), width=12)
+        d.text((190, y + 60), s, font=L.font(SERIF, 58), fill=INK + (255,), anchor="lm")
+        y += 120
+    return _shadow(im.rotate(-1.5, expand=True, resample=Image.BICUBIC))
+
+
+def clause(title, items, hi=None, seed=0):
+    """英文契約書のような紙に、条項を並べる。hi 番目の条項に黄色い蛍光ペン"""
+    w = 1000
+    h = 200 + 112 * len(items)
+    im = _paper(w, h, seed + 40, (248, 246, 240))
+    d = ImageDraw.Draw(im)
+    d.text((w // 2, 70), "MAJOR LEAGUE CONTRACT", font=L.font(SERIF, 40), fill=(80, 80, 80, 255), anchor="mm")
+    d.text((w // 2, 130), title, font=L.font(SERIF, 56), fill=INK + (255,), anchor="mm")
+    y = 190
+    for k, s in enumerate(items):
+        if hi is not None and k == hi:
+            d.rectangle((50, y + 8, w - 50, y + 92), fill=(255, 236, 90, 255))
+        d.text((70, y + 50), f"第{k + 1}条", font=L.font(SERIF, 40), fill=(90, 90, 90, 255), anchor="lm")
+        d.text((210, y + 50), s, font=L.font(SERIF, 50), fill=INK + (255,), anchor="lm")
+        y += 112
+    rng = random.Random(seed)
+    for _ in range(3):  # 小さな英文の行 (読めない飾り)
+        yy = rng.randrange(150, h - 40)
+        d.line((w - 160, yy, w - 70, yy), fill=(200, 200, 200, 255), width=3)
+    return _shadow(im.rotate(1.2, expand=True, resample=Image.BICUBIC))
+
+
+def countdown(left, total=45, label=None):
+    """45日のマス目。過ぎた日は×、残りは白"""
+    cols = 15
+    rows = (total + cols - 1) // cols
+    cs = 80
+    w, h = cols * cs + 40, rows * cs + 150
+    im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    for k in range(total):
+        x, y = 20 + (k % cols) * cs, 20 + (k // cols) * cs
+        past = k < total - left
+        d.rectangle((x + 4, y + 4, x + cs - 4, y + cs - 4), fill=(40, 40, 44, 255) if past else (240, 236, 224, 255),
+                    outline=(140, 140, 140, 255), width=2)
+        if past:
+            d.line((x + 16, y + 16, x + cs - 16, y + cs - 16), fill=RED + (255,), width=6)
+            d.line((x + cs - 16, y + 16, x + 16, y + cs - 16), fill=RED + (255,), width=6)
+        else:
+            d.text((x + cs // 2, y + cs // 2), str(k + 1), font=L.font(SANS, 30), fill=INK + (255,), anchor="mm")
+    t = label or f"残り {left}日"
+    d.text((w // 2, h - 60), t, font=L.font(SERIF, 64), fill=(255, 214, 90, 255), anchor="mm", stroke_width=5,
+           stroke_fill=(0, 0, 0, 255))
+    return _shadow(im)
+
+
+def meter(value, cap, label, unit="万ドル"):
+    """上限つきのゲージ (ボーナスプールなど)。value / cap は同じ単位"""
+    w, h = 1300, 300
+    im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    d.rounded_rectangle((40, 110, w - 40, 210), radius=50, fill=(30, 30, 34, 240), outline=(180, 180, 180, 255), width=4)
+    fw = (w - 100) * min(1.0, value / cap)
+    d.rounded_rectangle((50, 120, 50 + fw, 200), radius=40, fill=(230, 190, 80, 255))
+    d.line((w - 50, 90, w - 50, 230), fill=RED + (255,), width=8)
+    d.text((w - 50, 60), "上限", font=L.font(SERIF, 44), fill=RED + (255,), anchor="mm")
+    d.text((50, 50), label, font=L.font(SERIF, 52), fill=(255, 255, 255, 255), anchor="lm")
+    d.text((50 + fw / 2, 160), f"{value:g}{unit}", font=L.font(SANS, 54), fill=(10, 10, 10, 255), anchor="mm")
+    d.text((w - 60, 260), f"{cap:g}{unit}", font=L.font(SERIF, 44), fill=(220, 220, 220, 255), anchor="rm")
+    return im
