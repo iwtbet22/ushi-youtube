@@ -123,7 +123,7 @@ def FEE(total, upto=None):
 
 
 def CLAUSE(hi):
-    return G(TOP(P(R.clause, "付帯条項", ["契約金", "出来高", "オプトアウト", "トレード拒否権", "オプション", "後払い"], hi, hi),
+    return G(TOP(P(R.clause, "付帯条項", ["契約金", "出来高", "オプトアウト", "トレード拒否権", "オプション", "後払い"], hi, (hi or 0) + 7 * _n[0]),
                  900, 520))
 
 
