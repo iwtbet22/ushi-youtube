@@ -112,7 +112,9 @@ def calendar(y, m, d, note=None):
 
 def scoreboard(rows, title=None):
     """昔の手書きのスコアボード風の黒板 (rows = [(左の字, 右の字), ...])"""
-    w = 1100
+    fa, fb = L.font(SERIF, 72), L.font(SERIF, 96)
+    need = max((fa.getlength(a) + fb.getlength(b) for a, b in rows), default=0)
+    w = max(1100, int(need) + 80 * 2 + 70)  # 左右の字が重ならない幅
     h = 140 + 130 * len(rows) + (90 if title else 0)
     im = Image.new("RGBA", (w, h), (20, 46, 34, 255))
     d = ImageDraw.Draw(im)
@@ -122,8 +124,8 @@ def scoreboard(rows, title=None):
         d.text((w // 2, y + 10), title, font=L.font(SERIF, 56), fill=(240, 230, 200, 255), anchor="mm")
         y += 90
     for a, b in rows:
-        d.text((80, y + 60), a, font=L.font(SERIF, 72), fill=(245, 245, 235, 255), anchor="lm")
-        d.text((w - 80, y + 60), b, font=L.font(SERIF, 96), fill=(255, 214, 90, 255), anchor="rm")
+        d.text((80, y + 60), a, font=fa, fill=(245, 245, 235, 255), anchor="lm")
+        d.text((w - 80, y + 60), b, font=fb, fill=(255, 214, 90, 255), anchor="rm")
         y += 130
     return _shadow(N._grain(im.convert("RGB"), 10, 5).convert("RGBA"))
 
