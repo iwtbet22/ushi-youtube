@@ -24,6 +24,8 @@ BOX = {
     "YS-Munetaka_MUrakami20220812-2.jpg": (0.5, 0.38, 0.42),
     "今井達也_2023年5月16日エスコンフィールドHOKKAIDO.jpg": (0.4, 0.42, 0.85),
     "鎌ヶ谷スタジアム_0320_平良海馬2.jpg": (0.5, 0.4, 0.6),
+    "960px-Shota_Imanaga_pitching_form1.jpg": (0.53, 0.27, 0.45),
+    "960px-Yu_Darvish_on_March_13,_2012_(3).jpg": (0.55, 0.25, 0.4),
 }
 
 

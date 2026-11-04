@@ -65,7 +65,8 @@ _RECV = {"イチロー": "Ichiro_Suzuki_(51007139682)_(cropped)", "佐藤輝明"
          "今井達也": "今井達也_2023年5月16日エスコンフィールドHOKKAIDO",
          "前田健太": "Kenta_Maeda_Los_Angeles_Dodgers_(26686442045)_(cropped)", "高橋光成": "Konatakahashi",
          "佐々木麟太郎": "Rahm_Emanuel_with_Rintaro_Sasaki_-_01", "加藤豪将": "202306041702_DSCN7591",
-         "佐々木朗希": "Roki-Sasaki-20240430-Kobe_(cropped)", "田澤純一": "20110928-0441_Junichi_Tazawa"}
+         "佐々木朗希": "Roki-Sasaki-20240430-Kobe_(cropped)", "田澤純一": "20110928-0441_Junichi_Tazawa",
+         "今永昇太": "960px-Shota_Imanaga_pitching_form1", "ダルビッシュ有": "960px-Yu_Darvish_on_March_13,_2012_(3)"}
 FACES.update({k: f"face_{v}.jpg" for k, v in _RECV.items()})
 
 # ---- 背景の部品 ----------------------------------------------------------------
