@@ -57,6 +57,16 @@ NAGOYA = "Binnenkant_van_Nagoya_Dome__-21_maart_2019_a.jpg"
 # 人物カードの顔写真 (同じ人の目印なので、写真の重複の確かめからは外す)
 FACES = {"野茂英雄": NOMO, "松井秀喜": MATSUI, "大谷翔平": OHTANI, "山本由伸": YAMAMOTO, "千賀滉大": SENGA,
          "田中将大": TANAKA, "岡本和真": OKAMOTO}
+# 視聴者から受け取った写真 (tools/face_crops.py で上半身を切り出したもの)
+_RECV = {"イチロー": "Ichiro_Suzuki_(51007139682)_(cropped)", "佐藤輝明": "Teruaki-Sato-20240310-Koshien",
+         "平良海馬": "鎌ヶ谷スタジアム_0320_平良海馬2", "伊藤大海": "Hiromi_Ito_Fighters2026",
+         "松坂大輔": "Daisuke_Matsuzaka_on_March_25,_2008", "鈴木誠也": "Seiya_Suzuki_at_bat",
+         "吉田正尚": "Masataka_Yoshida_April14,_2026_(cropped)", "村上宗隆": "YS-Munetaka_MUrakami20220812-2",
+         "今井達也": "今井達也_2023年5月16日エスコンフィールドHOKKAIDO",
+         "前田健太": "Kenta_Maeda_Los_Angeles_Dodgers_(26686442045)_(cropped)", "高橋光成": "Konatakahashi",
+         "佐々木麟太郎": "Rahm_Emanuel_with_Rintaro_Sasaki_-_01", "加藤豪将": "202306041702_DSCN7591",
+         "佐々木朗希": "Roki-Sasaki-20240430-Kobe_(cropped)", "田澤純一": "20110928-0441_Junichi_Tazawa"}
+FACES.update({k: f"face_{v}.jpg" for k, v in _RECV.items()})
 
 # ---- 背景の部品 ----------------------------------------------------------------
 _n = [0]
