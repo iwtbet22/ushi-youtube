@@ -29,6 +29,20 @@
 
 国土地理院の写真は「国土地理院（国土交通省）の空中写真をもとに作成」と概要欄に書く。
 
+## 一覧にあるが、まだ取れていない写真（7枚）
+Wikimedia が、このサーバーからの自動ダウンロードを止めているため（連絡先の書かれていないプログラムからのアクセスは不可）、手で保存してもらう必要があります。
+下のページを開き、「元のファイル」か「その他の解像度」の1280px前後をダウンロードして、左の名前で `assets/ep02/img/` に置けば、そのまま動画に入ります（置かなければ、その場面は背景の模様になります）。
+
+| 保存する名前 | ページ |
+|---|---|
+| ep06_shoriki_1955.jpg | https://commons.wikimedia.org/wiki/File:Shoriki_Matsutaro_1955_(cropped).jpg |
+| ep06_takarazuka.jpg | https://commons.wikimedia.org/wiki/File:Takarazuka_Grand_Theater_and_Hankyu_train.jpg |
+| ep06_bauer.jpg | https://commons.wikimedia.org/wiki/File:横浜DeNAベイスターズ所属のバウアー20230422trevorbauer.jpg |
+| ep06_yakult_mexico.jpg | https://commons.wikimedia.org/wiki/File:Yakult_Mexico.jpg |
+| ep06_yakult_bike.jpg | https://commons.wikimedia.org/wiki/File:Yakult_delivery_bicycle.jpg |
+| ep06_mazda_aerial.jpg | https://commons.wikimedia.org/wiki/File:MAZDA_Zoom-Zoom_Stadium_Hiroshima_aerial_photograph_2023.jpg |
+| ep06_hiroshima_1962.jpg | https://commons.wikimedia.org/wiki/File:Hiroshima_Municipal_Stadium_aerial_photograph_1962.jpg |
+
 ## 拾えなかったけど、あったら良さそうなもの
 
 ### 写真
