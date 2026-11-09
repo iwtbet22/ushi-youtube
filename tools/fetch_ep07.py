@@ -44,6 +44,7 @@ FILES = {
     "ep07_shinjuku_prince.jpg": ("新宿プリンスホテル_遠景.jpg", "松倉傑", ["CC0"]),
     "ep07_lotte_urawa2.jpg": ("ロッテ浦和工場.JPG", "ブツチチ", ["cc-by-sa-4.0"]),
     "ep07_lotte_hq.jpg": ("Walk_around_Hatsudai_-36260.jpeg", "Syced", ["CC0"]),
+    "ep07_rakuten_shop.jpg": ("Rakuten_Mobile_Nansandori_Street_Shop.jpg", "Mr.ちゅらさん", ["cc-by-sa-4.0"]),
 }
 
 UA = "ushi-youtube-video/1.0 (credits kept per file)"
