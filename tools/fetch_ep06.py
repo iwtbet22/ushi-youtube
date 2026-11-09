@@ -31,7 +31,7 @@ FILES = {
     "ep06_bauer.jpg": ("横浜DeNAベイスターズ所属のバウアー20230422trevorbauer.jpg", "Moonlight Shado", ["cc-by-sa-4.0"]),
     "ep06_chunichi_bldg.jpg": ("Chunichi_Building_from_Hisaya-odori_Park_-_1.jpg", "Kyu3a", ["cc-by-sa-4.0"]),
     "ep06_chunichi_hq.jpg": ("Chunichi_Shimbun_Nagoya_Head_Office_-_1.jpg", "KKPCW（Kyu3）", ["cc-by-sa-4.0"]),
-    "ep06_news_trucks.jpg": ("中日新聞_and_毎日新聞_trucks.jpg", "Pvcba", ["cc0"]),
+    "ep06_news_trucks.jpg": ("中日新聞_and_毎日新聞_trucks.jpg", "Pvcba", ["CC0"]),
     "ep06_yakult1000.jpg": ("Yakult_1000_-_1.jpg", "KKPCW（Kyu3）", ["cc-by-sa-4.0"]),
     "ep06_yakult_mexico.jpg": ("Yakult_Mexico.jpg", "RottenKitten", ["cc-by-sa-4.0"]),
     "ep06_yakult_china.jpg": ("YAKULT_PRODUCTS_IN_CHINA.jpg", "Dinkun Chen", ["cc-by-sa-4.0"]),
@@ -39,6 +39,19 @@ FILES = {
     "ep06_mazda_facade.jpg": ("MAZDA_Zoom-Zoom_Stadium_Hiroshima_facade.jpg", "HKT3012", ["cc-by-sa-3.0"]),
     "ep06_mazda_aerial.jpg": ("MAZDA_Zoom-Zoom_Stadium_Hiroshima_aerial_photograph_2023.jpg", GSI, ["cc-by-4.0"]),
     "ep06_hiroshima_1962.jpg": ("Hiroshima_Municipal_Stadium_aerial_photograph_1962.jpg", GSI, ["cc-by-4.0"]),
+    # ユーザーが Google ドライブに集めてくれた写真 (2026-11-09。作者とライセンスは Commons の表示どおり)
+    "ep06_ntv.jpg": ("Nippon_TV_Tower.jpg", "Akonnchiroll", ["cc-by-sa-4.0"]),
+    "ep06_gtown.jpg": ("Yomiuri_Giants_stadium.jpg", "ブルーノ・プラス", ["cc-by-4.0"]),
+    "ep06_tsukiji.jpg": ("Former_Tsukiji_Fish_Market,_Hamarikyu_Garden_and_Kachidoki_Sep_29,_2019.jpg", "Zengame", ["cc-by-2.0"]),
+    "ep06_tokyo_shimbun.jpg": ("2_Chome_Kitazawa,_Setagaya-ku,_Tōkyō-to_155-0031,_Japan_-_panoramio_(139).jpg", "運転太郎", ["cc-by-3.0"]),
+    "ep06_vantelin.jpg": ("Nagoya_Dome_-_3.jpg", "KKPCW（Kyu3）", ["cc-by-sa-4.0"]),
+    "ep06_yakult_hq.jpg": ("Yakult_Honsha_Building_(2018-01-01).jpg", "Lombroso", ["cc-by-sa-4.0"]),
+    "ep06_ginkgo.jpg": ("Avenue_of_ginkgo_trees,_Meiji_Shrine_Outer_Garden_20201129.jpg", "Suicasmo", ["cc-by-sa-4.0"]),
+    "ep06_osuna.jpg": ("YS-Jose_Osuna20220812.jpg", "TSUBAME98", ["cc-by-sa-4.0"]),
+    "ep06_santana.jpg": ("YS-Domingo_Santana20211010.jpg", "TSUBAME98", ["cc-by-sa-4.0"]),
+    "ep06_genbaku.jpg": ("Genbaku_Dome04-r.JPG", "Oilstreet", ["cc-by-sa-3.0"]),
+    "ep06_mazda_build.jpg": ("新広島市民球場・１階～６階筐体工事.jpg", "HKT3012", ["cc-by-sa-3.0"]),
+    "ep06_austin.jpg": ("タイラー・オースティン.png", "日産・スカイライン", ["cc-by-4.0"]),
 }
 
 UA = "ushi-youtube-video/1.0 (credits kept per file)"
