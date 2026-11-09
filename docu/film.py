@@ -386,6 +386,7 @@ def main():
     ap.add_argument("--check", action="store_true")
     ap.add_argument("--qa", action="store_true", help="各文のコマを output/qa_<名前>/ に出して、4x3 の一覧にまとめる")
     ap.add_argument("--jobs", type=int, default=4)
+    ap.add_argument("--no-master", action="store_true", help="場面と音声だけ書き出し、つないだ大きな mp4 は作らない（ディスク節約）")
     ap.add_argument("--only", help="この番号のシーンだけ描き直してつなぎ直す (例: 3,7,12)。ほかは前回の書き出しを使う")
     args = ap.parse_args()
     scenes = importlib.import_module(args.module).SCENES
@@ -422,6 +423,9 @@ def main():
         return
     wav = OUT / f"{args.module}_audio.wav"
     write_audio(wav, scenes, items, total)
+    if args.no_master:
+        print("wrote", seg, wav)
+        return
     lst = seg / "list.txt"
     lst.write_text("".join(f"file '{i:03d}.mp4'\n" for i in range(len(scenes))))
     out = OUT / f"{args.module}.mp4"
