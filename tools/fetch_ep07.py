@@ -32,6 +32,18 @@ FILES = {
     "ep07_seibu_laview.jpg": ("Seibu_series001_Laview.jpg", "SEMISAYAMASHI", ["cc-by-sa-4.0"]),
     "ep07_belluna_dome.jpg": ("ベルーナドーム.jpg", "Windyakin", ["cc-by-sa-4.0"]),
     "ep07_lotte_urawa.jpg": ("Lotte_factory_in_Urawa,_with_Ghana_and_雪見だいふく_signs.jpg", "Syced", ["CC0"]),
+    # ユーザーが Google ドライブに集めてくれた写真 (2026-11-09)
+    "ep07_takeshiba2.jpg": ("Portcity_Takeshiba.jpg", "Akonnchiroll", ["cc-by-sa-4.0"]),
+    "ep07_escon2.jpg": ("エスコンフィールド北海道.jpg", "高梨慎太郎", ["cc-by-sa-4.0"]),
+    "ep07_escon_roof1.jpg": ("ES_CON_FIELD_HOKKAIDO_TOWER11_02.jpg", "Endou subaru", ["CC0"]),
+    "ep07_escon_roof2.jpg": ("ES_CON_FIELD_HOKKAIDO_Roof_Open_Photo_from_Left_Side.jpg", "StealthJPN", ["CC0"]),
+    "ep07_nh_logo.png": ("NH_Foods_Logo.svg", "NH Foods Ltd.", ["Public domain"]),
+    "ep07_orix_honmachi.jpg": ("ORIX_Honmachi_Bldg_20110328-001.jpg", "J o", ["cc-by-sa-3.0"]),
+    "ep07_orix_rentacar.png": ("Orix_rent-a-car-logo.svg", "ORIX Auto Corporation", ["Public domain"]),
+    "ep07_kyoto_aq.jpg": ("KYOTO_AQUARIUM.JPG", "Kirakirameister", ["cc-by-sa-3.0"]),
+    "ep07_shinjuku_prince.jpg": ("新宿プリンスホテル_遠景.jpg", "松倉傑", ["CC0"]),
+    "ep07_lotte_urawa2.jpg": ("ロッテ浦和工場.JPG", "ブツチチ", ["cc-by-sa-4.0"]),
+    "ep07_lotte_hq.jpg": ("Walk_around_Hatsudai_-36260.jpeg", "Syced", ["CC0"]),
 }
 
 UA = "ushi-youtube-video/1.0 (credits kept per file)"
