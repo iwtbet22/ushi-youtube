@@ -61,8 +61,8 @@ PAY = [("ルーキー", 710), ("1A", 885), ("ハイA", 935), ("2A", 1040), ("3A"
 # アスレチックスの傘下の町 (経度, 緯度)
 CITY = {"サクラメント": (-121.49, 38.58), "ラスベガス": (-115.33, 36.15), "ミッドランド": (-102.08, 31.99),
         "ランシング": (-84.55, 42.73), "ストックトン": (-121.29, 37.95), "メサ": (-111.83, 33.42)}
-LABEL_AT = {"サクラメント": (24, -66, "lt"), "ストックトン": (26, 6, "lt"), "ラスベガス": (24, 14, "lt"),
-            "メサ": (-24, 6, "rt"), "ミッドランド": (24, 6, "lt"), "ランシング": (-24, -62, "rt")}
+LABEL_AT = {"サクラメント": (170, 160, "la"), "ストックトン": (170, 330, "la"), "ラスベガス": (330, 420, "la"),
+            "メサ": (390, 515, "la"), "ミッドランド": (650, 610, "la"), "ランシング": (1010, 268, "ra")}  # 地図の中の文字の位置
 LEVEL_OF = {"メサ": "ルーキー", "ストックトン": "1A", "ランシング": "ハイA", "ミッドランド": "2A",
             "ラスベガス": "3A", "サクラメント": "メジャー"}
 # アメリカ本土のおおまかな形 (経度, 緯度)
@@ -124,10 +124,13 @@ def usmap(points=(), hi=None, w=1500, h=860, levels=True):
         col = RED if name == hi else GOLD
         r = 16 if name == hi else 12
         d.ellipse((x - r, y - r, x + r, y + r), fill=col + (255,), outline=(0, 0, 0, 255), width=3)
-        dx, dy, anc = LABEL_AT[name]
+        lx, ly, anc = LABEL_AT[name]
+        lx, ly = lx * w / 1500, ly * h / 860
         lab = name + (f"（{LEVEL_OF[name]}）" if levels else "")
-        d.text((x + dx, y + dy), lab, font=f, fill=(255, 255, 255, 255), stroke_width=5, stroke_fill=(0, 0, 0, 255),
-               anchor={"lt": "la", "rt": "ra", "rb": "rd"}[anc])
+        d.line((x, y, lx + (-8 if anc == "ra" else 8), ly + 26), fill=col + (200,), width=3)
+        d.ellipse((x - r, y - r, x + r, y + r), fill=col + (255,), outline=(0, 0, 0, 255), width=3)
+        d.text((lx, ly), lab, font=f, fill=(255, 255, 255, 255), stroke_width=5, stroke_fill=(0, 0, 0, 255),
+               anchor=anc)
     d.text((w - 20, h - 16), "※位置はおおよそ", font=fs, fill=C.DIM, anchor="rd")
     return im
 
