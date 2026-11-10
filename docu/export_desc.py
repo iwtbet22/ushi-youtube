@@ -21,7 +21,8 @@ import look  # noqa: E402
 
 LIC = {"cc-by-2.0": "CC BY 2.0", "cc-by-2.5": "CC BY 2.5", "cc-by-sa-2.0": "CC BY-SA 2.0", "cc-by-sa-3.0": "CC BY-SA 3.0",
        "cc-by-sa-3.0,2.5,2.0,1.0": "CC BY-SA 3.0", "cc-by-sa-all": "CC BY-SA 4.0", "cc-by-sa-3.0-migrated": "CC BY-SA 3.0",
-       "cc-by-4.0": "CC BY 4.0", "cc-by-sa-4.0": "CC BY-SA 4.0", "cc-zero": "CC0"}
+       "cc-by-4.0": "CC BY 4.0", "cc-by-sa-4.0": "CC BY-SA 4.0", "cc-zero": "CC0",
+       "cc0": "CC0", "cc-by-3.0": "CC BY 3.0"}
 
 
 def chapters(mod):
