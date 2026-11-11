@@ -4,6 +4,7 @@
 作りは6本目と同じ: 文ごとに要の単語を大きく出し、文ごとに背景の絵を替える。
 同じ写真は動画全体で1度しか使わない (最後に確かめる)。写真のない文は、図や小道具にする。
 """
+import re
 from functools import partial as P
 
 import charts as C
@@ -708,6 +709,8 @@ def _fix_speech(scenes):
             text, sp = (line if isinstance(line, tuple) else (line, readings.speech(line)))
             for k, v in SPEECH_FIX.items():
                 sp = sp.replace(k, v)
+            sp = re.sub(r"(?<![0-9.,])0(?![0-9.,])", "ゼロ", sp)  # 0円 などは れい ではなく ゼロ と読ませる (確認済み)
+            sp = sp.replace("何十年", "なんじゅうねん")         # なにじゅうねん と読まれる (確認済み)
             out.append((text, sp) if sp != text else text)
         sc["lines"] = out
     return scenes
