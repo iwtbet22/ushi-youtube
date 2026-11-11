@@ -1,0 +1,22 @@
+# 人の目で確かめた読み（語<TAB>読み(カタカナ) または ok<TAB>出典）。tools/check_yomi.py が正しい読みとして使う。
+# 固有名詞は、ここに入れる前に必ず出典（Wikipedia の冒頭のかな、球団・NPB の選手名鑑、週刊ベースボール など）で確かめる。
+関内	カンナイ	横浜市中区の地名（セ・リーグ編で視聴者から指摘）
+稼ぎ頭	カセギガシラ	辞書
+金子鋭	カネコトシ	Wikipedia「金子鋭」（第7代コミッショナー）
+渡辺智男	ワタナベトミオ	週刊ベースボール選手名鑑「わたなべ・とみお」
+智男	トミオ	同上（渡辺智男）
+内山智之	ウチヤマトモユキ	Baseball-Reference「Tomoyuki Uchiyama」
+智之	トモユキ	同上
+上川誠二	カミカワセイジ	Wikipedia
+平沼定晴	ヒラヌマサダハル	Wikipedia
+工藤隆人	クドウタカヒト	Wikipedia
+齋藤俊雄	サイトウトシオ	Wikipedia
+長谷川勉	ハセガワツトム	Wikipedia
+島野育夫	シマノイクオ	Wikipedia
+高橋一三	タカハシカズミ	Wikipedia
+那須野巧	ナスノタクミ	Wikipedia
+望月充	モチヅキミツル	Wikipedia（望月充）
+村田勝喜	ムラタカツヨシ	Baseball-Reference「Katsuyoshi Murata」
+公文克彦	クモンカツヒコ	NPB
+大谷	オオタニ	大谷翔平
+佐々木	ササキ	ok
