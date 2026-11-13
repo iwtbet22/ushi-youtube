@@ -117,6 +117,11 @@ def _place(e, im):
     return round(e["x"] - im.width * ax), round(e["y"] - im.height * ay)
 
 
+def _has_text(fn):
+    """背景が図や文字を載せたもの (news.compose) かどうか"""
+    return getattr(getattr(fn, "func", None), "__name__", "") == "compose"
+
+
 class SceneRenderer:
     def __init__(self, sc, item, index):
         self.sc, self.item, self.index = sc, item, index
@@ -127,6 +132,11 @@ class SceneRenderer:
             st = item["sents"][at]["start"] if at < len(item["sents"]) else 0.0
             self.bases.append((st, fn()))
         self.bases.sort(key=lambda x: x[0])
+        # 図や文字を載せた背景は動かさない (文字が伸び縮みすると読みにくく、酔う)
+        fns = [(0.0, sc["bg"])] + [(item["sents"][at]["start"] if at < len(item["sents"]) else 0.0, fn)
+                                   for at, fn in sc.get("bgs", [])]
+        fns.sort(key=lambda x: x[0])
+        self.still = [_has_text(fn) for _, fn in fns]
         # dyn=True の要素は、毎フレーム fn(出てからの秒数) で描き直す
         self.sprites = [None if e["dyn"] else e["fn"]() for e in sc["els"]]
         self.subs = [(a, b, look.subtitle(p)) for s in item["sents"] for a, b, p in sub_pages(s)]
@@ -136,14 +146,16 @@ class SceneRenderer:
     def _background(self, t):
         if len(self.bases) == 1:
             u = t / self.item["dur"]
-            return look.ken_burns(self.base, u, self.sc["move"]).convert("RGBA")
+            move = "still" if self.still[0] else self.sc["move"]
+            return look.ken_burns(self.base, u, move).convert("RGBA")
         k = max(i for i, (st, _) in enumerate(self.bases) if st <= t)
         ends = [st for st, _ in self.bases[1:]] + [self.item["dur"]]
 
         def kb(i, tt):
             st, base = self.bases[i]
             u = (tt - st) / max(0.5, ends[i] - st)
-            return look.ken_burns(base, min(1.0, max(0.0, u)), ("in", "out")[i % 2]).convert("RGBA")
+            move = "still" if self.still[i] else self.sc["move"] if self.sc["move"] in ("in", "out") else "in"
+            return look.ken_burns(base, min(1.0, max(0.0, u)), move).convert("RGBA")
 
         im = kb(k, t)
         fade = 0.3

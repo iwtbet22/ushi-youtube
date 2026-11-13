@@ -122,18 +122,25 @@ def plain(color=(10, 10, 12), scale=1.0):
     return Image.new("RGB", (round(W * scale), round(H * scale)), color)
 
 
+KB = 0.35  # 写真の寄り・引きの強さ (1 で背景いっぱい。大きいと見ていて酔うという声があった)
+
+
 def ken_burns(base, u, move="in"):
-    """u (0〜1) の位置の 1920x1080 を切り出す。in: 寄る / out: 引く / left・right: 横に流す / up: 上へ"""
+    """u (0〜1) の位置の 1920x1080 を切り出す。in: 寄る / out: 引く / left・right: 横に流す / up: 上へ / still: 動かさない"""
     bw, bh = base.size
     u = 0.5 - 0.5 * math.cos(math.pi * min(max(u, 0), 1))  # ゆっくり始まりゆっくり終わる
+    if move == "still":
+        x0, y0 = (bw - W) / 2, (bh - H) / 2
+        return base.crop((round(x0), round(y0), round(x0) + W, round(y0) + H))
     if move in ("in", "out"):
         z = u if move == "in" else 1 - u
-        cw = W + (bw - W) * (1 - z) * 0.999
+        cw = W + (bw - W) * KB * (1 - z) * 0.999
         ch = cw * H / W
         x0, y0 = (bw - cw) / 2, (bh - ch) / 2
     else:
         cw, ch = W * 1.02, H * 1.02
         k = {"left": (1 - u, 0.5), "right": (u, 0.5), "up": (0.5, 1 - u), "down": (0.5, u)}[move]
+        k = (0.5 + (k[0] - 0.5) * KB, 0.5 + (k[1] - 0.5) * KB)
         x0, y0 = (bw - cw) * k[0], (bh - ch) * k[1]
     cw, ch = min(cw, bw), min(ch, bh)
     x0, y0 = min(max(0.0, x0), bw - cw), min(max(0.0, y0), bh - ch)
