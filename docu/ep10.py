@@ -65,7 +65,6 @@ MANFRED = "Rob_Manfred_in_Philadelphia.jpg"
 MANFRED2 = "Rob_Manfred_7-15-2014.jpg"
 EXPOS = "Montreal_Expos_Aug_14_2004.jpg"
 ESCON = "ES_CON_FIELD_HOKKAIDO_exterior_from_south_202607a.jpg"
-ep05.FACES.update({"ロブ・マンフレッド": MANFRED})
 
 
 # ---- 数字 (億円は 1ドル158円で換算) ---------------------------------------------
