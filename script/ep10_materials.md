@@ -21,7 +21,7 @@
 | ジャパンマネー | ユニクロの店（東京駅） | Small_Uniqlo_store_in_Tokyo_Station_November_2023.jpg | CC BY-SA 4.0 |
 | 対立 | マンフレッド・コミッショナー（2019年） | Rob_Manfred_in_Philadelphia.jpg | CC BY 2.0 |
 | 対立 | マンフレッド（2014年、別の場面用） | Rob_Manfred_7-15-2014.jpg | CC BY-SA 2.0 |
-| 対立 | モントリオール・エクスポズ（2004年、最後の年） | Montreal_Expos_Aug_14_2004.jpg | CC BY-SA 2.0 |
+| 対立 | モントリオール・エクスポズ（2004年、最後の年） | Montreal_Expos_Aug_14_2004.jpg | CC BY-SA 2.0（取り込めず。今回は背景のみの画面） |
 
 ## 見つからなかったもの（あれば良い）
 | 章 | ほしいもの | メモ |

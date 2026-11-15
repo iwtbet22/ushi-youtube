@@ -11,7 +11,7 @@
 
 | 場面 | 使う写真 | ファイル名 | ライセンス |
 |---|---|---|---|
-| 近鉄の赤字 | 上空から見た藤井寺球場（1985年） | Fujiidera_bp_1985.jpg | 表示（Attribution） |
+| 近鉄の赤字 | 上空から見た藤井寺球場（1985年） | Fujiidera_bp_1985.jpg | 表示（Attribution）（取り込めず。2021年の跡地写真で代用） |
 | 合併 | 宮内義彦（2008年） | Yoshihiko_Miyauchi_2008.jpg | CC BY-SA 3.0 |
 | 福岡ドームの契約 | 福岡ドーム（2008年） | FUKUOKA_DOME.JPG | CC BY-SA 3.0 |
 | 一場事件 | 一場靖弘（2011年、ヤクルト時代） | 一場靖弘_October_8,_2011_(6227165370)_(cropped).jpg | CC BY-SA 2.0 |
