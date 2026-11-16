@@ -32,7 +32,22 @@ READ = {
 }
 
 
+# 数字のつく読みのうち、決まった形で読み間違えるもの (正規表現で直す)
+PATTERNS = [
+    # 10勝・20勝…90勝 (10勝目も) は「じゅう かち」と読まれる。11勝や57勝、100勝は正しく「しょう」。
+    # 9本目「トレード事件簿」で 30勝・10勝 を「かち」と読み、視聴者から指摘された。
+    (r"(?<![0-9０-９])([1-9]0)勝", r"\1しょう"),
+]
+
+
+def patterns(text):
+    import re
+    for pat, rep in PATTERNS:
+        text = re.sub(pat, rep, text)
+    return text
+
+
 def speech(text):
     for k in sorted(READ, key=len, reverse=True):
         text = text.replace(k, READ[k])
-    return text
+    return patterns(text)

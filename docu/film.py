@@ -51,7 +51,7 @@ def S(lines, bg, move="in", tag=None, els=(), trans="fade", hold=0.0):
 
 # ---- タイムライン -----------------------------------------------------------
 def _speech(line):
-    return line[1] if isinstance(line, tuple) else readings.speech(line)
+    return readings.patterns(line[1]) if isinstance(line, tuple) else readings.speech(line)
 
 
 def _display(line):

@@ -127,13 +127,59 @@ def check(ep, show_all=False):
                     continue
                 seen.add(key)
                 mism.append((surf, sp[ob:oe], o, want, "表" if t else "Sudachi", disp))
+    names = surname_check(ep, table)
     print(f"== {ep}：食い違い {len(mism)} 件 ==")
     for surf, span, o, want, src, disp in mism:
         print(f"  {span}  合成側(OpenJTalk) {o}  ／ 正({src}) {want}\n      {disp}")
     print(f"== {ep}：未確認の固有名詞 {len(unknown)} 語 ==")
     for surf, (rd, o, kind, disp) in sorted(unknown.items(), key=lambda x: x[1][2]):
         print(f"  {surf}\tSudachi {rd}\t合成側 {o}\t{kind}\t{disp[:40]}")
+    print(f"== {ep}：名字だけ・名前だけの呼び方の読み違い {len(names)} 件 ==")
+    for surf, o, want, src, disp in names:
+        print(f"  {surf}  合成側(OpenJTalk) {o}  ／ 正({src}) {want}\n      {disp}")
     return mism, unknown
+
+
+HIRA2KATA = str.maketrans({chr(c): chr(c + 0x60) for c in range(0x3041, 0x3097)})
+
+
+def surname_check(ep, table):
+    """フルネームだけ読みを指定して、名字だけで呼んだ所が抜けていないかを見る。
+    9本目で「張本勲」は指定したのに「張本は」を ちょうほん と読み、視聴者から指摘された。
+    1) 各回の読みの指定 (…FIX の辞書) で、漢字のフルネーム → ひらがな のもの
+       → 名字 (先頭2字、4字以上なら先頭3字も) が、指定の外で出てきたら、合成側の読みと比べる
+    2) yomi.tsv にカタカナの読みがある語 → 品詞に関係なく、出てくる所をすべて合成側の読みと比べる"""
+    mod = importlib.import_module(ep)
+    want = {}
+    for name in dir(mod):
+        d = getattr(mod, name)
+        if "FIX" not in name or not isinstance(d, dict):
+            continue
+        for k, v in d.items():
+            if not (isinstance(k, str) and isinstance(v, str)):
+                continue
+            if re.fullmatch(r"[一-龥々]{3,}", k) and re.fullmatch(r"[ぁ-ゖー]+", v) and not k.startswith("日本"):
+                rd = v.translate(HIRA2KATA)
+                for n in {2, 3} if len(k) >= 4 else {2}:
+                    want.setdefault(k[:n], (rd, f"{k}の指定"))
+    for k, v in table.items():
+        if v != "ok" and re.fullmatch(r"[一-龥々]{2,}", k):
+            want[k] = (v, "表")
+    out, seen = [], set()
+    for disp, sp in sentences(ep):
+        oj = None
+        for surf, (rd, src) in want.items():
+            for m in re.finditer(re.escape(surf), sp):
+                if oj is None:
+                    oj = spans_ojt(sp)
+                o, _, _ = ojt_reading(oj, m.start(), m.end())
+                if o is None:
+                    continue
+                ok = norm(rd).startswith(norm(o)) if src != "表" else same(o, rd)
+                if not ok and (surf, o) not in seen:
+                    seen.add((surf, o))
+                    out.append((surf, o, rd if src == "表" else rd + "…", src, disp))
+    return out
 
 
 if __name__ == "__main__":
