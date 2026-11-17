@@ -17,6 +17,7 @@ from functools import partial  # noqa: E402
 
 import charts  # noqa: E402
 import film  # noqa: E402
+from paths import script_dir  # noqa: E402
 import look  # noqa: E402
 
 LIC = {"cc-by-2.0": "CC BY 2.0", "cc-by-2.5": "CC BY 2.5", "cc-by-sa-2.0": "CC BY-SA 2.0", "cc-by-sa-3.0": "CC BY-SA 3.0",
@@ -100,11 +101,10 @@ def credit_lines(mod):
 def main():
     ep = sys.argv[1] if len(sys.argv) > 1 else "ep02"
     mod = importlib.import_module(ep)
-    root = HERE.parent
-    head = root / "script" / f"{ep}_description_head.txt"
+    head = script_dir(ep) / f"{ep}_description_head.txt"
     text = head.read_text().replace("{CHAPTERS}", "\n".join(chapters(mod))).replace(
         "{CREDITS}", "\n".join(credit_lines(mod)))
-    (root / "script" / f"{ep}_description.txt").write_text(text)
+    (script_dir(ep) / f"{ep}_description.txt").write_text(text)
     print(text)
 
 

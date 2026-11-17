@@ -9,9 +9,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "docu"))
+from paths import script_dir  # noqa: E402
 
 ep = sys.argv[1]
-t = (ROOT / "script" / f"{ep}_narration.txt").read_text().split("【オープニング】", 1)[1]
+t = (script_dir(ep) / f"{ep}_narration.txt").read_text().split("【オープニング】", 1)[1]
 script = [l.strip() for l in t.split("\n") if l.strip() and not l.startswith("【")]
 scenes = [l[0] if isinstance(l, tuple) else l for sc in importlib.import_module(ep).SCENES for l in sc["lines"]]
 diff = list(difflib.unified_diff(script, scenes, "台本", "場面", lineterm="", n=0))

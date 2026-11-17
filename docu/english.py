@@ -19,6 +19,9 @@ from pathlib import Path
 
 import numpy as np
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from paths import script_dir  # noqa: E402
+
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "render"))
 sys.path.insert(0, str(ROOT / "docu"))
@@ -54,7 +57,7 @@ def main(ep):
     scenes = importlib.import_module(ep).SCENES
     items, total = g["timeline"](scenes)
     SR, LEAD = g["SR"], g["LEAD"]
-    en = [ln.strip() for ln in (ROOT / "script" / f"{ep}_en.txt").read_text().splitlines() if ln.strip()]
+    en = [ln.strip() for ln in (script_dir(ep) / f"{ep}_en.txt").read_text().splitlines() if ln.strip()]
     starts = [it["start"] + s["start"] + LEAD for it in items for s in it["sents"]]
     if len(en) != len(starts):
         raise SystemExit(f"英語 {len(en)} 行と日本語 {len(starts)} 文の数が合わない")
