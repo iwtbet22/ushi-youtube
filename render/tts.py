@@ -19,13 +19,13 @@ CACHE = Path(__file__).resolve().parent.parent / "output" / "voice"
 CA = "/root/.ccr/ca-bundle.crt"
 
 
-def path_for(text: str, rate: str = RATE, pitch: str = "+0Hz") -> Path:
-    key = f"{VOICE}|{rate}|{text}" if pitch == "+0Hz" else f"{VOICE}|{rate}|{pitch}|{text}"
+def path_for(text: str, rate: str = RATE, pitch: str = "+0Hz", voice: str = VOICE) -> Path:
+    key = f"{voice}|{rate}|{text}" if pitch == "+0Hz" else f"{voice}|{rate}|{pitch}|{text}"
     h = hashlib.sha1(key.encode()).hexdigest()[:12]
     return CACHE / f"{h}.wav"
 
 
-async def _synth(text: str, mp3: Path, rate: str, pitch: str):
+async def _synth(text: str, mp3: Path, rate: str, pitch: str, voice: str = VOICE):
     import aiohttp
     import edge_tts
 
@@ -33,19 +33,19 @@ async def _synth(text: str, mp3: Path, rate: str, pitch: str):
     if os.path.exists(CA):  # このクラウド環境のプロキシ越しに繋ぐための設定
         kw["connector"] = aiohttp.TCPConnector(ssl=ssl.create_default_context(cafile=CA))
         kw["proxy"] = os.environ.get("HTTPS_PROXY")
-    await edge_tts.Communicate(text, VOICE, rate=rate, pitch=pitch, **kw).save(str(mp3))
+    await edge_tts.Communicate(text, voice, rate=rate, pitch=pitch, **kw).save(str(mp3))
 
 
-def ensure(text: str, rate: str = RATE, pitch: str = "+0Hz") -> Path:
-    """rate / pitch は edge-tts の指定 (例 "+8%", "-4Hz")。省略すると1本目と同じ声"""
-    wav = path_for(text, rate, pitch)
+def ensure(text: str, rate: str = RATE, pitch: str = "+0Hz", voice: str = VOICE) -> Path:
+    """rate / pitch は edge-tts の指定 (例 "+8%", "-4Hz")。省略すると1本目と同じ声。voice で英語の声なども使える"""
+    wav = path_for(text, rate, pitch, voice)
     if wav.exists():
         return wav
     CACHE.mkdir(parents=True, exist_ok=True)
     mp3 = wav.with_suffix(".mp3")
     for attempt in range(5):  # 通信が一時的に切れることがあるので、間をあけて再試行する
         try:
-            asyncio.run(_synth(text, mp3, rate, pitch))
+            asyncio.run(_synth(text, mp3, rate, pitch, voice))
             if mp3.exists() and mp3.stat().st_size > 0:
                 break
         except Exception:  # noqa: BLE001
