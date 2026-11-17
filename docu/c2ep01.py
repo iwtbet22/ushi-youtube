@@ -42,7 +42,7 @@ HK_STORE = "Saizeriya_in_8_and_one_half_2019.jpg"
 HK_STORE2 = "HK_North_Point_錦屏街_Kam_Ping_Street_薩莉亞_Saizeriya_Restaurant_interior_Metropole_Building_mall_shop_Jan-2012.JPG"
 SHANGHAI = "Shanghai_Lujiazui_night_skyline_2017_-_Flickr.jpg"
 SINGAPORE = "c2ep01_singapore.jpg"
-CATTLE = "c2ep01_cattle.jpg"
+CATTLE = "CSIRO_ScienceImage_4483_Cattle_grazing_on_lush_pastures_at_Bega_NSW_2002.jpg"
 WUHAN = "c2ep01_wuhan.jpg"
 KL = "c2ep01_kl.jpg"
 
