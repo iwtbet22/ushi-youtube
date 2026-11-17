@@ -41,14 +41,14 @@ SZ_STORE = "A_SAIZERIYA_RESTAURANT_IN_HEXING_MALL__SHENZHEN.jpg"
 HK_STORE = "Saizeriya_in_8_and_one_half_2019.jpg"
 HK_STORE2 = "HK_North_Point_錦屏街_Kam_Ping_Street_薩莉亞_Saizeriya_Restaurant_interior_Metropole_Building_mall_shop_Jan-2012.JPG"
 SHANGHAI = "Shanghai_Lujiazui_night_skyline_2017_-_Flickr.jpg"
-SINGAPORE = "c2ep01_singapore.jpg"
+SINGAPORE = "Singapore_Marina_Bay_Dusk_2018-02-27.jpg"
 CATTLE = "CSIRO_ScienceImage_4483_Cattle_grazing_on_lush_pastures_at_Bega_NSW_2002.jpg"
-WUHAN = "c2ep01_wuhan.jpg"
-KL = "c2ep01_kl.jpg"
+WUHAN = "4768-Hankou-skyline-seen-from-Wuchang-end-of-First-Bridge.jpg"
+KL = "Kuala_Lumpur_Malaysia_Skyline-03.jpg"
 
 
 # ---- この回の図 ------------------------------------------------------------------
-def seg_years(rows, upto=None, w=1600, h=640):
+def seg_years(rows, upto=None, w=1600, h=560):
     """日本とアジアのセグメント利益を、年ごとに並べる (赤字は下へ)。rows = [(年, 日本, アジア)] 単位は億円"""
     vmax = max(max(abs(a), abs(b)) for _, a, b in rows)
     im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
@@ -63,7 +63,7 @@ def seg_years(rows, upto=None, w=1600, h=640):
     d.text((108, 52), "日本", font=C._f(36, "NotoSansJP-Bold.ttf"), fill=C.INK, anchor="lm")
     d.rectangle((240, 34, 276, 70), fill=GOLD + (235,))
     d.text((288, 52), "アジア", font=C._f(36, "NotoSansJP-Bold.ttf"), fill=C.INK, anchor="lm")
-    d.text((w - 50, 52), "セグメント利益（億円）", font=C._f(30, "NotoSansJP-Bold.ttf"), fill=C.DIM, anchor="rm")
+    d.text((460, 52), "各年8月期のセグメント利益（億円）", font=C._f(30, "NotoSansJP-Bold.ttf"), fill=C.DIM, anchor="lm")
     n = len(rows)
     slot = (w - 120) / n
     bw = slot * 0.3
@@ -86,7 +86,7 @@ SEG = [("2020", -56.2, 17.6), ("2021", -72.1, 44.3), ("2022", -21.0, 22.3), ("20
 
 
 def SEGY(upto=None):
-    return G((P(seg_years, SEG, upto), 960, 380, 1640, 660))
+    return G((P(seg_years, SEG, upto), 960, 340, 1640, 560))
 
 
 def price_tag(old, new, label):
@@ -110,10 +110,26 @@ def PRICE(old, new, label):
     return G((P(price_tag, old, new, label), 960, 340, 1400, 520))
 
 
+def quote_card(s, by, per=16, size=66):
+    """引用の札。per 字ごとに折り返し、下に出典"""
+    s = "「" + s
+    lines = s.split("\n") if "\n" in s else [s[i:i + per] for i in range(0, len(s), per)]
+    ims = [L.text(t, "NotoSerifJP-Black.ttf", size, WHITE) for t in lines]
+    b = L.text(by, "NotoSansJP-Bold.ttf", 44, GOLD)
+    w = max(max(i.width for i in ims), b.width) + 120
+    h = sum(i.height - 20 for i in ims) + b.height + 100
+    im = C.panel(w, h)
+    y = 40
+    for i in ims:
+        im.alpha_composite(i, (60, y))
+        y += i.height - 20
+    im.alpha_composite(b, (w - b.width - 60, y + 20))
+    return im
+
+
 def QUOTE(s, by):
     """発表文・決算短信の引用"""
-    return G((P(C.bullet_list, [s], 52, 1600, mark="「"), 960, 330, 1700, 400),
-             (P(L.text, by, "NotoSansJP-Bold.ttf", 40, GOLD), 960, 560, 1600, 80))
+    return G((P(quote_card, s, by), 960, 370, 1600, 520))
 
 
 # ---- オープニング --------------------------------------------------------------
@@ -215,7 +231,7 @@ CH2 = [
        [(0, VB([("2022", 1.29, "1.29億人", False), ("2023", 1.52, "1.52億人", False), ("2024", 1.78, "1.78億人", False),
                 ("2025", 2.05, "2.05億人", False), ("2026", 2.36, "2.36億人", True)], unit="億人")),
         (2, FOG(GOLDF, 0.85))], tag=T[2], els=[
-           W("4年で約1.8倍", 2, GOLD, 200),
+           W("日本のお客さん", 0, WHITE, 120, 760, until=1), W("4年で約1.8倍", 2, GOLD, 200),
        ], notes=[(0, "※国内の客数。各年8月期")]),
     SC(["お客さん1人が払う金額も、少しずつ上がっています。",
         "4年前は780円、今は860円です。",
@@ -224,19 +240,19 @@ CH2 = [
         (1, VB([("2022", 780, "780円", False), ("2023", 795, "795円", False), ("2024", 822, "822円", False),
                 ("2025", 844, "844円", False), ("2026", 860, "860円", True)], unit="円")),
         (2, FLOW(["値段は\nそのまま", "注文が\n少し増える", "売上が\n伸びる"], 2))], tag=T[2], els=[
-           W("1人が払う金額", 0, WHITE, 170),
+           W("1人が払う金額", 0, WHITE, 170), W("国内の客単価", 1, GOLD, 120, 760),
        ], notes=[(1, "※国内の客単価。各年8月期")]),
     SC(["材料の値段が上がる中でも、サイゼリヤは値段を据え置いてきました。",
         "その間に、お客さんは大きく増えました。",
         "前からある店の売上は、2024年9月から2年あまり、毎月、前の年を上回り続けています。"],
-       [(0, A(SZ_STORE, (0.5, 0.5))), (1, FOG(GREENF, 0.85)), (2, BIG("前からある店の売上", "毎月 前年超え"))],
+       [(0, FOG(GOLDF, 0.85)), (1, FOG(GREENF, 0.85)), (2, BIG("前からある店の売上", "毎月 前年超え"))],
        tag=T[2], els=[
            W("値段を据え置き", 0, GOLD, 170), W("お客さんが増えた", 1, WHITE, 170),
-       ], notes=[(0, "※中国・深圳のサイゼリヤ"), (2, "※国内既存店 2024年9月〜2026年9月")]),
+       ], notes=[(2, "※国内既存店 2024年9月〜2026年9月")]),
     SC(["つまり、日本のサイゼリヤは、薄いもうけを、たくさんのお客さんで積み上げる仕組みです。",
         "では、この安さは、どうやって作っているのでしょうか。"],
-       [(0, FLOW(["薄いもうけ", "×", "たくさんの客"], 2)), (1, FOG(REDF, 0.85))], tag=T[2], els=[
-           W("安さはどう作る？", 1, GOLD, 180),
+       [(0, FOG(BLUEF, 0.85)), (1, FOG(REDF, 0.85))], tag=T[2], els=[
+           W("薄いもうけ × たくさんの客", 0, WHITE, 130), W("安さはどう作る？", 1, GOLD, 180),
        ]),
 ]
 
@@ -331,6 +347,7 @@ CH4 = [
         (3, VB([("上海", 98.9, "99%", True), ("広州", 103.0, "103%", True), ("北京", 99.2, "99%", True)], unit="%"))],
        tag=T[4], els=[
            W("アジアにも課題", 0, WHITE, 190), W("△4.2%", 1, RED, 140, 760),
+           W("既存店の前年比 80%台", 2, WHITE, 120, 760), W("前年並みまで回復", 3, GOLD, 120, 760),
        ], notes=[(2, "※既存店売上の前年比 2025年6〜8月ごろ"), (3, "※既存店売上の前年比 直近の四半期")]),
 ]
 
@@ -343,7 +360,7 @@ CH5 = [
         "いちばん大きかったのは、2021年8月までの1年間で、72億円の赤字です。"],
        [(0, FOG(BLUEF, 0.85)), (1, FOG(REDF, 0.85)), (2, SEGY(3)), (3, BIG("2021年8月期 日本", "△72億円"))], tag=T[5], els=[
            W("コロナの時期", 1, WHITE, 190), W("4年続けて赤字", 2, RED, 120, 760),
-       ], notes=[(2, "※各年8月期のセグメント利益")]),
+       ], ),
     SC(["4年間の赤字を合わせると、164億円になります。",
         "同じ4年間、アジアは黒字を続けました。",
         "4年間の利益を合わせると、169億円です。",
@@ -359,7 +376,7 @@ CH5 = [
         "サイゼリヤは、日本で安さを守りながら、アジアの稼ぎで会社を支えてきたのです。"],
        [(0, BIG("2024年8月期 日本", "27億円の黒字")), (1, SEGY()), (2, FOG(GOLDF, 0.85))], tag=T[5], els=[
            W("アジアの稼ぎが支えた", 2, GOLD, 160),
-       ], notes=[(1, "※各年8月期のセグメント利益")]),
+       ], ),
 ]
 
 # ---- 第6章 値上げしない、の限界 ---------------------------------------------------
@@ -369,7 +386,7 @@ CH6 = [
         "2026年8月までの1年間、会社全体で、売上に対する材料などの費用の割合は、およそ42パーセントから、44パーセント近くに上がりました。"],
        [(0, FOG(REDF, 0.85)), (1, VB([("2025年8月期", 41.9, "41.9%", False), ("2026年8月期", 43.7, "43.7%", True)], unit="%"))],
        tag=T[6], els=[
-           W("安さに無理", 0, WHITE, 200),
+           W("安さに無理", 0, WHITE, 200), W("材料などの費用の割合", 1, GOLD, 120, 760),
        ], notes=[(1, "※売上原価率（連結）")]),
     SC(["日本だけで見ると、材料などの費用が増えたことで、利益が45億円近く押し下げられました。",
         "そのうち、為替、つまり円安の影響だけで、32億円近くです。",
@@ -378,7 +395,7 @@ CH6 = [
         (1, BARS([("為替（円安）", 31.7, True), ("材料の値段", 18.7, False), ("物流費", 6.2, False)], unit="億円")),
         (2, FOG(BLUEF, 0.85))], tag=T[6], els=[
            W("円安 32億円近く", 1, GOLD, 140, 760), W("ハンバーグやチキン", 2, WHITE, 170),
-       ], notes=[(1, "※国内の原価で利益が減った額（2026年8月期）。メニューの組み合わせで＋10.3億円")]),
+       ], notes=[(1, "※国内の原価の増減（2026年8月期）")]),
     SC(["円安になると、海外から仕入れる材料の値段が上がります。",
         "自社の工場をオーストラリアに持っていても、その影響は避けられません。"],
        [(0, FLOW(["円安", "仕入れ値が上がる", "利益が減る"], 0)), (1, FOG(GREENF, 0.85))], tag=T[6], els=[
@@ -388,8 +405,8 @@ CH6 = [
         "「メニュー価格維持という方針で行ってまいりました」。",
         "そして、こう続けています。",
         "「メニュー価格改定は状況に応じて行う方針としてまいります」。"],
-       [(0, FOG(GOLDF, 0.85)), (1, QUOTE("メニュー価格維持という方針で行ってまいりました」", "2026年8月期 決算短信")),
-        (2, FOG(BLUEF, 0.85)), (3, QUOTE("メニュー価格改定は状況に応じて行う方針としてまいります」", "2026年8月期 決算短信"))],
+       [(0, FOG(GOLDF, 0.85)), (1, QUOTE("メニュー価格維持という\n方針で行ってまいりました」", "2026年8月期 決算短信")),
+        (2, FOG(BLUEF, 0.85)), (3, QUOTE("メニュー価格改定は状況に応じて\n行う方針としてまいります」", "2026年8月期 決算短信"))],
        tag=T[6], els=[
            W("決算の発表", 0, WHITE, 190), W("方針が変わった", 2, GOLD, 190),
        ]),
@@ -406,7 +423,7 @@ CH6 = [
         "それでも、ランチ、朝の限定メニュー、そしてフレッシュワインは、値段を据え置きました。",
         "報道では、およそ6年ぶりの値上げとされています。"],
        [(0, FOG(BLUEF, 0.85)),
-        (1, QUOTE("当社の努力不足により、食材の不足や原価上昇を吸収できない事態が発生しております」", "2026年10月14日の発表")),
+        (1, QUOTE("当社の努力不足により、\n食材の不足や原価上昇を\n吸収できない事態が\n発生しております」", "2026年10月14日の発表")),
         (2, BULLETS(["ランチ", "朝の限定メニュー", "フレッシュワイン"], 64)), (3, FOG(GOLDF, 0.85))], tag=T[6], els=[
            W("発表の文", 0, WHITE, 190), W("据え置き", 2, GOLD, 120, 760), W("約6年ぶり（報道）", 3, GOLD, 170),
        ]),
@@ -429,10 +446,10 @@ CH7 = [
         "ベトナムも含めて、新しい場所の店は、まだ赤字です。",
         "新しい場所が、上海や広州のように稼げるようになるかどうかが、これからの見どころです。"],
        [(0, A(SINGAPORE, (0.5, 0.5))), (1, BARS([("日本", 50, False), ("海外", 129, True)], unit="店")),
-        (2, A(WUHAN, (0.5, 0.5))), (3, A(KL, (0.5, 0.5))), (4, FOG(BLUEF, 0.85))], tag=T[7], els=[
+        (2, FOG(REDF, 0.85)), (3, A(KL, (0.5, 0.5))), (4, FOG(BLUEF, 0.85))], tag=T[7], els=[
            W("店も増やす", 0, WHITE, 190), W("武漢・マレーシア", 2, GOLD, 170), W("まだ赤字", 3, RED, 200),
            W("これからの見どころ", 4, GOLD, 170),
-       ], notes=[(0, "※シンガポールの街並み"), (1, "※2027年8月期の出店計画"), (2, "※中国・武漢の街並み"),
+       ], notes=[(0, "※シンガポールの街並み"), (1, "※2027年8月期の出店計画"),
                  (3, "※マレーシア・クアラルンプールの街並み")]),
 ]
 
@@ -489,5 +506,21 @@ def _fix_speech(scenes):
     return scenes
 
 
-SCENES = _arrange(ep05._finish(_fix_speech(OPEN + CH1 + CH2 + CH3 + CH4 + CH5 + CH6 + CH7 + ENDING)))
+def _all_notes(scenes):
+    """写真でない背景 (グラフなど) にも「※」の説明を出す。ep05._finish は写真の説明しか出さないため"""
+    import news as N
+    for sc in scenes:
+        marks = {0: sc["bg"], **dict(sc.get("bgs", []))}
+        keep = []
+        for k, txt in sc.get("notes", []):
+            if getattr(marks.get(k), "func", None) is N.archive:
+                keep.append((k, txt))
+                continue
+            until = next((j - 1 for j in sorted(marks) if j > k), None)
+            sc["els"].append(E(P(C.note, txt, 28), 960, 26, at=k, until=until, anchor="t", anim="fade"))
+        sc["notes"] = keep
+    return scenes
+
+
+SCENES = _arrange(ep05._finish(_all_notes(_fix_speech(OPEN + CH1 + CH2 + CH3 + CH4 + CH5 + CH6 + CH7 + ENDING))))
 PHOTOS = check_unique(SCENES)
