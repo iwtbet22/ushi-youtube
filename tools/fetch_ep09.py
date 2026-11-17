@@ -39,7 +39,7 @@ FILES = {
     "ep09_haneda.jpg": ("Tokyo-International-Airport_Satellite.jpg", "MaedaAkihiko", ["cc-by-sa-4.0"]),
 }
 
-UA = "ushi-youtube-video/1.0 (credits kept per file)"
+UA = "EducationalVideoImageFetcher/1.0 (credits kept per file)"
 
 
 def main():

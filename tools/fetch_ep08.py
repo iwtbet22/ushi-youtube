@@ -33,7 +33,7 @@ FILES = {
     "ep08_ohtani_pitch.jpg": ("Shohei_Ohtani_vs_Texas_Rangers_(September_3,_2021).jpg", "Vera26", ["cc-by-sa-4.0"]),
 }
 
-UA = "ushi-youtube-video/1.0 (credits kept per file)"
+UA = "EducationalVideoImageFetcher/1.0 (credits kept per file)"
 
 
 def main():

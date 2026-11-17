@@ -54,7 +54,7 @@ FILES = {
     "ep06_austin.jpg": ("タイラー・オースティン.png", "日産・スカイライン", ["cc-by-4.0"]),
 }
 
-UA = "ushi-youtube-video/1.0 (credits kept per file)"
+UA = "EducationalVideoImageFetcher/1.0 (credits kept per file)"
 
 
 def main():

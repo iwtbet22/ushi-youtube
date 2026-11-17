@@ -18,7 +18,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "assets" / "ep02" / "img"
-UA = "UshiYoutubeImageFetcher/0.2 (https://github.com/iwtbet22/ushi-youtube; educational video)"
+UA = "EducationalVideoImageFetcher/1.0 (credits kept per file)"
 
 
 def get(url, binary=False, tries=4):

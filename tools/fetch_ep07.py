@@ -47,7 +47,7 @@ FILES = {
     "ep07_rakuten_shop.jpg": ("Rakuten_Mobile_Nansandori_Street_Shop.jpg", "Mr.ちゅらさん", ["cc-by-sa-4.0"]),
 }
 
-UA = "ushi-youtube-video/1.0 (credits kept per file)"
+UA = "EducationalVideoImageFetcher/1.0 (credits kept per file)"
 
 
 def main():
