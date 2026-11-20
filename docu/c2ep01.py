@@ -542,3 +542,12 @@ def _all_notes(scenes):
 
 SCENES = _arrange(ep05._finish(_all_notes(_fix_speech(OPEN + CH1 + CH2 + CH3 + CH4 + CH5 + CH6 + CH7 + ENDING))))
 PHOTOS = check_unique(SCENES)
+
+# ---- サムネイル (python3 docu/thumb.py c2ep01) ------------------------------------
+THUMB = {
+    "bg": SHANGHAI,
+    "title": "サイゼリヤ",
+    "left": ("日本の利益", "60億円", (190, 190, 198)),
+    "right": ("アジアの利益", "97億円", (240, 200, 90)),
+    "bottom": "稼ぐのは日本じゃない",
+}
