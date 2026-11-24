@@ -42,7 +42,6 @@ DOTONBORI = "ep15_dotonbori.jpg"
 KOSHIEN_STA = "ep15_koshien_station.jpg"
 HANKYU2 = "ep15_hankyu_umeda.jpg"
 HANSHIN2 = "ep15_hanshin_train2.jpg"
-ALPS = "ep15_alps.jpg"
 KOSHIEN_GINSAN = "ep15_koshien_ginsan.jpg"
 
 
@@ -342,10 +341,10 @@ CH6 = [
         "もちろん、タイガースのファンです。",
         "ただ、アルプス席が主役になるのは、夏の高校野球です。",
         "甲子園は、阪神の本拠地であると同時に、高校野球の聖地でもあります。"],
-       [(0, FOG(GOLDF, 0.85)), (1, FOG(BLUEF, 0.85)), (2, A(ALPS, (0.5, 0.5))), (3, FOG(GOLDF, 0.85))], tag=T[6], els=[
-           W("誰が得をする？", 0, WHITE, 180), W("タイガースのファン", 1, GOLD, 160), W("夏の高校野球", 2, GOLD, 170, 760),
+       [(0, FOG(GOLDF, 0.85)), (1, FOG(BLUEF, 0.85)), (2, FOG(GREENF, 0.85)), (3, FOG(GOLDF, 0.85))], tag=T[6], els=[
+           W("誰が得をする？", 0, WHITE, 180), W("タイガースのファン", 1, GOLD, 160), W("夏の高校野球", 2, GOLD, 170),
            W("本拠地であり 聖地", 3, GOLD, 160),
-       ], notes=[(2, "※夏の甲子園のアルプス席（2006年）")]),
+       ]),
     SC(["その高校野球は、阪神のお金とは、別のところで動いています。",
         "高校野球を開く日本高校野球連盟の、1年の収入は、およそ16億円。そのうち、およそ14億円が入場料とされています。",
         "NHKは、高校野球の放映権料を払っていません。",

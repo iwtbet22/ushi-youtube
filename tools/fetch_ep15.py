@@ -25,7 +25,6 @@ FILES = {
     "ep15_dotonbori.jpg": "Dotonbori, Osaka, at night, November 2016.jpg",
     "ep15_koshien_station.jpg": "Hanshin Koshien Station East Gate.jpg",
     "ep15_koshien_ginsan.jpg": "Koshien Stadium Ginsan and Liner Vision.jpg",
-    "ep15_alps.jpg": "Chiben-w alps.jpg",
 }
 UA = "EducationalVideoImageFetcher/1.0 (credits kept per file)"
 OK = re.compile(r"^(CC BY(-SA)? [0-9.]+|CC0|Public domain)", re.I)
