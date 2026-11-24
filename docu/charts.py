@@ -438,3 +438,34 @@ def big_number(top, bottom, size=150):
         im.alpha_composite(s, ((w - s.width) // 2, y))
         y += s.height - 60
     return im
+
+
+def plbars(rows, unit="億円", h=520, bw=130, gap=50, upto=None):
+    """赤字も描ける縦の棒グラフ（15本目 球団の純利益）。rows = [(下のラベル, 値, 表示する文字, 金色か)]。
+    値がマイナスの棒は、0の線より下に赤で描く。upto を指定すると、その番号までの棒だけ描く"""
+    vmax = max(max(v for _, v, _, _ in rows), 1)
+    vmin = min(min(v for _, v, _, _ in rows), 0)
+    span = vmax - vmin
+    n = len(rows)
+    w = n * bw + (n - 1) * gap + 80
+    top = 80
+    im = Image.new("RGBA", (w, h + 150), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    zero = top + h * vmax / span
+    d.line((20, zero, w - 20, zero), fill=(200, 190, 170, 220), width=4)
+    for i, (lab, v, txt, hi) in enumerate(rows):
+        x = 40 + i * (bw + gap)
+        bottom_lab = top + h + 60
+        d.text((x + bw / 2, bottom_lab), lab, font=fit(lab, 38, bw + gap - 6, "NotoSansJP-Bold.ttf"), fill=INK, anchor="ms")
+        if upto is not None and i > upto:
+            continue
+        bh = h * abs(v) / span
+        if v >= 0:
+            col = L.GOLD if hi else (150, 150, 158)
+            d.rectangle((x, zero - bh, x + bw, zero), fill=col + (235,))
+            d.text((x + bw / 2, zero - bh - 16), txt, font=fit(txt, 40, bw + gap - 6), fill=col, anchor="ms")
+        else:
+            col = (226, 52, 44)
+            d.rectangle((x, zero, x + bw, zero + bh), fill=col + (235,))
+            d.text((x + bw / 2, zero - 16), txt, font=fit(txt, 40, bw + gap - 6), fill=col, anchor="ms")
+    return im
