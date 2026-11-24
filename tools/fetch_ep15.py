@@ -47,6 +47,8 @@ def main():
     cj = IMG / "credits.json"
     credits = json.loads(cj.read_text())
     for local, name in FILES.items():
+        if (IMG / local).exists() and local in credits:
+            continue  # 取り込み済み（Commons に余計な問い合わせをしない）
         api = "https://commons.wikimedia.org/w/api.php?" + urllib.parse.urlencode(dict(
             action="query", prop="imageinfo", iiprop="extmetadata", format="json", titles="File:" + name))
         m = next(iter(json.loads(get(api))["query"]["pages"].values()))["imageinfo"][0]["extmetadata"]
