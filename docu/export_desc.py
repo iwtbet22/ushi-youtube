@@ -26,17 +26,20 @@ LIC = {"cc-by-2.0": "CC BY 2.0", "cc-by-2.5": "CC BY 2.5", "cc-by-sa-2.0": "CC B
        "cc0": "CC0", "cc-by-3.0": "CC BY 3.0"}
 
 
-def _render_timeline(scenes):
+def _render_timeline(scenes, narrator=None):
     """書き出し (python3 film.py 回) と同じ時間割を出す。
     film.py は __main__ として動くので、各回が import した film に書いた VOICE や TAIL は使われない。
     ここでも同じように、まっさらな film で時間を数える (概要欄のチャプターがずれないように)。"""
     import runpy
     fresh = runpy.run_path(str(Path(film.__file__)), run_name="film_render")
+    if narrator:  # film.py の main と同じく、回ごとの声 (NARRATOR) だけは使う
+        fresh["VOICE"].clear()
+        fresh["VOICE"].update(narrator)
     return fresh["timeline"](scenes)
 
 
 def chapters(mod):
-    items, _ = _render_timeline(mod.SCENES)
+    items, _ = _render_timeline(mod.SCENES, getattr(mod, "NARRATOR", None))
     out = ["0:00 オープニング"]
     named = any("chapter" in sc for sc in mod.SCENES)  # 章の名前を場面に持たせている回 (4本目から)
     for sc, it in zip(mod.SCENES, items):

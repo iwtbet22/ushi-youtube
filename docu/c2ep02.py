@@ -22,7 +22,8 @@ GOLD = L.GOLD
 NAME = "もうけの裏側"  # チャンネル名
 
 # 球界金融道（Keita）と聞き分けられるよう、2本目から声を変える
-film.VOICE = {"voice": "ja-JP-NanamiNeural", "rate": "+0%", "pitch": "+0Hz"}
+NARRATOR = {"voice": "ja-JP-NanamiNeural", "rate": "+0%", "pitch": "+0Hz"}  # 書き出し (film.py main) が読む
+film.VOICE = dict(NARRATOR)  # 読みの点検 (check_kana / check_word) が読む
 
 T = {}
 for _k, _v in enumerate(["東宝の今", "ヒットの波", "動かない家賃", "映画館が閉まった年", "配信が変えた稼ぎ方",

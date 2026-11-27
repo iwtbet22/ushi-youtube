@@ -401,7 +401,11 @@ def main():
     ap.add_argument("--no-master", action="store_true", help="場面と音声だけ書き出し、つないだ大きな mp4 は作らない（ディスク節約）")
     ap.add_argument("--only", help="この番号のシーンだけ描き直してつなぎ直す (例: 3,7,12)。ほかは前回の書き出しを使う")
     args = ap.parse_args()
-    scenes = importlib.import_module(args.module).SCENES
+    mod = importlib.import_module(args.module)
+    if hasattr(mod, "NARRATOR"):  # 回ごとの声。film.VOICE への書き込みは __main__ には届かないので、ここで受け取る
+        VOICE.clear()
+        VOICE.update(mod.NARRATOR)
+    scenes = mod.SCENES
     items, total = timeline(scenes)
     print(f"total {total:.1f}s, {len(scenes)} scenes", flush=True)
     if args.check:
