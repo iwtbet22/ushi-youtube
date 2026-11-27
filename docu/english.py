@@ -54,7 +54,11 @@ def _ts(t):
 
 def main(ep):
     g = runpy.run_path(str(ROOT / "docu" / "film.py"), run_name="film_render")  # 書き出しと同じ時間割
-    scenes = importlib.import_module(ep).SCENES
+    mod = importlib.import_module(ep)
+    if hasattr(mod, "NARRATOR"):  # 書き出しと同じく、回ごとの日本語の声で時間割を数える
+        g["VOICE"].clear()
+        g["VOICE"].update(mod.NARRATOR)
+    scenes = mod.SCENES
     items, total = g["timeline"](scenes)
     SR, LEAD = g["SR"], g["LEAD"]
     en = [ln.strip() for ln in (script_dir(ep) / f"{ep}_en.txt").read_text().splitlines() if ln.strip()]
