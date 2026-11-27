@@ -3,6 +3,7 @@
 台本は script/ep15_narration.txt と同じ文。事実と出典は script/ep15_research.md（確度つき）。
 作りは14本目と同じ。同じ写真は動画全体で1度しか使わない。画面のチャンネル名は「球界金融道」。
 """
+import re
 from functools import partial as P
 
 import charts as C
@@ -455,6 +456,7 @@ ENDING = [
 
 SPEECH_FIX = dict(ep14.SPEECH_FIX)
 SPEECH_FIX.update({
+    "4万1644人": "よんまんせんろっぴゃくよんじゅうよにん",  # 9本目の「4人」→よにん が 1644人 の中に入るのを防ぐ
     "球界金融道": "きゅうかいきんゆうどう",
     "もう一歩": "もういっぽ",            # いちほ と読まれる (check_yomi)
     "大鉄傘": "だいてっさん",            # てつかさ と読まれる (check_yomi)
@@ -475,7 +477,10 @@ def _fix_speech(scenes):
         for line in sc["lines"]:
             text, sp = (line if isinstance(line, tuple) else (line, readings.speech(line)))
             for k in keys:
-                sp = sp.replace(k, SPEECH_FIX[k])
+                if k[:1].isdigit():  # 「2人の」が「12人の」の中に入らないよう、前が数字のときは置き換えない
+                    sp = re.sub(r"(?<![0-9０-９])" + re.escape(k), lambda m, v=SPEECH_FIX[k]: v, sp)
+                else:
+                    sp = sp.replace(k, SPEECH_FIX[k])
             out.append((text, sp) if sp != text else text)
         sc["lines"] = out
     return scenes
