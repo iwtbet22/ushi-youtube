@@ -13,12 +13,16 @@ import ep05
 from ep04 import _arrange
 from ep05 import FOG, A, W, SC, REDF, BLUEF, GOLDF, GREENF, G
 from ep06 import BARS, BIG, BULLETS, FLOW, VB, chap, check_unique
+import film
 from film import E, S
 from c2ep01 import QUOTE, _fix_speech as _fix_speech1, _all_notes, SPEECH_FIX as _SF1  # noqa: F401
 
 WHITE = L.WHITE
 GOLD = L.GOLD
 NAME = "もうけの裏側"  # チャンネル名
+
+# 球界金融道（Keita）と聞き分けられるよう、2本目から声を変える
+film.VOICE = {"voice": "ja-JP-NanamiNeural", "rate": "+0%", "pitch": "+0Hz"}
 
 T = {}
 for _k, _v in enumerate(["東宝の今", "ヒットの波", "動かない家賃", "映画館が閉まった年", "配信が変えた稼ぎ方",
