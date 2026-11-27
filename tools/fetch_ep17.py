@@ -25,7 +25,6 @@ FILES = {
     "ep17_tatsumi.jpg": ("Konosuke Tatsumi 2024 01.jpg", "Hotta Akahane", "CC BY 4.0"),
     "ep17_suzuki.jpg": ("Hiroshi Suzuki Pitcher of Chunichi Dragons NPB.jpg", "Goshuinnist", "CC BY-SA 4.0"),
     "ep17_yoshida.jpg": ("Kengo Yoshida Fighters.jpg", "Rikigon", "CC0"),
-    "ep17_hosokawa_db.jpg": ("170616 Seiya Hosokawa.jpg", "Baylexs", "CC BY-SA 4.0"),
     "ep17_noguchi.jpg": ("野口寿浩 (51003686242) (cropped).jpg", "Jeffrey Hayes", "CC BY 2.0"),
 }
 
